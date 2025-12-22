@@ -1,6 +1,26 @@
 import 'package:common_control/common_control.dart';
-import 'package:dreamcam/models/status.dart';
 
+
+enum UsehealthStatus {
+  none(0, ''),
+  terminated(1, '종료'),
+  use(2, '사용중'),
+  paused(3, '일시정지'),
+  expired(4, '만료'),
+;
+
+  const UsehealthStatus(this.code, this.label);
+
+  final int code;
+  final String label;
+
+  @override
+  String toString() => label;
+
+  static UsehealthStatus fromCode(int code) {
+    return UsehealthStatus.values.firstWhere((e) => e.code == code, orElse: () => UsehealthStatus.none);
+  }
+}
 
 class Usehealth {
   int id;
@@ -13,7 +33,7 @@ class Usehealth {
   String startday;
   String endday;
   int gym;
-  Status status;
+  UsehealthStatus status;
   int totalcount;
   int usedcount;
   int remainingcount;
@@ -34,7 +54,7 @@ class Usehealth {
     this.startday = '',
     this.endday = '',
     this.gym = 0,
-    this.status = Status(),
+    this.status = UsehealthStatus.none,
     this.totalcount = 0,
     this.usedcount = 0,
     this.remainingcount = 0,
@@ -57,7 +77,7 @@ class Usehealth {
       startday: json['startday'] as String,
       endday: json['endday'] as String,
       gym: json['gym'] as int,
-      status: Status.fromJson(json['status']),
+      status: UsehealthStatus.fromCode(json['status'] as int),
       totalcount: json['totalcount'] as int,
       usedcount: json['usedcount'] as int,
       remainingcount: json['remainingcount'] as int,
@@ -79,7 +99,7 @@ class Usehealth {
     'startday': startday,
     'endday': endday,
     'gym': gym,
-    'status': status.toJson(),
+    'status': status.code,
     'totalcount': totalcount,
     'usedcount': usedcount,
     'remainingcount': remainingcount,

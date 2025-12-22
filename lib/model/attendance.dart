@@ -1,20 +1,76 @@
 import 'package:common_control/common_control.dart';
-import 'package:dreamcam/models/type.dart';
-import 'package:dreamcam/models/method.dart';
-import 'package:dreamcam/models/status.dart';
 
+
+enum AttendanceType {
+  none(0, ''),
+  entry(1, '입장'),
+  exit(2, '퇴장'),
+;
+
+  const AttendanceType(this.code, this.label);
+
+  final int code;
+  final String label;
+
+  @override
+  String toString() => label;
+
+  static AttendanceType fromCode(int code) {
+    return AttendanceType.values.firstWhere((e) => e.code == code, orElse: () => AttendanceType.none);
+  }
+}
+
+enum AttendanceMethod {
+  none(0, ''),
+  qr_code(1, 'QR코드'),
+  manual(2, '수동'),
+  card(3, '카드'),
+;
+
+  const AttendanceMethod(this.code, this.label);
+
+  final int code;
+  final String label;
+
+  @override
+  String toString() => label;
+
+  static AttendanceMethod fromCode(int code) {
+    return AttendanceMethod.values.firstWhere((e) => e.code == code, orElse: () => AttendanceMethod.none);
+  }
+}
+
+enum AttendanceStatus {
+  none(0, ''),
+  normal(1, '정상'),
+  late(2, '지각'),
+  unauthorized(3, '무단입장'),
+;
+
+  const AttendanceStatus(this.code, this.label);
+
+  final int code;
+  final String label;
+
+  @override
+  String toString() => label;
+
+  static AttendanceStatus fromCode(int code) {
+    return AttendanceStatus.values.firstWhere((e) => e.code == code, orElse: () => AttendanceStatus.none);
+  }
+}
 
 class Attendance {
   int id;
   int user;
   int usehealth;
   int gym;
-  Type type;
-  Method method;
+  AttendanceType type;
+  AttendanceMethod method;
   String checkintime;
   String checkouttime;
   int duration;
-  Status status;
+  AttendanceStatus status;
   String note;
   String ip;
   String device;
@@ -28,12 +84,12 @@ class Attendance {
     this.user = 0,
     this.usehealth = 0,
     this.gym = 0,
-    this.type = Type(),
-    this.method = Method(),
+    this.type = AttendanceType.none,
+    this.method = AttendanceMethod.none,
     this.checkintime = '',
     this.checkouttime = '',
     this.duration = 0,
-    this.status = Status(),
+    this.status = AttendanceStatus.none,
     this.note = '',
     this.ip = '',
     this.device = '',
@@ -49,12 +105,12 @@ class Attendance {
       user: json['user'] as int,
       usehealth: json['usehealth'] as int,
       gym: json['gym'] as int,
-      type: Type.fromJson(json['type']),
-      method: Method.fromJson(json['method']),
+      type: AttendanceType.fromCode(json['type'] as int),
+      method: AttendanceMethod.fromCode(json['method'] as int),
       checkintime: json['checkintime'] as String,
       checkouttime: json['checkouttime'] as String,
       duration: json['duration'] as int,
-      status: Status.fromJson(json['status']),
+      status: AttendanceStatus.fromCode(json['status'] as int),
       note: json['note'] as String,
       ip: json['ip'] as String,
       device: json['device'] as String,
@@ -69,12 +125,12 @@ class Attendance {
     'user': user,
     'usehealth': usehealth,
     'gym': gym,
-    'type': type.toJson(),
-    'method': method.toJson(),
+    'type': type.code,
+    'method': method.code,
     'checkintime': checkintime,
     'checkouttime': checkouttime,
     'duration': duration,
-    'status': status.toJson(),
+    'status': status.code,
     'note': note,
     'ip': ip,
     'device': device,

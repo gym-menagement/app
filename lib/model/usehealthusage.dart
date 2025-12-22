@@ -1,6 +1,26 @@
 import 'package:common_control/common_control.dart';
-import 'package:dreamcam/models/type.dart';
 
+enum UsehealthusageType {
+  none(0, ''),
+  entry(1, '입장'),
+  pt(2, 'PT수업'),
+  group(3, '그룹수업');
+
+  const UsehealthusageType(this.code, this.label);
+
+  final int code;
+  final String label;
+
+  @override
+  String toString() => label;
+
+  static UsehealthusageType fromCode(int code) {
+    return UsehealthusageType.values.firstWhere(
+      (e) => e.code == code,
+      orElse: () => UsehealthusageType.none,
+    );
+  }
+}
 
 class Usehealthusage {
   int id;
@@ -9,7 +29,7 @@ class Usehealthusage {
   int membership;
   int user;
   int attendance;
-  Type type;
+  UsehealthusageType type;
   int usedcount;
   int remainingcount;
   String checkintime;
@@ -27,7 +47,7 @@ class Usehealthusage {
     this.membership = 0,
     this.user = 0,
     this.attendance = 0,
-    this.type = Type(),
+    this.type = UsehealthusageType.none,
     this.usedcount = 0,
     this.remainingcount = 0,
     this.checkintime = '',
@@ -47,7 +67,7 @@ class Usehealthusage {
       membership: json['membership'] as int,
       user: json['user'] as int,
       attendance: json['attendance'] as int,
-      type: Type.fromJson(json['type']),
+      type: UsehealthusageType.fromCode(json['type'] as int),
       usedcount: json['usedcount'] as int,
       remainingcount: json['remainingcount'] as int,
       checkintime: json['checkintime'] as String,
@@ -55,7 +75,10 @@ class Usehealthusage {
       duration: json['duration'] as int,
       note: json['note'] as String,
       date: json['date'] as String,
-      extra: json['extra'] == null ? <String, dynamic>{} : json['extra'] as Map<String, dynamic>,
+      extra:
+          json['extra'] == null
+              ? <String, dynamic>{}
+              : json['extra'] as Map<String, dynamic>,
     );
   }
 
@@ -66,7 +89,7 @@ class Usehealthusage {
     'membership': membership,
     'user': user,
     'attendance': attendance,
-    'type': type.toJson(),
+    'type': type.code,
     'usedcount': usedcount,
     'remainingcount': remainingcount,
     'checkintime': checkintime,
@@ -97,7 +120,9 @@ class UsehealthusageManager {
       return List<Usehealthusage>.empty(growable: true);
     }
 
-    return result['items'].map<Usehealthusage>((json) => Usehealthusage.fromJson(json)).toList();
+    return result['items']
+        .map<Usehealthusage>((json) => Usehealthusage.fromJson(json))
+        .toList();
   }
 
   static Future<int> count({String? params}) async {

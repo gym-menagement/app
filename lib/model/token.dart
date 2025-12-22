@@ -1,12 +1,31 @@
 import 'package:common_control/common_control.dart';
-import 'package:dreamcam/models/status.dart';
 
+
+enum TokenStatus {
+  none(0, ''),
+  active(1, '활성'),
+  expired(2, '만료'),
+  revoked(3, '폐기'),
+;
+
+  const TokenStatus(this.code, this.label);
+
+  final int code;
+  final String label;
+
+  @override
+  String toString() => label;
+
+  static TokenStatus fromCode(int code) {
+    return TokenStatus.values.firstWhere((e) => e.code == code, orElse: () => TokenStatus.none);
+  }
+}
 
 class Token {
   int id;
   int user;
   String token;
-  Status status;
+  TokenStatus status;
   String date;
   bool checked;
   Map<String, dynamic> extra;
@@ -15,7 +34,7 @@ class Token {
     this.id = 0,
     this.user = 0,
     this.token = '',
-    this.status = Status(),
+    this.status = TokenStatus.none,
     this.date = '',
     this.extra = const {},
     this.checked = false,
@@ -26,7 +45,7 @@ class Token {
       id: json['id'] as int,
       user: json['user'] as int,
       token: json['token'] as String,
-      status: Status.fromJson(json['status']),
+      status: TokenStatus.fromCode(json['status'] as int),
       date: json['date'] as String,
       extra: json['extra'] == null ? <String, dynamic>{} : json['extra'] as Map<String, dynamic>,
     );
@@ -36,7 +55,7 @@ class Token {
     'id': id,
     'user': user,
     'token': token,
-    'status': status.toJson(),
+    'status': status.code,
     'date': date,
   };
 

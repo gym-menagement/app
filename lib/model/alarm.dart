@@ -1,14 +1,53 @@
 import 'package:common_control/common_control.dart';
-import 'package:dreamcam/models/type.dart';
-import 'package:dreamcam/models/status.dart';
 
+
+enum AlarmType {
+  none(0, ''),
+  notice(1, '공지'),
+  warning(2, '경고'),
+  error(3, '에러'),
+  info(4, '정보'),
+;
+
+  const AlarmType(this.code, this.label);
+
+  final int code;
+  final String label;
+
+  @override
+  String toString() => label;
+
+  static AlarmType fromCode(int code) {
+    return AlarmType.values.firstWhere((e) => e.code == code, orElse: () => AlarmType.none);
+  }
+}
+
+enum AlarmStatus {
+  none(0, ''),
+  success(1, '성공'),
+  fail(2, '실패'),
+  pending(3, '대기'),
+;
+
+  const AlarmStatus(this.code, this.label);
+
+  final int code;
+  final String label;
+
+  @override
+  String toString() => label;
+
+  static AlarmStatus fromCode(int code) {
+    return AlarmStatus.values.firstWhere((e) => e.code == code, orElse: () => AlarmStatus.none);
+  }
+}
 
 class Alarm {
   int id;
   String title;
   String content;
-  Type type;
-  Status status;
+  AlarmType type;
+  AlarmStatus status;
   int user;
   String date;
   bool checked;
@@ -18,8 +57,8 @@ class Alarm {
     this.id = 0,
     this.title = '',
     this.content = '',
-    this.type = Type(),
-    this.status = Status(),
+    this.type = AlarmType.none,
+    this.status = AlarmStatus.none,
     this.user = 0,
     this.date = '',
     this.extra = const {},
@@ -31,8 +70,8 @@ class Alarm {
       id: json['id'] as int,
       title: json['title'] as String,
       content: json['content'] as String,
-      type: Type.fromJson(json['type']),
-      status: Status.fromJson(json['status']),
+      type: AlarmType.fromCode(json['type'] as int),
+      status: AlarmStatus.fromCode(json['status'] as int),
       user: json['user'] as int,
       date: json['date'] as String,
       extra: json['extra'] == null ? <String, dynamic>{} : json['extra'] as Map<String, dynamic>,
@@ -43,8 +82,8 @@ class Alarm {
     'id': id,
     'title': title,
     'content': content,
-    'type': type.toJson(),
-    'status': status.toJson(),
+    'type': type.code,
+    'status': status.code,
     'user': user,
     'date': date,
   };

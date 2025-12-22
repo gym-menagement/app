@@ -1,22 +1,58 @@
 import 'package:common_control/common_control.dart';
-import 'package:dreamcam/models/type.dart';
-import 'package:dreamcam/models/result.dart';
 
+
+enum SystemlogType {
+  none(0, ''),
+  login(1, '로그인'),
+  crawling(2, '크롤링'),
+;
+
+  const SystemlogType(this.code, this.label);
+
+  final int code;
+  final String label;
+
+  @override
+  String toString() => label;
+
+  static SystemlogType fromCode(int code) {
+    return SystemlogType.values.firstWhere((e) => e.code == code, orElse: () => SystemlogType.none);
+  }
+}
+
+enum SystemlogResult {
+  none(0, ''),
+  success(1, '성공'),
+  fail(2, '실패'),
+;
+
+  const SystemlogResult(this.code, this.label);
+
+  final int code;
+  final String label;
+
+  @override
+  String toString() => label;
+
+  static SystemlogResult fromCode(int code) {
+    return SystemlogResult.values.firstWhere((e) => e.code == code, orElse: () => SystemlogResult.none);
+  }
+}
 
 class Systemlog {
   int id;
-  Type type;
+  SystemlogType type;
   String content;
-  Result result;
+  SystemlogResult result;
   String date;
   bool checked;
   Map<String, dynamic> extra;
 
   Systemlog({
     this.id = 0,
-    this.type = Type(),
+    this.type = SystemlogType.none,
     this.content = '',
-    this.result = Result(),
+    this.result = SystemlogResult.none,
     this.date = '',
     this.extra = const {},
     this.checked = false,
@@ -25,9 +61,9 @@ class Systemlog {
   factory Systemlog.fromJson(Map<String, dynamic> json) {
     return Systemlog(
       id: json['id'] as int,
-      type: Type.fromJson(json['type']),
+      type: SystemlogType.fromCode(json['type'] as int),
       content: json['content'] as String,
-      result: Result.fromJson(json['result']),
+      result: SystemlogResult.fromCode(json['result'] as int),
       date: json['date'] as String,
       extra: json['extra'] == null ? <String, dynamic>{} : json['extra'] as Map<String, dynamic>,
     );
@@ -35,9 +71,9 @@ class Systemlog {
 
   Map<String, dynamic> toJson() => {
     'id': id,
-    'type': type.toJson(),
+    'type': type.code,
     'content': content,
-    'result': result.toJson(),
+    'result': result.code,
     'date': date,
   };
 

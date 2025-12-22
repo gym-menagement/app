@@ -1,6 +1,24 @@
 import 'package:common_control/common_control.dart';
-import 'package:dreamcam/models/status.dart';
 
+
+enum TrainermemberStatus {
+  none(0, ''),
+  terminated(1, '종료'),
+  in_progress(2, '진행중'),
+;
+
+  const TrainermemberStatus(this.code, this.label);
+
+  final int code;
+  final String label;
+
+  @override
+  String toString() => label;
+
+  static TrainermemberStatus fromCode(int code) {
+    return TrainermemberStatus.values.firstWhere((e) => e.code == code, orElse: () => TrainermemberStatus.none);
+  }
+}
 
 class Trainermember {
   int id;
@@ -9,7 +27,7 @@ class Trainermember {
   int gym;
   String startdate;
   String enddate;
-  Status status;
+  TrainermemberStatus status;
   String note;
   String date;
   bool checked;
@@ -22,7 +40,7 @@ class Trainermember {
     this.gym = 0,
     this.startdate = '',
     this.enddate = '',
-    this.status = Status(),
+    this.status = TrainermemberStatus.none,
     this.note = '',
     this.date = '',
     this.extra = const {},
@@ -37,7 +55,7 @@ class Trainermember {
       gym: json['gym'] as int,
       startdate: json['startdate'] as String,
       enddate: json['enddate'] as String,
-      status: Status.fromJson(json['status']),
+      status: TrainermemberStatus.fromCode(json['status'] as int),
       note: json['note'] as String,
       date: json['date'] as String,
       extra: json['extra'] == null ? <String, dynamic>{} : json['extra'] as Map<String, dynamic>,
@@ -51,7 +69,7 @@ class Trainermember {
     'gym': gym,
     'startdate': startdate,
     'enddate': enddate,
-    'status': status.toJson(),
+    'status': status.code,
     'note': note,
     'date': date,
   };

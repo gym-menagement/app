@@ -1,16 +1,55 @@
 import 'package:common_control/common_control.dart';
-import 'package:dreamcam/models/type.dart';
-import 'package:dreamcam/models/status.dart';
 
+
+enum InquiryType {
+  none(0, ''),
+  general(1, '일반'),
+  membership(2, '회원권'),
+  refund(3, '환불'),
+  facility(4, '시설'),
+  other(5, '기타'),
+;
+
+  const InquiryType(this.code, this.label);
+
+  final int code;
+  final String label;
+
+  @override
+  String toString() => label;
+
+  static InquiryType fromCode(int code) {
+    return InquiryType.values.firstWhere((e) => e.code == code, orElse: () => InquiryType.none);
+  }
+}
+
+enum InquiryStatus {
+  none(0, ''),
+  waiting(1, '대기'),
+  answered(2, '답변완료'),
+;
+
+  const InquiryStatus(this.code, this.label);
+
+  final int code;
+  final String label;
+
+  @override
+  String toString() => label;
+
+  static InquiryStatus fromCode(int code) {
+    return InquiryStatus.values.firstWhere((e) => e.code == code, orElse: () => InquiryStatus.none);
+  }
+}
 
 class Inquiry {
   int id;
   int user;
   int gym;
-  Type type;
+  InquiryType type;
   String title;
   String content;
-  Status status;
+  InquiryStatus status;
   String answer;
   int answeredby;
   String answereddate;
@@ -23,10 +62,10 @@ class Inquiry {
     this.id = 0,
     this.user = 0,
     this.gym = 0,
-    this.type = Type(),
+    this.type = InquiryType.none,
     this.title = '',
     this.content = '',
-    this.status = Status(),
+    this.status = InquiryStatus.none,
     this.answer = '',
     this.answeredby = 0,
     this.answereddate = '',
@@ -41,10 +80,10 @@ class Inquiry {
       id: json['id'] as int,
       user: json['user'] as int,
       gym: json['gym'] as int,
-      type: Type.fromJson(json['type']),
+      type: InquiryType.fromCode(json['type'] as int),
       title: json['title'] as String,
       content: json['content'] as String,
-      status: Status.fromJson(json['status']),
+      status: InquiryStatus.fromCode(json['status'] as int),
       answer: json['answer'] as String,
       answeredby: json['answeredby'] as int,
       answereddate: json['answereddate'] as String,
@@ -58,10 +97,10 @@ class Inquiry {
     'id': id,
     'user': user,
     'gym': gym,
-    'type': type.toJson(),
+    'type': type.code,
     'title': title,
     'content': content,
-    'status': status.toJson(),
+    'status': status.code,
     'answer': answer,
     'answeredby': answeredby,
     'answereddate': answereddate,

@@ -1,11 +1,32 @@
 import 'package:common_control/common_control.dart';
-import 'package:dreamcam/models/roleid.dart';
 
+
+enum RoleRoleid {
+  none(0, ''),
+  member(1, '회원'),
+  trainer(2, '트레이너'),
+  staff(3, '직원'),
+  gym_admin(4, '헬스장관리자'),
+  platform_admin(5, '플랫폼관리자'),
+;
+
+  const RoleRoleid(this.code, this.label);
+
+  final int code;
+  final String label;
+
+  @override
+  String toString() => label;
+
+  static RoleRoleid fromCode(int code) {
+    return RoleRoleid.values.firstWhere((e) => e.code == code, orElse: () => RoleRoleid.none);
+  }
+}
 
 class Role {
   int id;
   int gym;
-  Roleid roleid;
+  RoleRoleid roleid;
   String name;
   String date;
   bool checked;
@@ -14,7 +35,7 @@ class Role {
   Role({
     this.id = 0,
     this.gym = 0,
-    this.roleid = Roleid(),
+    this.roleid = RoleRoleid.none,
     this.name = '',
     this.date = '',
     this.extra = const {},
@@ -25,7 +46,7 @@ class Role {
     return Role(
       id: json['id'] as int,
       gym: json['gym'] as int,
-      roleid: Roleid.fromJson(json['roleid']),
+      roleid: RoleRoleid.fromCode(json['roleid'] as int),
       name: json['name'] as String,
       date: json['date'] as String,
       extra: json['extra'] == null ? <String, dynamic>{} : json['extra'] as Map<String, dynamic>,
@@ -35,7 +56,7 @@ class Role {
   Map<String, dynamic> toJson() => {
     'id': id,
     'gym': gym,
-    'roleid': roleid.toJson(),
+    'roleid': roleid.code,
     'name': name,
     'date': date,
   };

@@ -1,13 +1,31 @@
 import 'package:common_control/common_control.dart';
-import 'package:dreamcam/models/isactive.dart';
 
+
+enum QrcodeIsactive {
+  none(0, ''),
+  inactive(1, '비활성'),
+  active(2, '활성'),
+;
+
+  const QrcodeIsactive(this.code, this.label);
+
+  final int code;
+  final String label;
+
+  @override
+  String toString() => label;
+
+  static QrcodeIsactive fromCode(int code) {
+    return QrcodeIsactive.values.firstWhere((e) => e.code == code, orElse: () => QrcodeIsactive.none);
+  }
+}
 
 class Qrcode {
   int id;
   int user;
   String code;
   String imageurl;
-  Isactive isactive;
+  QrcodeIsactive isactive;
   String expiredate;
   String generateddate;
   String lastuseddate;
@@ -21,7 +39,7 @@ class Qrcode {
     this.user = 0,
     this.code = '',
     this.imageurl = '',
-    this.isactive = Isactive(),
+    this.isactive = QrcodeIsactive.none,
     this.expiredate = '',
     this.generateddate = '',
     this.lastuseddate = '',
@@ -37,7 +55,7 @@ class Qrcode {
       user: json['user'] as int,
       code: json['code'] as String,
       imageurl: json['imageurl'] as String,
-      isactive: Isactive.fromJson(json['isactive']),
+      isactive: QrcodeIsactive.fromCode(json['isactive'] as int),
       expiredate: json['expiredate'] as String,
       generateddate: json['generateddate'] as String,
       lastuseddate: json['lastuseddate'] as String,
@@ -52,7 +70,7 @@ class Qrcode {
     'user': user,
     'code': code,
     'imageurl': imageurl,
-    'isactive': isactive.toJson(),
+    'isactive': isactive.code,
     'expiredate': expiredate,
     'generateddate': generateddate,
     'lastuseddate': lastuseddate,

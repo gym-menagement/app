@@ -1,6 +1,24 @@
 import 'package:common_control/common_control.dart';
-import 'package:dreamcam/models/isactive.dart';
 
+
+enum PushtokenIsactive {
+  none(0, ''),
+  inactive(1, '비활성'),
+  active(2, '활성'),
+;
+
+  const PushtokenIsactive(this.code, this.label);
+
+  final int code;
+  final String label;
+
+  @override
+  String toString() => label;
+
+  static PushtokenIsactive fromCode(int code) {
+    return PushtokenIsactive.values.firstWhere((e) => e.code == code, orElse: () => PushtokenIsactive.none);
+  }
+}
 
 class Pushtoken {
   int id;
@@ -9,7 +27,7 @@ class Pushtoken {
   String devicetype;
   String deviceid;
   String appversion;
-  Isactive isactive;
+  PushtokenIsactive isactive;
   String createddate;
   String updateddate;
   String date;
@@ -23,7 +41,7 @@ class Pushtoken {
     this.devicetype = '',
     this.deviceid = '',
     this.appversion = '',
-    this.isactive = Isactive(),
+    this.isactive = PushtokenIsactive.none,
     this.createddate = '',
     this.updateddate = '',
     this.date = '',
@@ -39,7 +57,7 @@ class Pushtoken {
       devicetype: json['devicetype'] as String,
       deviceid: json['deviceid'] as String,
       appversion: json['appversion'] as String,
-      isactive: Isactive.fromJson(json['isactive']),
+      isactive: PushtokenIsactive.fromCode(json['isactive'] as int),
       createddate: json['createddate'] as String,
       updateddate: json['updateddate'] as String,
       date: json['date'] as String,
@@ -54,7 +72,7 @@ class Pushtoken {
     'devicetype': devicetype,
     'deviceid': deviceid,
     'appversion': appversion,
-    'isactive': isactive.toJson(),
+    'isactive': isactive.code,
     'createddate': createddate,
     'updateddate': updateddate,
     'date': date,

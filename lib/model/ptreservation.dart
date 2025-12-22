@@ -1,6 +1,26 @@
 import 'package:common_control/common_control.dart';
-import 'package:dreamcam/models/status.dart';
 
+
+enum PtreservationStatus {
+  none(0, ''),
+  reserved(1, '예약'),
+  completed(2, '완료'),
+  cancelled(3, '취소'),
+  no_show(4, '노쇼'),
+;
+
+  const PtreservationStatus(this.code, this.label);
+
+  final int code;
+  final String label;
+
+  @override
+  String toString() => label;
+
+  static PtreservationStatus fromCode(int code) {
+    return PtreservationStatus.values.firstWhere((e) => e.code == code, orElse: () => PtreservationStatus.none);
+  }
+}
 
 class Ptreservation {
   int id;
@@ -11,7 +31,7 @@ class Ptreservation {
   String starttime;
   String endtime;
   int duration;
-  Status status;
+  PtreservationStatus status;
   String note;
   String cancelreason;
   String createddate;
@@ -29,7 +49,7 @@ class Ptreservation {
     this.starttime = '',
     this.endtime = '',
     this.duration = 0,
-    this.status = Status(),
+    this.status = PtreservationStatus.none,
     this.note = '',
     this.cancelreason = '',
     this.createddate = '',
@@ -49,7 +69,7 @@ class Ptreservation {
       starttime: json['starttime'] as String,
       endtime: json['endtime'] as String,
       duration: json['duration'] as int,
-      status: Status.fromJson(json['status']),
+      status: PtreservationStatus.fromCode(json['status'] as int),
       note: json['note'] as String,
       cancelreason: json['cancelreason'] as String,
       createddate: json['createddate'] as String,
@@ -68,7 +88,7 @@ class Ptreservation {
     'starttime': starttime,
     'endtime': endtime,
     'duration': duration,
-    'status': status.toJson(),
+    'status': status.code,
     'note': note,
     'cancelreason': cancelreason,
     'createddate': createddate,

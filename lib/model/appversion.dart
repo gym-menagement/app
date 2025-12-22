@@ -1,17 +1,53 @@
 import 'package:common_control/common_control.dart';
-import 'package:dreamcam/models/forceupdate.dart';
-import 'package:dreamcam/models/status.dart';
 
+
+enum AppversionForceupdate {
+  none(0, ''),
+  no(1, '아니오'),
+  yes(2, '예'),
+;
+
+  const AppversionForceupdate(this.code, this.label);
+
+  final int code;
+  final String label;
+
+  @override
+  String toString() => label;
+
+  static AppversionForceupdate fromCode(int code) {
+    return AppversionForceupdate.values.firstWhere((e) => e.code == code, orElse: () => AppversionForceupdate.none);
+  }
+}
+
+enum AppversionStatus {
+  none(0, ''),
+  inactive(1, '비활성'),
+  active(2, '활성'),
+;
+
+  const AppversionStatus(this.code, this.label);
+
+  final int code;
+  final String label;
+
+  @override
+  String toString() => label;
+
+  static AppversionStatus fromCode(int code) {
+    return AppversionStatus.values.firstWhere((e) => e.code == code, orElse: () => AppversionStatus.none);
+  }
+}
 
 class Appversion {
   int id;
   String platform;
   String version;
   String minversion;
-  Forceupdate forceupdate;
+  AppversionForceupdate forceupdate;
   String updatemessage;
   String downloadurl;
-  Status status;
+  AppversionStatus status;
   String releasedate;
   String createddate;
   String date;
@@ -23,10 +59,10 @@ class Appversion {
     this.platform = '',
     this.version = '',
     this.minversion = '',
-    this.forceupdate = Forceupdate(),
+    this.forceupdate = AppversionForceupdate.none,
     this.updatemessage = '',
     this.downloadurl = '',
-    this.status = Status(),
+    this.status = AppversionStatus.none,
     this.releasedate = '',
     this.createddate = '',
     this.date = '',
@@ -40,10 +76,10 @@ class Appversion {
       platform: json['platform'] as String,
       version: json['version'] as String,
       minversion: json['minversion'] as String,
-      forceupdate: Forceupdate.fromJson(json['forceupdate']),
+      forceupdate: AppversionForceupdate.fromCode(json['forceupdate'] as int),
       updatemessage: json['updatemessage'] as String,
       downloadurl: json['downloadurl'] as String,
-      status: Status.fromJson(json['status']),
+      status: AppversionStatus.fromCode(json['status'] as int),
       releasedate: json['releasedate'] as String,
       createddate: json['createddate'] as String,
       date: json['date'] as String,
@@ -56,10 +92,10 @@ class Appversion {
     'platform': platform,
     'version': version,
     'minversion': minversion,
-    'forceupdate': forceupdate.toJson(),
+    'forceupdate': forceupdate.code,
     'updatemessage': updatemessage,
     'downloadurl': downloadurl,
-    'status': status.toJson(),
+    'status': status.code,
     'releasedate': releasedate,
     'createddate': createddate,
     'date': date,

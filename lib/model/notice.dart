@@ -1,24 +1,116 @@
 import 'package:common_control/common_control.dart';
-import 'package:dreamcam/models/type.dart';
-import 'package:dreamcam/models/ispopup.dart';
-import 'package:dreamcam/models/ispush.dart';
-import 'package:dreamcam/models/target.dart';
-import 'package:dreamcam/models/status.dart';
 
+
+enum NoticeType {
+  none(0, ''),
+  general(1, '일반'),
+  important(2, '중요'),
+  event(3, '이벤트'),
+;
+
+  const NoticeType(this.code, this.label);
+
+  final int code;
+  final String label;
+
+  @override
+  String toString() => label;
+
+  static NoticeType fromCode(int code) {
+    return NoticeType.values.firstWhere((e) => e.code == code, orElse: () => NoticeType.none);
+  }
+}
+
+enum NoticeIspopup {
+  none(0, ''),
+  no(1, '아니오'),
+  yes(2, '예'),
+;
+
+  const NoticeIspopup(this.code, this.label);
+
+  final int code;
+  final String label;
+
+  @override
+  String toString() => label;
+
+  static NoticeIspopup fromCode(int code) {
+    return NoticeIspopup.values.firstWhere((e) => e.code == code, orElse: () => NoticeIspopup.none);
+  }
+}
+
+enum NoticeIspush {
+  none(0, ''),
+  no(1, '아니오'),
+  yes(2, '예'),
+;
+
+  const NoticeIspush(this.code, this.label);
+
+  final int code;
+  final String label;
+
+  @override
+  String toString() => label;
+
+  static NoticeIspush fromCode(int code) {
+    return NoticeIspush.values.firstWhere((e) => e.code == code, orElse: () => NoticeIspush.none);
+  }
+}
+
+enum NoticeTarget {
+  none(0, ''),
+  all(1, '전체'),
+  members_only(2, '회원만'),
+  specific_members(3, '특정회원'),
+;
+
+  const NoticeTarget(this.code, this.label);
+
+  final int code;
+  final String label;
+
+  @override
+  String toString() => label;
+
+  static NoticeTarget fromCode(int code) {
+    return NoticeTarget.values.firstWhere((e) => e.code == code, orElse: () => NoticeTarget.none);
+  }
+}
+
+enum NoticeStatus {
+  none(0, ''),
+  private(1, '비공개'),
+  public(2, '공개'),
+;
+
+  const NoticeStatus(this.code, this.label);
+
+  final int code;
+  final String label;
+
+  @override
+  String toString() => label;
+
+  static NoticeStatus fromCode(int code) {
+    return NoticeStatus.values.firstWhere((e) => e.code == code, orElse: () => NoticeStatus.none);
+  }
+}
 
 class Notice {
   int id;
   int gym;
   String title;
   String content;
-  Type type;
-  Ispopup ispopup;
-  Ispush ispush;
-  Target target;
+  NoticeType type;
+  NoticeIspopup ispopup;
+  NoticeIspush ispush;
+  NoticeTarget target;
   int viewcount;
   String startdate;
   String enddate;
-  Status status;
+  NoticeStatus status;
   int createdby;
   String createddate;
   String updateddate;
@@ -31,14 +123,14 @@ class Notice {
     this.gym = 0,
     this.title = '',
     this.content = '',
-    this.type = Type(),
-    this.ispopup = Ispopup(),
-    this.ispush = Ispush(),
-    this.target = Target(),
+    this.type = NoticeType.none,
+    this.ispopup = NoticeIspopup.none,
+    this.ispush = NoticeIspush.none,
+    this.target = NoticeTarget.none,
     this.viewcount = 0,
     this.startdate = '',
     this.enddate = '',
-    this.status = Status(),
+    this.status = NoticeStatus.none,
     this.createdby = 0,
     this.createddate = '',
     this.updateddate = '',
@@ -53,14 +145,14 @@ class Notice {
       gym: json['gym'] as int,
       title: json['title'] as String,
       content: json['content'] as String,
-      type: Type.fromJson(json['type']),
-      ispopup: Ispopup.fromJson(json['ispopup']),
-      ispush: Ispush.fromJson(json['ispush']),
-      target: Target.fromJson(json['target']),
+      type: NoticeType.fromCode(json['type'] as int),
+      ispopup: NoticeIspopup.fromCode(json['ispopup'] as int),
+      ispush: NoticeIspush.fromCode(json['ispush'] as int),
+      target: NoticeTarget.fromCode(json['target'] as int),
       viewcount: json['viewcount'] as int,
       startdate: json['startdate'] as String,
       enddate: json['enddate'] as String,
-      status: Status.fromJson(json['status']),
+      status: NoticeStatus.fromCode(json['status'] as int),
       createdby: json['createdby'] as int,
       createddate: json['createddate'] as String,
       updateddate: json['updateddate'] as String,
@@ -74,14 +166,14 @@ class Notice {
     'gym': gym,
     'title': title,
     'content': content,
-    'type': type.toJson(),
-    'ispopup': ispopup.toJson(),
-    'ispush': ispush.toJson(),
-    'target': target.toJson(),
+    'type': type.code,
+    'ispopup': ispopup.code,
+    'ispush': ispush.code,
+    'target': target.code,
     'viewcount': viewcount,
     'startdate': startdate,
     'enddate': enddate,
-    'status': status.toJson(),
+    'status': status.code,
     'createdby': createdby,
     'createddate': createddate,
     'updateddate': updateddate,

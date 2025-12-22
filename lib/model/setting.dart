@@ -1,6 +1,25 @@
 import 'package:common_control/common_control.dart';
-import 'package:dreamcam/models/type.dart';
 
+
+enum SettingType {
+  none(0, ''),
+  string(1, '문자열'),
+  number(2, '숫자'),
+  boolean(3, '참거짓'),
+;
+
+  const SettingType(this.code, this.label);
+
+  final int code;
+  final String label;
+
+  @override
+  String toString() => label;
+
+  static SettingType fromCode(int code) {
+    return SettingType.values.firstWhere((e) => e.code == code, orElse: () => SettingType.none);
+  }
+}
 
 class Setting {
   int id;
@@ -9,7 +28,7 @@ class Setting {
   String key;
   String value;
   String remark;
-  Type type;
+  SettingType type;
   String data;
   int order;
   String date;
@@ -23,7 +42,7 @@ class Setting {
     this.key = '',
     this.value = '',
     this.remark = '',
-    this.type = Type(),
+    this.type = SettingType.none,
     this.data = '',
     this.order = 0,
     this.date = '',
@@ -39,7 +58,7 @@ class Setting {
       key: json['key'] as String,
       value: json['value'] as String,
       remark: json['remark'] as String,
-      type: Type.fromJson(json['type']),
+      type: SettingType.fromCode(json['type'] as int),
       data: json['data'] as String,
       order: json['order'] as int,
       date: json['date'] as String,
@@ -54,7 +73,7 @@ class Setting {
     'key': key,
     'value': value,
     'remark': remark,
-    'type': type.toJson(),
+    'type': type.code,
     'data': data,
     'order': order,
     'date': date,

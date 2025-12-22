@@ -1,10 +1,109 @@
 import 'package:common_control/common_control.dart';
-import 'package:dreamcam/models/sex.dart';
-import 'package:dreamcam/models/type.dart';
-import 'package:dreamcam/models/level.dart';
-import 'package:dreamcam/models/role.dart';
-import 'package:dreamcam/models/use.dart';
 
+
+enum UserLevel {
+  none(0, ''),
+  normal(1, '일반회원'),
+  manager(2, '트레이너/직원'),
+  admin(3, '헬스장관리자'),
+  superadmin(4, '플랫폼관리자'),
+  rootadmin(5, '최고관리자'),
+;
+
+  const UserLevel(this.code, this.label);
+
+  final int code;
+  final String label;
+
+  @override
+  String toString() => label;
+
+  static UserLevel fromCode(int code) {
+    return UserLevel.values.firstWhere((e) => e.code == code, orElse: () => UserLevel.none);
+  }
+}
+
+enum UserUse {
+  none(0, ''),
+  use(1, '사용'),
+  notuse(2, '사용안함'),
+;
+
+  const UserUse(this.code, this.label);
+
+  final int code;
+  final String label;
+
+  @override
+  String toString() => label;
+
+  static UserUse fromCode(int code) {
+    return UserUse.values.firstWhere((e) => e.code == code, orElse: () => UserUse.none);
+  }
+}
+
+enum UserType {
+  none(0, ''),
+  normal(1, '일반'),
+  kakao(2, '카카오'),
+  naver(3, '네이버'),
+  google(4, '구글'),
+  apple(5, '애플'),
+;
+
+  const UserType(this.code, this.label);
+
+  final int code;
+  final String label;
+
+  @override
+  String toString() => label;
+
+  static UserType fromCode(int code) {
+    return UserType.values.firstWhere((e) => e.code == code, orElse: () => UserType.none);
+  }
+}
+
+enum UserRole {
+  none(0, ''),
+  member(1, '회원'),
+  trainer(2, '트레이너'),
+  staff(3, '직원'),
+  gym_admin(4, '헬스장관리자'),
+  platform_admin(5, '플랫폼관리자'),
+;
+
+  const UserRole(this.code, this.label);
+
+  final int code;
+  final String label;
+
+  @override
+  String toString() => label;
+
+  static UserRole fromCode(int code) {
+    return UserRole.values.firstWhere((e) => e.code == code, orElse: () => UserRole.none);
+  }
+}
+
+enum UserSex {
+  none(0, ''),
+  male(1, '남성'),
+  female(2, '여성'),
+;
+
+  const UserSex(this.code, this.label);
+
+  final int code;
+  final String label;
+
+  @override
+  String toString() => label;
+
+  static UserSex fromCode(int code) {
+    return UserSex.values.firstWhere((e) => e.code == code, orElse: () => UserSex.none);
+  }
+}
 
 class User {
   int id;
@@ -15,13 +114,13 @@ class User {
   String tel;
   String address;
   String image;
-  Sex sex;
+  UserSex sex;
   String birth;
-  Type type;
+  UserType type;
   String connectid;
-  Level level;
-  Role role;
-  Use use;
+  UserLevel level;
+  UserRole role;
+  UserUse use;
   String logindate;
   String lastchangepasswddate;
   String date;
@@ -37,13 +136,13 @@ class User {
     this.tel = '',
     this.address = '',
     this.image = '',
-    this.sex = Sex(),
+    this.sex = UserSex.none,
     this.birth = '',
-    this.type = Type(),
+    this.type = UserType.none,
     this.connectid = '',
-    this.level = Level(),
-    this.role = Role(),
-    this.use = Use(),
+    this.level = UserLevel.none,
+    this.role = UserRole.none,
+    this.use = UserUse.none,
     this.logindate = '',
     this.lastchangepasswddate = '',
     this.date = '',
@@ -61,13 +160,13 @@ class User {
       tel: json['tel'] as String,
       address: json['address'] as String,
       image: json['image'] as String,
-      sex: Sex.fromJson(json['sex']),
+      sex: UserSex.fromCode(json['sex'] as int),
       birth: json['birth'] as String,
-      type: Type.fromJson(json['type']),
+      type: UserType.fromCode(json['type'] as int),
       connectid: json['connectid'] as String,
-      level: Level.fromJson(json['level']),
-      role: Role.fromJson(json['role']),
-      use: Use.fromJson(json['use']),
+      level: UserLevel.fromCode(json['level'] as int),
+      role: UserRole.fromCode(json['role'] as int),
+      use: UserUse.fromCode(json['use'] as int),
       logindate: json['logindate'] as String,
       lastchangepasswddate: json['lastchangepasswddate'] as String,
       date: json['date'] as String,
@@ -84,13 +183,13 @@ class User {
     'tel': tel,
     'address': address,
     'image': image,
-    'sex': sex.toJson(),
+    'sex': sex.code,
     'birth': birth,
-    'type': type.toJson(),
+    'type': type.code,
     'connectid': connectid,
-    'level': level.toJson(),
-    'role': role.toJson(),
-    'use': use.toJson(),
+    'level': level.code,
+    'role': role.code,
+    'use': use.code,
     'logindate': logindate,
     'lastchangepasswddate': lastchangepasswddate,
     'date': date,

@@ -1,15 +1,69 @@
 import 'package:common_control/common_control.dart';
-import 'package:dreamcam/models/type.dart';
-import 'package:dreamcam/models/policy.dart';
-import 'package:dreamcam/models/use.dart';
 
+
+enum IpblockType {
+  none(0, ''),
+  admin(1, '관리자 접근'),
+  normal(2, '일반 접근'),
+;
+
+  const IpblockType(this.code, this.label);
+
+  final int code;
+  final String label;
+
+  @override
+  String toString() => label;
+
+  static IpblockType fromCode(int code) {
+    return IpblockType.values.firstWhere((e) => e.code == code, orElse: () => IpblockType.none);
+  }
+}
+
+enum IpblockPolicy {
+  none(0, ''),
+  grant(1, '허용'),
+  deny(2, '거부'),
+;
+
+  const IpblockPolicy(this.code, this.label);
+
+  final int code;
+  final String label;
+
+  @override
+  String toString() => label;
+
+  static IpblockPolicy fromCode(int code) {
+    return IpblockPolicy.values.firstWhere((e) => e.code == code, orElse: () => IpblockPolicy.none);
+  }
+}
+
+enum IpblockUse {
+  none(0, ''),
+  use(1, '사용'),
+  notuse(2, '사용안함'),
+;
+
+  const IpblockUse(this.code, this.label);
+
+  final int code;
+  final String label;
+
+  @override
+  String toString() => label;
+
+  static IpblockUse fromCode(int code) {
+    return IpblockUse.values.firstWhere((e) => e.code == code, orElse: () => IpblockUse.none);
+  }
+}
 
 class Ipblock {
   int id;
   String address;
-  Type type;
-  Policy policy;
-  Use use;
+  IpblockType type;
+  IpblockPolicy policy;
+  IpblockUse use;
   int order;
   String date;
   bool checked;
@@ -18,9 +72,9 @@ class Ipblock {
   Ipblock({
     this.id = 0,
     this.address = '',
-    this.type = Type(),
-    this.policy = Policy(),
-    this.use = Use(),
+    this.type = IpblockType.none,
+    this.policy = IpblockPolicy.none,
+    this.use = IpblockUse.none,
     this.order = 0,
     this.date = '',
     this.extra = const {},
@@ -31,9 +85,9 @@ class Ipblock {
     return Ipblock(
       id: json['id'] as int,
       address: json['address'] as String,
-      type: Type.fromJson(json['type']),
-      policy: Policy.fromJson(json['policy']),
-      use: Use.fromJson(json['use']),
+      type: IpblockType.fromCode(json['type'] as int),
+      policy: IpblockPolicy.fromCode(json['policy'] as int),
+      use: IpblockUse.fromCode(json['use'] as int),
       order: json['order'] as int,
       date: json['date'] as String,
       extra: json['extra'] == null ? <String, dynamic>{} : json['extra'] as Map<String, dynamic>,
@@ -43,9 +97,9 @@ class Ipblock {
   Map<String, dynamic> toJson() => {
     'id': id,
     'address': address,
-    'type': type.toJson(),
-    'policy': policy.toJson(),
-    'use': use.toJson(),
+    'type': type.code,
+    'policy': policy.code,
+    'use': use.code,
     'order': order,
     'date': date,
   };
