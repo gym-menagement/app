@@ -24,14 +24,17 @@ class AppColors {
   static const onSuccess = Color(0xFFFFFFFF);
   static const error = Color(0xFFB3261E);
   static const onError = Color(0xFFFFFFFF);
+  static const errorContainer = Color(0xFFF9DEDC);
   static const warning = Color(0xFFFFA726);
   static const onWarning = Color(0xFF000000);
+  static const warningContainer = Color(0xFFFFE0B2);
   static const info = Color(0xFF2196F3);
   static const onInfo = Color(0xFFFFFFFF);
 
   // Neutral Colors
   static const grey900 = Color(0xFF212121);
   static const grey700 = Color(0xFF616161);
+  static const grey600 = Color(0xFF757575);
   static const grey500 = Color(0xFF9E9E9E);
   static const grey400 = Color(0xFFBDBDBD);
   static const grey300 = Color(0xFFE0E0E0);
