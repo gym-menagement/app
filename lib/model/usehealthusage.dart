@@ -1,10 +1,12 @@
-import 'package:common_control/common_control.dart';
+import 'package:app/config/http.dart';
+
 
 enum UsehealthusageType {
   none(0, ''),
   entry(1, '입장'),
   pt(2, 'PT수업'),
-  group(3, '그룹수업');
+  groupclass(3, '그룹수업'),
+;
 
   const UsehealthusageType(this.code, this.label);
 
@@ -15,10 +17,7 @@ enum UsehealthusageType {
   String toString() => label;
 
   static UsehealthusageType fromCode(int code) {
-    return UsehealthusageType.values.firstWhere(
-      (e) => e.code == code,
-      orElse: () => UsehealthusageType.none,
-    );
+    return UsehealthusageType.values.firstWhere((e) => e.code == code, orElse: () => UsehealthusageType.none);
   }
 }
 
@@ -75,10 +74,7 @@ class Usehealthusage {
       duration: json['duration'] as int,
       note: json['note'] as String,
       date: json['date'] as String,
-      extra:
-          json['extra'] == null
-              ? <String, dynamic>{}
-              : json['extra'] as Map<String, dynamic>,
+      extra: json['extra'] == null ? <String, dynamic>{} : json['extra'] as Map<String, dynamic>,
     );
   }
 
@@ -120,9 +116,7 @@ class UsehealthusageManager {
       return List<Usehealthusage>.empty(growable: true);
     }
 
-    return result['items']
-        .map<Usehealthusage>((json) => Usehealthusage.fromJson(json))
-        .toList();
+    return result['items'].map<Usehealthusage>((json) => Usehealthusage.fromJson(json)).toList();
   }
 
   static Future<int> count({String? params}) async {
