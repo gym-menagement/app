@@ -594,7 +594,7 @@ class _SignupScreenState extends State<SignupScreen> {
           Container(
             padding: const EdgeInsets.all(AppSpacing.md),
             decoration: BoxDecoration(
-              color: AppColors.primaryContainer,
+              color: AppColors.primaryLight,
               borderRadius: BorderRadius.circular(AppSpacing.radiusMedium),
             ),
             child: CheckboxListTile(

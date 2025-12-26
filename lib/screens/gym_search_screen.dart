@@ -590,7 +590,7 @@ class _FilterBottomSheetState extends State<_FilterBottomSheet> {
           }
         });
       },
-      selectedColor: AppColors.primaryContainer,
+      selectedColor: AppColors.primaryLight,
       checkmarkColor: AppColors.primary,
       labelStyle: AppTextStyles.bodyMedium.copyWith(
         color: isSelected ? AppColors.primary : AppColors.grey700,

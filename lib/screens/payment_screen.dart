@@ -519,7 +519,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
         children: [
           // Selected Plan Summary
           Card(
-            color: AppColors.primaryContainer,
+            color: AppColors.primaryLight,
             child: Padding(
               padding: const EdgeInsets.all(AppSpacing.md),
               child: Column(

@@ -659,7 +659,7 @@ class _MembershipScreenState extends State<MembershipScreen> {
                   icon: Icons.emoji_events,
                   label: '최장 연속 방문',
                   value: '${_stats?['longestStreak'] ?? 0}일',
-                  color: AppColors.secondary,
+                  color: AppColors.warning,
                 ),
               ),
             ],
@@ -809,13 +809,13 @@ class _MembershipScreenState extends State<MembershipScreen> {
   Color _getStatusBackgroundColor(MembershipStatus status) {
     switch (status) {
       case MembershipStatus.active:
-        return AppColors.primaryContainer;
+        return AppColors.primaryLight;
       case MembershipStatus.paused:
-        return AppColors.warningContainer;
+        return AppColors.warningLight;
       case MembershipStatus.expired:
         return AppColors.grey200;
       case MembershipStatus.cancelled:
-        return AppColors.errorContainer;
+        return AppColors.errorLight;
     }
   }
 

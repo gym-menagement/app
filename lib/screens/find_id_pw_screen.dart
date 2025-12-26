@@ -378,7 +378,7 @@ class _FindIdTabState extends State<FindIdTab> {
             Container(
               padding: const EdgeInsets.all(AppSpacing.xl),
               decoration: BoxDecoration(
-                color: AppColors.primaryContainer,
+                color: AppColors.primaryLight,
                 borderRadius: BorderRadius.circular(AppSpacing.radiusMedium),
               ),
               child: Column(
