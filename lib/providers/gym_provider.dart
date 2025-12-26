@@ -1,5 +1,7 @@
 import 'package:flutter/foundation.dart';
 import '../model/gym.dart';
+import '../config/http.dart';
+import '../config/config.dart';
 
 /// Gym data and search state management provider
 /// Manages gym listings, search filters, favorites, and location-based queries
@@ -29,86 +31,36 @@ class GymProvider extends ChangeNotifier {
   String get searchQuery => _searchQuery;
   String get sortBy => _sortBy;
   Set<String> get selectedFacilities => _selectedFacilities;
-  bool get hasActiveFilters => _searchQuery.isNotEmpty || _selectedFacilities.isNotEmpty || _sortBy != 'distance';
+  bool get hasActiveFilters =>
+      _searchQuery.isNotEmpty ||
+      _selectedFacilities.isNotEmpty ||
+      _sortBy != 'distance';
 
   /// Load gyms from API
-  Future<void> loadGyms() async {
+  Future<void> loadGyms({int page = 0, int pageSize = 100}) async {
     _isLoading = true;
     _error = null;
     notifyListeners();
 
     try {
-      // TODO: Implement actual API call
-      await Future.delayed(const Duration(seconds: 1));
+      // GET /api/gym?page=0&pageSize=100
+      final result = await Http.get(Config.apiGym, {
+        'page': page,
+        'pageSize': pageSize,
+      });
 
-      // Mock data
-      _allGyms = [
-        Gym(
-          id: 1,
-          name: '강남 피트니스',
-          address: '서울 강남구 테헤란로 123',
-          tel: '02-1234-5678',
-          user: 1,
-          date: DateTime.now().toString(),
-          extra: {
-            'facilities': ['PT', '샤워실', '주차'],
-            'distance': 0.5,
-          },
-        ),
-        Gym(
-          id: 2,
-          name: '역삼 헬스클럽',
-          address: '서울 강남구 역삼동 456',
-          tel: '02-2345-6789',
-          user: 1,
-          date: DateTime.now().toString(),
-          extra: {
-            'facilities': ['그룹수업', '샤워실'],
-            'distance': 1.2,
-          },
-        ),
-        Gym(
-          id: 3,
-          name: '삼성 스포츠센터',
-          address: '서울 강남구 삼성동 789',
-          tel: '02-3456-7890',
-          user: 1,
-          date: DateTime.now().toString(),
-          extra: {
-            'facilities': ['수영장', 'PT', '주차', '샤워실'],
-            'distance': 2.1,
-          },
-        ),
-        Gym(
-          id: 4,
-          name: '논현 GYM',
-          address: '서울 강남구 논현동 321',
-          tel: '02-4567-8901',
-          user: 1,
-          date: DateTime.now().toString(),
-          extra: {
-            'facilities': ['PT', '락커룸'],
-            'distance': 0.8,
-          },
-        ),
-        Gym(
-          id: 5,
-          name: '도곡 휘트니스',
-          address: '서울 강남구 도곡동 654',
-          tel: '02-5678-9012',
-          user: 1,
-          date: DateTime.now().toString(),
-          extra: {
-            'facilities': ['그룹수업', '샤워실', '주차'],
-            'distance': 1.5,
-          },
-        ),
-      ];
-
-      _isLoading = false;
-      applyFilters();
+      if (result != null && result['content'] != null) {
+        final List<dynamic> content = result['content'];
+        _allGyms = content.map((json) => Gym.fromJson(json)).toList();
+        _isLoading = false;
+        applyFilters();
+      } else {
+        _error = '체육관 목록을 불러올 수 없습니다.';
+        _isLoading = false;
+        notifyListeners();
+      }
     } catch (e) {
-      _error = e.toString();
+      _error = '네트워크 오류가 발생했습니다: ${e.toString()}';
       _isLoading = false;
       notifyListeners();
     }
@@ -158,25 +110,28 @@ class GymProvider extends ChangeNotifier {
 
   /// Apply current filters and sorting
   void applyFilters() {
-    _filteredGyms = _allGyms.where((gym) {
-      // Search filter
-      if (_searchQuery.isNotEmpty) {
-        final matchesName = gym.name.toLowerCase().contains(_searchQuery);
-        final matchesAddress = gym.address.toLowerCase().contains(_searchQuery);
-        if (!matchesName && !matchesAddress) return false;
-      }
+    _filteredGyms =
+        _allGyms.where((gym) {
+          // Search filter
+          if (_searchQuery.isNotEmpty) {
+            final matchesName = gym.name.toLowerCase().contains(_searchQuery);
+            final matchesAddress = gym.address.toLowerCase().contains(
+              _searchQuery,
+            );
+            if (!matchesName && !matchesAddress) return false;
+          }
 
-      // Facility filter
-      if (_selectedFacilities.isNotEmpty) {
-        final gymFacilities = gym.extra['facilities'] as List? ?? [];
-        final hasAllFacilities = _selectedFacilities.every(
-          (facility) => gymFacilities.contains(facility),
-        );
-        if (!hasAllFacilities) return false;
-      }
+          // Facility filter
+          if (_selectedFacilities.isNotEmpty) {
+            final gymFacilities = gym.extra['facilities'] as List? ?? [];
+            final hasAllFacilities = _selectedFacilities.every(
+              (facility) => gymFacilities.contains(facility),
+            );
+            if (!hasAllFacilities) return false;
+          }
 
-      return true;
-    }).toList();
+          return true;
+        }).toList();
 
     // Apply sorting
     _filteredGyms.sort((a, b) {
@@ -213,12 +168,49 @@ class GymProvider extends ChangeNotifier {
     return _favoriteGymIds.contains(gymId);
   }
 
-  /// Get gym by ID
-  Gym? getGymById(int id) {
+  /// Get gym by ID from API
+  Future<Gym?> getGymById(int id) async {
     try {
-      return _allGyms.firstWhere((gym) => gym.id == id);
-    } catch (e) {
+      // GET /api/gym/{id}
+      final result = await Http.get('${Config.apiGym}/$id');
+
+      if (result != null) {
+        return Gym.fromJson(result);
+      }
       return null;
+    } catch (e) {
+      _error = '체육관 정보를 불러올 수 없습니다: ${e.toString()}';
+      notifyListeners();
+      return null;
+    }
+  }
+
+  /// Search gyms by name from API
+  Future<void> searchGymsByName(String name) async {
+    _isLoading = true;
+    _error = null;
+    notifyListeners();
+
+    try {
+      // GET /api/gym/search/name?name=xxx
+      final result = await Http.get('${Config.apiGym}/search/name', {
+        'name': name,
+      });
+
+      if (result != null && result is List) {
+        _allGyms = result.map((json) => Gym.fromJson(json)).toList();
+        _isLoading = false;
+        applyFilters();
+      } else {
+        _error = '검색 결과가 없습니다.';
+        _allGyms = [];
+        _isLoading = false;
+        notifyListeners();
+      }
+    } catch (e) {
+      _error = '검색 중 오류가 발생했습니다: ${e.toString()}';
+      _isLoading = false;
+      notifyListeners();
     }
   }
 

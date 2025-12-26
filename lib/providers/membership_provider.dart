@@ -1,6 +1,8 @@
 import 'package:flutter/foundation.dart';
 import '../model/membership.dart';
 import '../model/gym.dart';
+import '../config/http.dart';
+import '../config/config.dart';
 
 /// Membership state management provider
 /// Manages active memberships, history, statistics, and membership operations
@@ -29,69 +31,83 @@ class MembershipProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      // TODO: Implement actual API call
-      await Future.delayed(const Duration(seconds: 1));
+      // GET /api/membership/search/user?user={userId}
+      final result = await Http.get('${Config.apiMembership}/search/user', {
+        'user': userId,
+      });
 
-      // Mock active membership
-      _activeMembership = Membership(
-        id: 1,
-        user: userId,
-        gym: 1,
-        date: DateTime.now().toString(),
-        extra: {
-          'plan': '6개월 이용권',
-          'startDate': DateTime.now().subtract(const Duration(days: 30)).toIso8601String(),
-          'endDate': DateTime.now().add(const Duration(days: 150)).toIso8601String(),
-          'price': 480000,
-          'status': 'active',
-          'features': ['무제한 이용', 'PT 5회', '락커 제공', '운동복 제공'],
-          'totalVisits': 45,
-          'pauseAvailable': true,
-        },
-      );
+      if (result != null && result is List) {
+        // API 응답의 userId/gymId를 user/gym으로 변환하고 추가 필드는 extra에 저장
+        final memberships = result.map((json) {
+          final extra = json['extra'] == null
+              ? <String, dynamic>{}
+              : Map<String, dynamic>.from(json['extra'] as Map<String, dynamic>);
 
-      // Mock gym data
-      _activeGym = Gym(
-        id: 1,
-        name: '강남 피트니스',
-        address: '서울 강남구 테헤란로 123',
-        tel: '02-1234-5678',
-        user: 1,
-        date: DateTime.now().toString(),
-        extra: {},
-      );
+          // API 응답의 추가 필드들을 extra에 저장
+          if (json['healthId'] != null) extra['healthId'] = json['healthId'];
+          if (json['orderId'] != null) extra['orderId'] = json['orderId'];
+          if (json['startDate'] != null) extra['startDate'] = json['startDate'];
+          if (json['endDate'] != null) extra['endDate'] = json['endDate'];
+          if (json['remainingCount'] != null) extra['remainingCount'] = json['remainingCount'];
+          if (json['totalCount'] != null) extra['totalCount'] = json['totalCount'];
+          if (json['status'] != null) extra['statusCode'] = json['status'];
 
-      // Mock history
-      _membershipHistory = [
-        Membership(
-          id: 2,
-          user: userId,
-          gym: 1,
-          date: DateTime.now().subtract(const Duration(days: 210)).toString(),
-          extra: {
-            'plan': '3개월 이용권',
-            'startDate': DateTime.now().subtract(const Duration(days: 210)).toIso8601String(),
-            'endDate': DateTime.now().subtract(const Duration(days: 30)).toIso8601String(),
-            'price': 270000,
-            'status': 'expired',
-          },
-        ),
-      ];
+          // userId/gymId를 user/gym으로 변환
+          final converted = {
+            'id': json['id'],
+            'user': json['userId'] ?? json['user'] ?? 0,
+            'gym': json['gymId'] ?? json['gym'] ?? 0,
+            'date': json['date'] ?? '',
+            'extra': extra,
+          };
 
-      // Mock statistics
-      _stats = {
-        'totalVisitsThisMonth': 12,
-        'averageVisitsPerWeek': 3.5,
-        'currentStreak': 5,
-        'longestStreak': 14,
-      };
+          return Membership.fromJson(converted);
+        }).toList();
 
-      _isLoading = false;
-      notifyListeners();
+        // Separate active and history memberships based on status
+        _activeMembership = null;
+        _membershipHistory = [];
+
+        for (var membership in memberships) {
+          final status = membership.extra['statusCode'] as int? ?? 0;
+          if (status == 0) { // ACTIVE
+            _activeMembership = membership;
+          } else {
+            _membershipHistory.add(membership);
+          }
+        }
+
+        // Load active gym if there's an active membership
+        if (_activeMembership != null) {
+          await _loadActiveGym(_activeMembership!.gym);
+        }
+
+        _isLoading = false;
+        notifyListeners();
+      } else {
+        _error = '멤버십 정보를 불러올 수 없습니다.';
+        _isLoading = false;
+        notifyListeners();
+      }
     } catch (e) {
-      _error = e.toString();
+      _error = '네트워크 오류가 발생했습니다: ${e.toString()}';
       _isLoading = false;
       notifyListeners();
+    }
+  }
+
+  /// Load active gym data
+  Future<void> _loadActiveGym(int gymId) async {
+    try {
+      // GET /api/gym/{id}
+      final result = await Http.get('${Config.apiGym}/$gymId');
+
+      if (result != null) {
+        _activeGym = Gym.fromJson(result);
+      }
+    } catch (e) {
+      // Gym loading error is not critical, just log it
+      debugPrint('Failed to load gym: $e');
     }
   }
 
@@ -102,15 +118,14 @@ class MembershipProvider extends ChangeNotifier {
     required String plan,
     required int price,
     required String paymentMethod,
+    int? orderId,
+    int? healthId,
   }) async {
     _isLoading = true;
     _error = null;
     notifyListeners();
 
     try {
-      // TODO: Implement actual payment API
-      await Future.delayed(const Duration(seconds: 2));
-
       // Calculate dates based on plan
       final startDate = DateTime.now();
       DateTime endDate;
@@ -127,37 +142,33 @@ class MembershipProvider extends ChangeNotifier {
         endDate = startDate.add(const Duration(days: 30));
       }
 
-      // Create new membership
-      final newMembership = Membership(
-        id: DateTime.now().millisecondsSinceEpoch,
-        user: userId,
-        gym: gymId,
-        date: DateTime.now().toString(),
-        extra: {
-          'plan': plan,
-          'startDate': startDate.toIso8601String(),
-          'endDate': endDate.toIso8601String(),
-          'price': price,
-          'status': 'active',
-          'paymentMethod': paymentMethod,
-          'features': ['무제한 이용', '락커 제공'],
-          'totalVisits': 0,
-          'pauseAvailable': true,
-        },
-      );
+      // POST /api/membership - API expects userId, gymId format
+      final result = await Http.post(Config.apiMembership, {
+        'userId': userId,
+        'gymId': gymId,
+        'healthId': healthId ?? 0,
+        'orderId': orderId ?? 0,
+        'startDate': startDate.toString(),
+        'endDate': endDate.toString(),
+        'remainingCount': 0,
+        'totalCount': 0,
+        'status': 0, // ACTIVE
+      });
 
-      // Move current active to history if exists
-      if (_activeMembership != null) {
-        _membershipHistory.insert(0, _activeMembership!);
+      if (result != null && result['id'] != null) {
+        // Reload memberships to get updated list
+        await loadMemberships(userId);
+        _isLoading = false;
+        notifyListeners();
+        return true;
+      } else {
+        _error = '멤버십 구매에 실패했습니다.';
+        _isLoading = false;
+        notifyListeners();
+        return false;
       }
-
-      _activeMembership = newMembership;
-
-      _isLoading = false;
-      notifyListeners();
-      return true;
     } catch (e) {
-      _error = e.toString();
+      _error = '네트워크 오류가 발생했습니다: ${e.toString()}';
       _isLoading = false;
       notifyListeners();
       return false;
@@ -181,10 +192,9 @@ class MembershipProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      // TODO: Implement actual API call
-      await Future.delayed(const Duration(seconds: 2));
-
-      final currentEndDate = DateTime.parse(_activeMembership!.extra['endDate'] as String);
+      // extra에서 데이터 가져오기
+      final endDateStr = _activeMembership!.extra['endDate'] as String? ?? DateTime.now().toString();
+      final currentEndDate = DateTime.parse(endDateStr);
       DateTime newEndDate;
 
       if (plan.contains('1개월')) {
@@ -199,16 +209,33 @@ class MembershipProvider extends ChangeNotifier {
         newEndDate = currentEndDate.add(const Duration(days: 30));
       }
 
-      // Update membership
-      _activeMembership!.extra['endDate'] = newEndDate.toIso8601String();
-      _activeMembership!.extra['extendedPlan'] = plan;
-      _activeMembership!.extra['extendedPrice'] = price;
+      // PUT /api/membership/{id} - API expects userId, gymId format
+      final success = await Http.put('${Config.apiMembership}/${_activeMembership!.id}', {
+        'userId': _activeMembership!.user,
+        'gymId': _activeMembership!.gym,
+        'healthId': _activeMembership!.extra['healthId'] ?? 0,
+        'orderId': _activeMembership!.extra['orderId'] ?? 0,
+        'startDate': _activeMembership!.extra['startDate'] ?? DateTime.now().toString(),
+        'endDate': newEndDate.toString(),
+        'remainingCount': _activeMembership!.extra['remainingCount'] ?? 0,
+        'totalCount': _activeMembership!.extra['totalCount'] ?? 0,
+        'status': _activeMembership!.extra['statusCode'] ?? 0,
+      });
 
-      _isLoading = false;
-      notifyListeners();
-      return true;
+      if (success == true) {
+        // Reload memberships to get updated data
+        await loadMemberships(_activeMembership!.user);
+        _isLoading = false;
+        notifyListeners();
+        return true;
+      } else {
+        _error = '멤버십 연장에 실패했습니다.';
+        _isLoading = false;
+        notifyListeners();
+        return false;
+      }
     } catch (e) {
-      _error = e.toString();
+      _error = '네트워크 오류가 발생했습니다: ${e.toString()}';
       _isLoading = false;
       notifyListeners();
       return false;

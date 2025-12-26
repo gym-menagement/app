@@ -1,5 +1,10 @@
 import 'package:flutter/foundation.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:convert';
 import '../model/user.dart';
+import '../config/http.dart';
+import '../config/config.dart';
+import '../config/cconfig.dart';
 
 /// Authentication state management provider
 /// Manages user login/logout state, authentication tokens, and user data
@@ -24,32 +29,68 @@ class AuthProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      // TODO: Implement actual API call
-      await Future.delayed(const Duration(seconds: 1));
+      // POST /api/auth/login
+      final result = await Http.post('${Config.apiAuth}/login', {
+        'loginid': loginId,
+        'passwd': password,
+      });
 
-      // Mock successful login
-      _currentUser = User(
-        id: 1,
-        loginid: loginId,
-        name: '홍길동',
-        email: 'user@example.com',
-        tel: '010-1234-5678',
-        date: DateTime.now().toString(),
-        extra: {
-          'rememberMe': rememberMe,
-        },
-      );
-      _token = 'mock_token_${DateTime.now().millisecondsSinceEpoch}';
-      _isAuthenticated = true;
+      if (result != null && result['token'] != null) {
+        // 토큰 저장
+        _token = result['token'];
+        CConfig().token = _token!;
 
-      _isLoading = false;
-      notifyListeners();
-      return true;
+        // 사용자 정보 파싱
+        if (result['user'] != null) {
+          _currentUser = User.fromJson(result['user']);
+          _currentUser!.extra['rememberMe'] = rememberMe;
+        }
+
+        _isAuthenticated = true;
+
+        // 자동 로그인 정보 저장
+        if (rememberMe) {
+          await _saveAuthData();
+        }
+
+        _isLoading = false;
+        notifyListeners();
+        return true;
+      } else {
+        _error = '로그인에 실패했습니다. 아이디와 비밀번호를 확인해주세요.';
+        _isLoading = false;
+        notifyListeners();
+        return false;
+      }
     } catch (e) {
-      _error = e.toString();
+      _error = '네트워크 오류가 발생했습니다: ${e.toString()}';
       _isLoading = false;
       notifyListeners();
       return false;
+    }
+  }
+
+  /// Save authentication data to local storage
+  Future<void> _saveAuthData() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('auth_token', _token ?? '');
+      if (_currentUser != null) {
+        await prefs.setString('user_data', jsonEncode(_currentUser!.toJson()));
+      }
+    } catch (e) {
+      debugPrint('Failed to save auth data: $e');
+    }
+  }
+
+  /// Clear saved authentication data
+  Future<void> _clearAuthData() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.remove('auth_token');
+      await prefs.remove('user_data');
+    } catch (e) {
+      debugPrint('Failed to clear auth data: $e');
     }
   }
 
@@ -95,18 +136,35 @@ class AuthProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      // TODO: Implement actual signup API
-      await Future.delayed(const Duration(seconds: 1));
+      // POST /api/user
+      final result = await Http.post(Config.apiUser, {
+        'loginid': user.loginid,
+        'passwd': password,
+        'email': user.email,
+        'name': user.name,
+        'tel': user.tel,
+        'address': user.address ?? '',
+        'image': user.image ?? '',
+        'sex': user.sex ?? 0,
+        'birth': user.birth ?? '',
+        'type': user.type ?? 0,
+        'connectid': user.connectid ?? '',
+        'level': user.level ?? 0,
+        'role': user.role ?? 3, // MEMBER
+        'use': user.use ?? 0,
+      });
 
-      _currentUser = user;
-      _token = 'mock_token_${DateTime.now().millisecondsSinceEpoch}';
-      _isAuthenticated = true;
-
-      _isLoading = false;
-      notifyListeners();
-      return true;
+      if (result != null && result['id'] != null) {
+        // 회원가입 성공 후 자동 로그인
+        return await login(user.loginid, password);
+      } else {
+        _error = '회원가입에 실패했습니다.';
+        _isLoading = false;
+        notifyListeners();
+        return false;
+      }
     } catch (e) {
-      _error = e.toString();
+      _error = '네트워크 오류가 발생했습니다: ${e.toString()}';
       _isLoading = false;
       notifyListeners();
       return false;
@@ -122,8 +180,12 @@ class AuthProvider extends ChangeNotifier {
       // TODO: Implement actual logout API call
       await Future.delayed(const Duration(milliseconds: 500));
 
+      // 저장된 로그인 정보 삭제
+      await _clearAuthData();
+
       _currentUser = null;
       _token = null;
+      CConfig().token = '';
       _isAuthenticated = false;
       _error = null;
 
@@ -143,16 +205,36 @@ class AuthProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      // TODO: Implement actual API call
-      await Future.delayed(const Duration(seconds: 1));
+      // PUT /api/user/{id}
+      final success = await Http.put('${Config.apiUser}/${updatedUser.id}', {
+        'loginid': updatedUser.loginid,
+        'email': updatedUser.email,
+        'name': updatedUser.name,
+        'tel': updatedUser.tel,
+        'address': updatedUser.address ?? '',
+        'image': updatedUser.image ?? '',
+        'sex': updatedUser.sex ?? 0,
+        'birth': updatedUser.birth ?? '',
+        'type': updatedUser.type ?? 0,
+        'connectid': updatedUser.connectid ?? '',
+        'level': updatedUser.level ?? 0,
+        'role': updatedUser.role ?? 3,
+        'use': updatedUser.use ?? 0,
+      });
 
-      _currentUser = updatedUser;
-
-      _isLoading = false;
-      notifyListeners();
-      return true;
+      if (success == true) {
+        _currentUser = updatedUser;
+        _isLoading = false;
+        notifyListeners();
+        return true;
+      } else {
+        _error = '프로필 업데이트에 실패했습니다.';
+        _isLoading = false;
+        notifyListeners();
+        return false;
+      }
     } catch (e) {
-      _error = e.toString();
+      _error = '네트워크 오류가 발생했습니다: ${e.toString()}';
       _isLoading = false;
       notifyListeners();
       return false;
@@ -162,11 +244,13 @@ class AuthProvider extends ChangeNotifier {
   /// Check if login ID exists (for duplicate check during signup)
   Future<bool> checkLoginIdExists(String loginId) async {
     try {
-      // TODO: Implement actual API call
-      await Future.delayed(const Duration(milliseconds: 500));
+      // GET /api/user/search/loginid?loginid=xxx
+      final result = await Http.get('${Config.apiUser}/search/loginid', {'loginid': loginId});
 
-      // Mock: loginIds starting with 'admin' are taken
-      return loginId.toLowerCase().startsWith('admin');
+      if (result != null && result is List && result.isNotEmpty) {
+        return true; // 이미 존재함
+      }
+      return false; // 사용 가능
     } catch (e) {
       return false;
     }
@@ -228,15 +312,30 @@ class AuthProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      // TODO: Load from secure storage (e.g., flutter_secure_storage)
-      await Future.delayed(const Duration(milliseconds: 500));
+      final prefs = await SharedPreferences.getInstance();
+      final savedToken = prefs.getString('auth_token');
+      final savedUserData = prefs.getString('user_data');
 
-      // Mock: No saved auth for now
-      _isAuthenticated = false;
+      if (savedToken != null && savedToken.isNotEmpty && savedUserData != null) {
+        // 저장된 토큰과 사용자 정보 복원
+        _token = savedToken;
+        CConfig().token = _token!;
+
+        final userData = jsonDecode(savedUserData) as Map<String, dynamic>;
+        _currentUser = User.fromJson(userData);
+        _isAuthenticated = true;
+
+        debugPrint('Auto-login successful for user: ${_currentUser?.loginid}');
+      } else {
+        _isAuthenticated = false;
+        debugPrint('No saved auth data found');
+      }
 
       _isLoading = false;
       notifyListeners();
     } catch (e) {
+      debugPrint('Failed to load saved auth: $e');
+      _isAuthenticated = false;
       _isLoading = false;
       notifyListeners();
     }
