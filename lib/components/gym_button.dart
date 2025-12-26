@@ -4,9 +4,11 @@ import '../config/app_text_styles.dart';
 import '../config/app_spacing.dart';
 
 enum GymButtonSize { small, medium, large }
-enum GymButtonStyle { filled, outlined, text }
-enum GymButtonPurpose { primary, secondary, success, error, warning }
+enum GymButtonStyle { filled, outlined, text, ghost }
+enum GymButtonPurpose { primary, secondary, success, error, warning, neutral }
 
+/// Toss Design System Button
+/// A highly customizable button component with Toss design language
 class GymButton extends StatelessWidget {
   const GymButton({
     super.key,
@@ -50,6 +52,12 @@ class GymButton extends StatelessWidget {
         style: buttonStyle,
         child: _buildContent(),
       );
+    } else if (style == GymButtonStyle.ghost) {
+      button = TextButton(
+        onPressed: _getOnPressed(),
+        style: buttonStyle,
+        child: _buildContent(),
+      );
     } else {
       button = TextButton(
         onPressed: _getOnPressed(),
@@ -73,11 +81,11 @@ class GymButton extends StatelessWidget {
   double _getHeight() {
     switch (size) {
       case GymButtonSize.small:
-        return 40.0;
+        return AppSpacing.buttonHeightSmall;
       case GymButtonSize.large:
-        return 56.0;
+        return AppSpacing.buttonHeightLarge;
       default:
-        return AppSpacing.buttonHeight;
+        return AppSpacing.buttonHeightMedium;
     }
   }
 
@@ -92,21 +100,35 @@ class GymButton extends StatelessWidget {
               ? AppColors.grey200
               : Colors.transparent;
         }
+        if (states.contains(WidgetState.pressed) && style == GymButtonStyle.filled) {
+          return colors.pressed;
+        }
+        if (style == GymButtonStyle.ghost) {
+          return AppColors.grey100;
+        }
         return style == GymButtonStyle.filled ? colors.background : Colors.transparent;
       }),
       foregroundColor: WidgetStateProperty.resolveWith((states) {
         if (states.contains(WidgetState.disabled)) {
-          return AppColors.grey400;
+          return AppColors.textDisabled;
         }
         return colors.foreground;
       }),
-      overlayColor: WidgetStateProperty.all(colors.foreground.withOpacity(0.1)),
+      overlayColor: WidgetStateProperty.resolveWith((states) {
+        if (style == GymButtonStyle.filled) {
+          return Colors.white.withOpacity(0.1);
+        }
+        return colors.foreground.withOpacity(0.08);
+      }),
       side: WidgetStateProperty.resolveWith((states) {
         if (style == GymButtonStyle.outlined) {
           if (states.contains(WidgetState.disabled)) {
-            return const BorderSide(color: AppColors.grey300);
+            return BorderSide(color: AppColors.border, width: AppSpacing.borderThin);
           }
-          return BorderSide(color: colors.foreground, width: 1.5);
+          return BorderSide(
+            color: colors.background,
+            width: AppSpacing.borderThin,
+          );
         }
         return null;
       }),
@@ -114,47 +136,44 @@ class GymButton extends StatelessWidget {
         RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(
             size == GymButtonSize.small
-                ? AppSpacing.radiusSmall
-                : AppSpacing.radiusMedium,
+                ? AppSpacing.radiusMedium
+                : AppSpacing.radiusLarge,
           ),
         ),
       ),
       padding: WidgetStateProperty.all(
         EdgeInsets.symmetric(
           horizontal: size == GymButtonSize.small
-              ? AppSpacing.md
-              : AppSpacing.lg,
+              ? AppSpacing.lg
+              : AppSpacing.xxl,
         ),
       ),
       textStyle: WidgetStateProperty.all(textStyle),
-      elevation: WidgetStateProperty.resolveWith((states) {
-        if (style == GymButtonStyle.filled && !states.contains(WidgetState.disabled)) {
-          return 2.0;
-        }
-        return 0.0;
-      }),
+      elevation: WidgetStateProperty.all(AppSpacing.elevationNone),
+      shadowColor: WidgetStateProperty.all(Colors.transparent),
     );
   }
 
   TextStyle _getTextStyle() {
     switch (size) {
       case GymButtonSize.small:
-        return AppTextStyles.labelMedium;
+        return AppTextStyles.buttonSmall;
       case GymButtonSize.large:
-        return AppTextStyles.titleMedium;
+        return AppTextStyles.buttonLarge;
       default:
-        return AppTextStyles.button;
+        return AppTextStyles.buttonMedium;
     }
   }
 
-  ({Color background, Color foreground}) _getColors() {
+  ({Color background, Color foreground, Color pressed}) _getColors() {
     switch (purpose) {
-      case GymButtonPurpose.secondary:
+      case GymButtonPurpose.neutral:
         return (
-          background: AppColors.secondary,
+          background: AppColors.grey800,
           foreground: style == GymButtonStyle.filled
-              ? AppColors.onSecondary
-              : AppColors.secondary,
+              ? AppColors.textInverse
+              : AppColors.grey800,
+          pressed: AppColors.grey900,
         );
       case GymButtonPurpose.success:
         return (
@@ -162,6 +181,7 @@ class GymButton extends StatelessWidget {
           foreground: style == GymButtonStyle.filled
               ? AppColors.onSuccess
               : AppColors.success,
+          pressed: AppColors.success,
         );
       case GymButtonPurpose.error:
         return (
@@ -169,6 +189,7 @@ class GymButton extends StatelessWidget {
           foreground: style == GymButtonStyle.filled
               ? AppColors.onError
               : AppColors.error,
+          pressed: AppColors.error,
         );
       case GymButtonPurpose.warning:
         return (
@@ -176,6 +197,13 @@ class GymButton extends StatelessWidget {
           foreground: style == GymButtonStyle.filled
               ? AppColors.onWarning
               : AppColors.warning,
+          pressed: AppColors.warning,
+        );
+      case GymButtonPurpose.secondary:
+        return (
+          background: AppColors.grey100,
+          foreground: AppColors.grey700,
+          pressed: AppColors.grey200,
         );
       default:
         return (
@@ -183,6 +211,7 @@ class GymButton extends StatelessWidget {
           foreground: style == GymButtonStyle.filled
               ? AppColors.onPrimary
               : AppColors.primary,
+          pressed: AppColors.primaryPressed,
         );
     }
   }
@@ -190,10 +219,10 @@ class GymButton extends StatelessWidget {
   Widget _buildContent() {
     if (loading) {
       return SizedBox(
-        height: size == GymButtonSize.small ? 16.0 : 20.0,
-        width: size == GymButtonSize.small ? 16.0 : 20.0,
+        height: size == GymButtonSize.small ? 18.0 : 22.0,
+        width: size == GymButtonSize.small ? 18.0 : 22.0,
         child: CircularProgressIndicator(
-          strokeWidth: 2,
+          strokeWidth: 2.5,
           valueColor: AlwaysStoppedAnimation<Color>(
             style == GymButtonStyle.filled
                 ? _getColors().foreground
@@ -208,8 +237,13 @@ class GymButton extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(icon, size: size == GymButtonSize.small ? 16.0 : 20.0),
-          const SizedBox(width: AppSpacing.sm),
+          Icon(
+            icon,
+            size: size == GymButtonSize.small
+                ? AppSpacing.iconSmall
+                : AppSpacing.iconMedium,
+          ),
+          SizedBox(width: size == GymButtonSize.small ? AppSpacing.xs : AppSpacing.sm),
           Text(text),
         ],
       );

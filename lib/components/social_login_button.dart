@@ -27,7 +27,7 @@ class SocialLoginButton extends StatelessWidget {
     final config = _getProviderConfig();
 
     return SizedBox(
-      height: AppSpacing.buttonHeight,
+      height: AppSpacing.buttonHeightMedium,
       width: fullWidth ? double.infinity : null,
       child: ElevatedButton(
         onPressed: onPressed,

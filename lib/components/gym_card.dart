@@ -161,7 +161,7 @@ class GymCard extends StatelessWidget {
           vertical: 2,
         ),
         decoration: BoxDecoration(
-          color: AppColors.primaryContainer,
+          color: AppColors.primaryLight,
           borderRadius: BorderRadius.circular(AppSpacing.radiusSmall),
         ),
         child: Text(
