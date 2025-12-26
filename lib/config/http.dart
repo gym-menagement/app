@@ -4,7 +4,28 @@ import 'package:app/config/cconfig.dart';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 
+/// HTTP 통신을 위한 유틸리티 클래스
+/// CConfig의 serverUrl과 token을 사용하여 API 통신을 수행합니다.
+///
+/// 사용 예시:
+/// ```dart
+/// // GET 요청
+/// var data = await Http.get('/api/gyms', {'page': 1, 'limit': 10});
+///
+/// // POST 요청
+/// var result = await Http.post('/api/auth/login', {
+///   'email': 'user@example.com',
+///   'password': 'password123'
+/// });
+///
+/// // PUT 요청
+/// await Http.put('/api/user/profile', {'name': 'New Name'});
+///
+/// // DELETE 요청
+/// await Http.delete('/api/user/account', {'id': 123});
+/// ```
 class Http {
+  /// URL 쿼리 파라미터 생성
   static makeParams(Map<String, dynamic>? items, [String? etc]) {
     if (items == null) {
       return '';
@@ -30,6 +51,10 @@ class Http {
     return params;
   }
 
+  /// GET 요청
+  /// [path]: API 엔드포인트 (예: '/api/gyms')
+  /// [params]: 쿼리 파라미터 (예: {'page': 1, 'limit': 10})
+  /// [etc]: 추가 쿼리 문자열
   static get(String path, [Map<String, dynamic>? params, String? etc]) async {
     var param = makeParams(params, etc);
 
@@ -58,6 +83,9 @@ class Http {
     return null;
   }
 
+  /// POST 요청
+  /// [path]: API 엔드포인트
+  /// [item]: 전송할 데이터 (Map 또는 Object)
   static post(String path, Object item) async {
     final config = CConfig();
 
@@ -82,6 +110,10 @@ class Http {
     return null;
   }
 
+  /// INSERT 요청 (POST와 유사하지만 생성된 ID를 반환)
+  /// [path]: API 엔드포인트
+  /// [item]: 생성할 데이터
+  /// 반환: 생성된 항목의 ID
   static insert(String path, Object item) async {
     final config = CConfig();
 
@@ -107,6 +139,9 @@ class Http {
     return 0;
   }
 
+  /// PUT 요청 (업데이트)
+  /// [path]: API 엔드포인트
+  /// [item]: 업데이트할 데이터
   static put(String path, Object item) async {
     final config = CConfig();
 
@@ -129,6 +164,9 @@ class Http {
     }
   }
 
+  /// DELETE 요청
+  /// [path]: API 엔드포인트
+  /// [item]: 삭제할 항목 정보
   static delete(String path, Object item) async {
     final config = CConfig();
 
@@ -149,6 +187,11 @@ class Http {
     }
   }
 
+  /// 파일 업로드
+  /// [url]: 업로드 API 엔드포인트
+  /// [name]: 파일 필드 이름
+  /// [path]: 업로드할 파일 경로
+  /// 반환: 업로드된 파일명
   static upload(String url, String name, String path) async {
     final config = CConfig();
 
