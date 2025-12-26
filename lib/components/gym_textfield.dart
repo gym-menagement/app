@@ -7,7 +7,7 @@ import '../config/app_spacing.dart';
 enum GymTextFieldType { text, number, email, phone, password }
 
 /// Toss Design System TextField
-/// A customizable text input component with Toss design language
+/// A customizable text input component with Gym design language
 class GymTextField extends StatefulWidget {
   const GymTextField({
     super.key,

@@ -3,20 +3,20 @@ import '../config/app_colors.dart';
 import '../config/app_spacing.dart';
 import '../config/app_text_styles.dart';
 
-enum TossChipSize { small, medium, large }
-enum TossChipStyle { filled, outlined, ghost }
+enum GymChipSize { small, medium, large }
+enum GymChipStyle { filled, outlined, ghost }
 
-/// Toss Design System Chip
+/// Gym Design System Chip
 /// A compact element for displaying tags, categories, or attributes
-class TossChip extends StatelessWidget {
-  const TossChip({
+class GymChip extends StatelessWidget {
+  const GymChip({
     super.key,
     required this.label,
     this.icon,
     this.onTap,
     this.onDelete,
-    this.size = TossChipSize.medium,
-    this.style = TossChipStyle.filled,
+    this.size = GymChipSize.medium,
+    this.style = GymChipStyle.filled,
     this.backgroundColor,
     this.foregroundColor,
     this.selected = false,
@@ -26,8 +26,8 @@ class TossChip extends StatelessWidget {
   final IconData? icon;
   final VoidCallback? onTap;
   final VoidCallback? onDelete;
-  final TossChipSize size;
-  final TossChipStyle style;
+  final GymChipSize size;
+  final GymChipStyle style;
   final Color? backgroundColor;
   final Color? foregroundColor;
   final bool selected;
@@ -47,14 +47,14 @@ class TossChip extends StatelessWidget {
             size: _getIconSize(),
             color: colors.foreground,
           ),
-          SizedBox(width: size == TossChipSize.small ? AppSpacing.xs : AppSpacing.sm),
+          SizedBox(width: size == GymChipSize.small ? AppSpacing.xs : AppSpacing.sm),
         ],
         Text(
           label,
           style: textStyle.copyWith(color: colors.foreground),
         ),
         if (onDelete != null) ...[
-          SizedBox(width: size == TossChipSize.small ? AppSpacing.xs : AppSpacing.sm),
+          SizedBox(width: size == GymChipSize.small ? AppSpacing.xs : AppSpacing.sm),
           GestureDetector(
             onTap: onDelete,
             child: Icon(
@@ -73,11 +73,11 @@ class TossChip extends StatelessWidget {
         padding: padding,
         decoration: BoxDecoration(
           color: colors.background,
-          border: style == TossChipStyle.outlined
+          border: style == GymChipStyle.outlined
               ? Border.all(color: colors.border, width: AppSpacing.borderThin)
               : null,
           borderRadius: BorderRadius.circular(
-            size == TossChipSize.large
+            size == GymChipSize.large
                 ? AppSpacing.radiusMedium
                 : AppSpacing.radiusSmall,
           ),
@@ -89,12 +89,12 @@ class TossChip extends StatelessWidget {
 
   EdgeInsets _getPadding() {
     switch (size) {
-      case TossChipSize.small:
+      case GymChipSize.small:
         return const EdgeInsets.symmetric(
           horizontal: AppSpacing.sm,
           vertical: AppSpacing.xs,
         );
-      case TossChipSize.large:
+      case GymChipSize.large:
         return const EdgeInsets.symmetric(
           horizontal: AppSpacing.lg,
           vertical: AppSpacing.md,
@@ -109,9 +109,9 @@ class TossChip extends StatelessWidget {
 
   TextStyle _getTextStyle() {
     switch (size) {
-      case TossChipSize.small:
+      case GymChipSize.small:
         return AppTextStyles.labelSmall;
-      case TossChipSize.large:
+      case GymChipSize.large:
         return AppTextStyles.labelLarge;
       default:
         return AppTextStyles.labelMedium;
@@ -120,9 +120,9 @@ class TossChip extends StatelessWidget {
 
   double _getIconSize() {
     switch (size) {
-      case TossChipSize.small:
+      case GymChipSize.small:
         return AppSpacing.iconSmall;
-      case TossChipSize.large:
+      case GymChipSize.large:
         return AppSpacing.iconMedium;
       default:
         return AppSpacing.iconSmall;
@@ -142,13 +142,13 @@ class TossChip extends StatelessWidget {
     }
 
     switch (style) {
-      case TossChipStyle.outlined:
+      case GymChipStyle.outlined:
         return (
           background: Colors.transparent,
           foreground: effectiveForegroundColor ?? AppColors.textPrimary,
           border: AppColors.border,
         );
-      case TossChipStyle.ghost:
+      case GymChipStyle.ghost:
         return (
           background: Colors.transparent,
           foreground: effectiveForegroundColor ?? AppColors.textPrimary,

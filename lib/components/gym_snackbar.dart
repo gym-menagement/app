@@ -3,16 +3,16 @@ import '../config/app_colors.dart';
 import '../config/app_spacing.dart';
 import '../config/app_text_styles.dart';
 
-enum TossSnackbarType { success, error, warning, info }
+enum GymSnackbarType { success, error, warning, info }
 
-/// Toss Design System Snackbar
-/// Toast-style notifications with Toss design language
-class TossSnackbar {
+/// Gym Design System Snackbar
+/// Toast-style notifications with Gym design language
+class GymSnackbar {
   /// Show a snackbar message
   static void show({
     required BuildContext context,
     required String message,
-    TossSnackbarType type = TossSnackbarType.info,
+    GymSnackbarType type = GymSnackbarType.info,
     Duration duration = const Duration(seconds: 3),
     String? actionLabel,
     VoidCallback? onAction,
@@ -85,7 +85,7 @@ class TossSnackbar {
     show(
       context: context,
       message: message,
-      type: TossSnackbarType.success,
+      type: GymSnackbarType.success,
       duration: duration,
     );
   }
@@ -101,7 +101,7 @@ class TossSnackbar {
     show(
       context: context,
       message: message,
-      type: TossSnackbarType.error,
+      type: GymSnackbarType.error,
       duration: duration,
       actionLabel: actionLabel,
       onAction: onAction,
@@ -117,7 +117,7 @@ class TossSnackbar {
     show(
       context: context,
       message: message,
-      type: TossSnackbarType.warning,
+      type: GymSnackbarType.warning,
       duration: duration,
     );
   }
@@ -133,7 +133,7 @@ class TossSnackbar {
     show(
       context: context,
       message: message,
-      type: TossSnackbarType.info,
+      type: GymSnackbarType.info,
       duration: duration,
       actionLabel: actionLabel,
       onAction: onAction,
@@ -145,30 +145,30 @@ class TossSnackbar {
     Color textColor,
     Color iconColor,
     Color actionColor,
-  }) _getColors(TossSnackbarType type) {
+  }) _getColors(GymSnackbarType type) {
     switch (type) {
-      case TossSnackbarType.success:
+      case GymSnackbarType.success:
         return (
           backgroundColor: AppColors.success,
           textColor: AppColors.onSuccess,
           iconColor: AppColors.onSuccess,
           actionColor: AppColors.onSuccess,
         );
-      case TossSnackbarType.error:
+      case GymSnackbarType.error:
         return (
           backgroundColor: AppColors.error,
           textColor: AppColors.onError,
           iconColor: AppColors.onError,
           actionColor: AppColors.onError,
         );
-      case TossSnackbarType.warning:
+      case GymSnackbarType.warning:
         return (
           backgroundColor: AppColors.warning,
           textColor: AppColors.onWarning,
           iconColor: AppColors.onWarning,
           actionColor: AppColors.onWarning,
         );
-      case TossSnackbarType.info:
+      case GymSnackbarType.info:
         return (
           backgroundColor: AppColors.grey800,
           textColor: AppColors.textInverse,
@@ -178,15 +178,15 @@ class TossSnackbar {
     }
   }
 
-  static IconData _getIcon(TossSnackbarType type) {
+  static IconData _getIcon(GymSnackbarType type) {
     switch (type) {
-      case TossSnackbarType.success:
+      case GymSnackbarType.success:
         return Icons.check_circle_outline;
-      case TossSnackbarType.error:
+      case GymSnackbarType.error:
         return Icons.error_outline;
-      case TossSnackbarType.warning:
+      case GymSnackbarType.warning:
         return Icons.warning_amber_outlined;
-      case TossSnackbarType.info:
+      case GymSnackbarType.info:
         return Icons.info_outline;
     }
   }

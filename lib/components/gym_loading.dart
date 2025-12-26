@@ -3,10 +3,10 @@ import '../config/app_colors.dart';
 import '../config/app_spacing.dart';
 import '../config/app_text_styles.dart';
 
-/// Toss Design System Loading Indicator
-/// Loading indicators with Toss design language
-class TossLoading extends StatelessWidget {
-  const TossLoading({
+/// Gym Design System Loading Indicator
+/// Loading indicators with Gym design language
+class GymLoading extends StatelessWidget {
+  const GymLoading({
     super.key,
     this.size = 40,
     this.color,
@@ -33,8 +33,8 @@ class TossLoading extends StatelessWidget {
 }
 
 /// Full screen loading overlay
-class TossLoadingOverlay extends StatelessWidget {
-  const TossLoadingOverlay({
+class GymLoadingOverlay extends StatelessWidget {
+  const GymLoadingOverlay({
     super.key,
     this.message,
     this.backgroundColor,
@@ -64,7 +64,7 @@ class TossLoadingOverlay extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const TossLoading(),
+              const GymLoading(),
               if (message != null) ...[
                 const SizedBox(height: AppSpacing.lg),
                 Text(
@@ -107,7 +107,7 @@ Future<void> showLoadingDialog({
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const TossLoading(),
+              const GymLoading(),
               if (message != null) ...[
                 const SizedBox(height: AppSpacing.lg),
                 Text(
@@ -127,8 +127,8 @@ Future<void> showLoadingDialog({
 }
 
 /// Shimmer loading effect for skeleton screens
-class TossShimmer extends StatefulWidget {
-  const TossShimmer({
+class GymShimmer extends StatefulWidget {
+  const GymShimmer({
     super.key,
     required this.child,
     this.baseColor,
@@ -140,10 +140,10 @@ class TossShimmer extends StatefulWidget {
   final Color? highlightColor;
 
   @override
-  State<TossShimmer> createState() => _TossShimmerState();
+  State<GymShimmer> createState() => _GymShimmerState();
 }
 
-class _TossShimmerState extends State<TossShimmer>
+class _GymShimmerState extends State<GymShimmer>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _animation;

@@ -2,16 +2,16 @@ import 'package:flutter/material.dart';
 import '../config/app_colors.dart';
 import '../config/app_spacing.dart';
 
-enum TossAvatarSize { small, medium, large, xlarge }
+enum GymAvatarSize { small, medium, large, xlarge }
 
-/// Toss Design System Avatar
+/// Gym Design System Avatar
 /// A circular avatar component for displaying user profile images
-class TossAvatar extends StatelessWidget {
-  const TossAvatar({
+class GymAvatar extends StatelessWidget {
+  const GymAvatar({
     super.key,
     this.imageUrl,
     this.name,
-    this.size = TossAvatarSize.medium,
+    this.size = GymAvatarSize.medium,
     this.backgroundColor,
     this.textColor,
     this.onTap,
@@ -21,7 +21,7 @@ class TossAvatar extends StatelessWidget {
 
   final String? imageUrl;
   final String? name;
-  final TossAvatarSize size;
+  final GymAvatarSize size;
   final Color? backgroundColor;
   final Color? textColor;
   final VoidCallback? onTap;
@@ -96,11 +96,11 @@ class TossAvatar extends StatelessWidget {
 
   double _getSize() {
     switch (size) {
-      case TossAvatarSize.small:
+      case GymAvatarSize.small:
         return AppSpacing.avatarSmall;
-      case TossAvatarSize.large:
+      case GymAvatarSize.large:
         return AppSpacing.avatarLarge;
-      case TossAvatarSize.xlarge:
+      case GymAvatarSize.xlarge:
         return AppSpacing.avatarXLarge;
       default:
         return AppSpacing.avatarMedium;
@@ -109,11 +109,11 @@ class TossAvatar extends StatelessWidget {
 
   double _getFontSize() {
     switch (size) {
-      case TossAvatarSize.small:
+      case GymAvatarSize.small:
         return 12;
-      case TossAvatarSize.large:
+      case GymAvatarSize.large:
         return 20;
-      case TossAvatarSize.xlarge:
+      case GymAvatarSize.xlarge:
         return 28;
       default:
         return 16;
@@ -135,17 +135,17 @@ class TossAvatar extends StatelessWidget {
 }
 
 /// Avatar group component for displaying multiple avatars
-class TossAvatarGroup extends StatelessWidget {
-  const TossAvatarGroup({
+class GymAvatarGroup extends StatelessWidget {
+  const GymAvatarGroup({
     super.key,
     required this.avatars,
-    this.size = TossAvatarSize.medium,
+    this.size = GymAvatarSize.medium,
     this.max = 3,
     this.spacing = -8,
   });
 
-  final List<TossAvatar> avatars;
-  final TossAvatarSize size;
+  final List<GymAvatar> avatars;
+  final GymAvatarSize size;
   final int max;
   final double spacing;
 
@@ -183,7 +183,7 @@ class TossAvatarGroup extends StatelessWidget {
                   width: 2,
                 ),
               ),
-              child: TossAvatar(
+              child: GymAvatar(
                 name: '+$remainingCount',
                 size: size,
                 backgroundColor: AppColors.grey300,

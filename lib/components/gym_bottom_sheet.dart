@@ -3,9 +3,9 @@ import '../config/app_colors.dart';
 import '../config/app_spacing.dart';
 import '../config/app_text_styles.dart';
 
-/// Toss Design System Bottom Sheet
-/// A bottom sheet component with Toss design language
-class TossBottomSheet {
+/// Gym Design System Bottom Sheet
+/// A bottom sheet component with Gym design language
+class GymBottomSheet {
   /// Show a modal bottom sheet
   static Future<T?> show<T>({
     required BuildContext context,
@@ -91,7 +91,7 @@ class TossBottomSheet {
   static Future<T?> showOptions<T>({
     required BuildContext context,
     String? title,
-    required List<TossBottomSheetOption<T>> options,
+    required List<GymBottomSheetOption<T>> options,
     bool showCancel = true,
     String cancelText = '취소',
   }) {
@@ -104,7 +104,7 @@ class TossBottomSheet {
           if (showCancel) ...[
             const SizedBox(height: AppSpacing.sm),
             _OptionItem<T>(
-              option: TossBottomSheetOption<T>(
+              option: GymBottomSheetOption<T>(
                 label: cancelText,
                 onTap: () => Navigator.of(context).pop(),
               ),
@@ -117,8 +117,8 @@ class TossBottomSheet {
 }
 
 /// Option item for bottom sheet
-class TossBottomSheetOption<T> {
-  const TossBottomSheetOption({
+class GymBottomSheetOption<T> {
+  const GymBottomSheetOption({
     required this.label,
     this.value,
     this.icon,
@@ -136,7 +136,7 @@ class TossBottomSheetOption<T> {
 class _OptionItem<T> extends StatelessWidget {
   const _OptionItem({required this.option});
 
-  final TossBottomSheetOption<T> option;
+  final GymBottomSheetOption<T> option;
 
   @override
   Widget build(BuildContext context) {

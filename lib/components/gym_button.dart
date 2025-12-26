@@ -8,7 +8,7 @@ enum GymButtonStyle { filled, outlined, text, ghost }
 enum GymButtonPurpose { primary, secondary, success, error, warning, neutral }
 
 /// Toss Design System Button
-/// A highly customizable button component with Toss design language
+/// A highly customizable button component with Gym design language
 class GymButton extends StatelessWidget {
   const GymButton({
     super.key,

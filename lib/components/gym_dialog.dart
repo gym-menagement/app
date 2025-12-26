@@ -4,9 +4,9 @@ import '../config/app_spacing.dart';
 import '../config/app_text_styles.dart';
 import 'gym_button.dart';
 
-/// Toss Design System Dialog
-/// A modal dialog component with Toss design language
-class TossDialog {
+/// Gym Design System Dialog
+/// A modal dialog component with Gym design language
+class GymDialog {
   /// Show a simple alert dialog
   static Future<bool?> showAlert({
     required BuildContext context,
@@ -175,7 +175,7 @@ Future<void> showSuccessDialog({
   required String message,
   String buttonText = '확인',
 }) {
-  return TossDialog.showAlert(
+  return GymDialog.showAlert(
     context: context,
     title: title,
     message: message,
@@ -190,7 +190,7 @@ Future<void> showErrorDialog({
   required String message,
   String buttonText = '확인',
 }) {
-  return TossDialog.showAlert(
+  return GymDialog.showAlert(
     context: context,
     title: title,
     message: message,

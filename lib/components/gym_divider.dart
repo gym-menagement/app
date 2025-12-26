@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import '../config/app_colors.dart';
 import '../config/app_spacing.dart';
 
-/// Toss Design System Divider
-/// A horizontal or vertical divider with Toss design language
-class TossDivider extends StatelessWidget {
-  const TossDivider({
+/// Gym Design System Divider
+/// A horizontal or vertical divider with Gym design language
+class GymDivider extends StatelessWidget {
+  const GymDivider({
     super.key,
     this.height,
     this.thickness,
@@ -14,7 +14,7 @@ class TossDivider extends StatelessWidget {
     this.endIndent = 0,
   }) : direction = Axis.horizontal;
 
-  const TossDivider.vertical({
+  const GymDivider.vertical({
     super.key,
     this.height,
     this.thickness,
@@ -53,9 +53,9 @@ class TossDivider extends StatelessWidget {
   }
 }
 
-/// Toss Design System Divider with text
-class TossDividerWithText extends StatelessWidget {
-  const TossDividerWithText({
+/// Gym Design System Divider with text
+class GymDividerWithText extends StatelessWidget {
+  const GymDividerWithText({
     super.key,
     required this.text,
     this.color,
@@ -82,7 +82,7 @@ class TossDividerWithText extends StatelessWidget {
     return Row(
       children: [
         Expanded(
-          child: TossDivider(
+          child: GymDivider(
             color: effectiveColor,
             thickness: thickness,
           ),
@@ -92,7 +92,7 @@ class TossDividerWithText extends StatelessWidget {
           child: Text(text, style: effectiveTextStyle),
         ),
         Expanded(
-          child: TossDivider(
+          child: GymDivider(
             color: effectiveColor,
             thickness: thickness,
           ),
