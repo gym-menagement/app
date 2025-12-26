@@ -1,144 +1,194 @@
 import 'package:flutter/material.dart';
 import 'app_colors.dart';
 
+/// Toss Design System Typography
+/// Clean, readable typography inspired by Toss's design language
 class AppTextStyles {
-  // Display
+  // Display - For hero sections and large headings
   static const displayLarge = TextStyle(
-    fontSize: 57,
-    fontWeight: FontWeight.w400,
-    letterSpacing: -0.25,
-    height: 1.12,
+    fontSize: 48,
+    fontWeight: FontWeight.w700,
+    height: 1.2,
+    letterSpacing: -0.5,
+    color: AppColors.textPrimary,
   );
 
   static const displayMedium = TextStyle(
-    fontSize: 45,
-    fontWeight: FontWeight.w400,
-    height: 1.16,
+    fontSize: 40,
+    fontWeight: FontWeight.w700,
+    height: 1.25,
+    letterSpacing: -0.5,
+    color: AppColors.textPrimary,
   );
 
   static const displaySmall = TextStyle(
-    fontSize: 36,
-    fontWeight: FontWeight.w400,
-    height: 1.22,
+    fontSize: 32,
+    fontWeight: FontWeight.w700,
+    height: 1.3,
+    letterSpacing: -0.5,
+    color: AppColors.textPrimary,
   );
 
-  // Headings
+  // Headings - For section titles
   static const h1 = TextStyle(
-    fontSize: 32,
-    fontWeight: FontWeight.bold,
-    height: 1.2,
+    fontSize: 28,
+    fontWeight: FontWeight.w700,
+    height: 1.35,
+    letterSpacing: -0.3,
+    color: AppColors.textPrimary,
   );
 
   static const h2 = TextStyle(
     fontSize: 24,
-    fontWeight: FontWeight.bold,
-    height: 1.3,
+    fontWeight: FontWeight.w700,
+    height: 1.4,
+    letterSpacing: -0.3,
+    color: AppColors.textPrimary,
   );
 
   static const h3 = TextStyle(
     fontSize: 20,
-    fontWeight: FontWeight.w600,
+    fontWeight: FontWeight.w700,
     height: 1.4,
+    letterSpacing: -0.2,
+    color: AppColors.textPrimary,
   );
 
   static const h4 = TextStyle(
     fontSize: 18,
     fontWeight: FontWeight.w600,
-    height: 1.4,
+    height: 1.45,
+    letterSpacing: -0.2,
+    color: AppColors.textPrimary,
   );
 
-  // Title
+  // Title - For card titles and labels
   static const titleLarge = TextStyle(
-    fontSize: 22,
+    fontSize: 18,
     fontWeight: FontWeight.w600,
-    height: 1.27,
+    height: 1.45,
+    color: AppColors.textPrimary,
   );
 
   static const titleMedium = TextStyle(
     fontSize: 16,
     fontWeight: FontWeight.w600,
-    letterSpacing: 0.15,
     height: 1.5,
+    color: AppColors.textPrimary,
   );
 
   static const titleSmall = TextStyle(
     fontSize: 14,
     fontWeight: FontWeight.w600,
-    letterSpacing: 0.1,
-    height: 1.43,
+    height: 1.5,
+    color: AppColors.textPrimary,
   );
 
-  // Body
+  // Body - For main content
   static const bodyLarge = TextStyle(
-    fontSize: 16,
-    fontWeight: FontWeight.normal,
-    letterSpacing: 0.5,
-    height: 1.5,
+    fontSize: 17,
+    fontWeight: FontWeight.w400,
+    height: 1.6,
+    color: AppColors.textPrimary,
   );
 
   static const bodyMedium = TextStyle(
-    fontSize: 14,
-    fontWeight: FontWeight.normal,
-    letterSpacing: 0.25,
-    height: 1.5,
+    fontSize: 15,
+    fontWeight: FontWeight.w400,
+    height: 1.6,
+    color: AppColors.textPrimary,
   );
 
   static const bodySmall = TextStyle(
-    fontSize: 12,
-    fontWeight: FontWeight.normal,
-    letterSpacing: 0.4,
-    height: 1.5,
+    fontSize: 13,
+    fontWeight: FontWeight.w400,
+    height: 1.6,
+    color: AppColors.textSecondary,
   );
 
-  // Labels
+  // Labels - For input labels and small text
   static const labelLarge = TextStyle(
-    fontSize: 14,
-    fontWeight: FontWeight.w600,
-    letterSpacing: 0.1,
-    height: 1.43,
+    fontSize: 15,
+    fontWeight: FontWeight.w500,
+    height: 1.5,
+    color: AppColors.textSecondary,
   );
 
   static const labelMedium = TextStyle(
-    fontSize: 12,
-    fontWeight: FontWeight.w600,
-    letterSpacing: 0.5,
-    height: 1.33,
+    fontSize: 13,
+    fontWeight: FontWeight.w500,
+    height: 1.5,
+    color: AppColors.textSecondary,
   );
 
   static const labelSmall = TextStyle(
     fontSize: 11,
-    fontWeight: FontWeight.w600,
-    letterSpacing: 0.5,
-    height: 1.45,
+    fontWeight: FontWeight.w500,
+    height: 1.5,
+    color: AppColors.textTertiary,
   );
 
-  // Special
-  static const button = TextStyle(
-    fontSize: 14,
+  // Button - For buttons
+  static const buttonLarge = TextStyle(
+    fontSize: 17,
     fontWeight: FontWeight.w600,
-    letterSpacing: 0.1,
-    height: 1.43,
+    height: 1.4,
+    letterSpacing: -0.2,
   );
 
+  static const buttonMedium = TextStyle(
+    fontSize: 15,
+    fontWeight: FontWeight.w600,
+    height: 1.4,
+    letterSpacing: -0.2,
+  );
+
+  static const buttonSmall = TextStyle(
+    fontSize: 13,
+    fontWeight: FontWeight.w600,
+    height: 1.4,
+    letterSpacing: -0.1,
+  );
+
+  // Legacy button style for backward compatibility
+  static const button = buttonMedium;
+
+  // Caption - For hints and helper text
   static const caption = TextStyle(
     fontSize: 12,
-    fontWeight: FontWeight.normal,
-    letterSpacing: 0.4,
-    height: 1.33,
-  );
-
-  static const overline = TextStyle(
-    fontSize: 10,
-    fontWeight: FontWeight.w600,
-    letterSpacing: 1.5,
-    height: 1.6,
-  );
-
-  // Error
-  static const error = TextStyle(
-    fontSize: 12,
     fontWeight: FontWeight.w400,
+    height: 1.5,
+    color: AppColors.textTertiary,
+  );
+
+  // Link
+  static const link = TextStyle(
+    fontSize: 15,
+    fontWeight: FontWeight.w500,
+    height: 1.5,
+    color: AppColors.primary,
+    decoration: TextDecoration.underline,
+  );
+
+  // Status messages
+  static const error = TextStyle(
+    fontSize: 13,
+    fontWeight: FontWeight.w400,
+    height: 1.5,
     color: AppColors.error,
-    height: 1.33,
+  );
+
+  static const success = TextStyle(
+    fontSize: 13,
+    fontWeight: FontWeight.w400,
+    height: 1.5,
+    color: AppColors.success,
+  );
+
+  static const warning = TextStyle(
+    fontSize: 13,
+    fontWeight: FontWeight.w400,
+    height: 1.5,
+    color: AppColors.warning,
   );
 }
