@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'app_colors.dart';
 
 /// Toss Design System Typography
-/// Clean, readable typography inspired by Toss's design language
+/// Clean, readable typography inspired by Gym's design language
 class AppTextStyles {
   // Display - For hero sections and large headings
   static const displayLarge = TextStyle(

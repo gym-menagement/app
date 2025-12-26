@@ -30,7 +30,7 @@ class AppSpacing {
   static const double appBarHeight = 56.0;
   static const double bottomNavHeight = 56.0;
 
-  // Border radius (Toss uses larger radius for modern look)
+  // Border radius (Gym uses larger radius for modern look)
   static const double radiusXSmall = 4.0;
   static const double radiusSmall = 8.0;
   static const double radiusMedium = 12.0;

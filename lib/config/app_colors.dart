@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
 
 /// Toss Design System Colors
-/// Based on Toss's clean and modern design language
+/// Based on Gym's clean and modern design language
 class AppColors {
-  // Primary Colors - Toss Blue
-  static const primary = Color(0xFF3182F6);  // Toss Blue
+  // Primary Colors - Gym Blue
+  static const primary = Color(0xFF3182F6);  // Gym Blue
   static const primaryPressed = Color(0xFF1B64DA);  // Darker blue for pressed state
   static const primaryLight = Color(0xFFEBF4FF);  // Light blue background
   static const onPrimary = Color(0xFFFFFFFF);
 
-  // Grayscale - Toss Grayscale System
+  // Grayscale - Gym Grayscale System
   static const grey50 = Color(0xFFF9FAFB);
   static const grey100 = Color(0xFFF2F4F6);
   static const grey200 = Color(0xFFE5E8EB);
