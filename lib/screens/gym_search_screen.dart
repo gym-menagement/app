@@ -378,7 +378,7 @@ class _GymSearchScreenState extends State<GymSearchScreen> {
                             padding: const EdgeInsets.only(
                               bottom: AppSpacing.md,
                             ),
-                            child: GymCard(
+                            child: GymListCard(
                               gym: gym,
                               isFavorite: _favoriteGymIds.contains(gym.id),
                               distance: gym.extra['distance'] as double?,
