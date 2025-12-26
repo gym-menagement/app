@@ -1,9 +1,10 @@
+import 'package:app/config/config.dart';
+import 'package:app/config/http.dart';
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 import '../model/user.dart';
-import '../config/http.dart';
-import '../config/config.dart';
+import '../model/login.dart';
 import '../config/cconfig.dart';
 
 /// Authentication state management provider
@@ -23,28 +24,37 @@ class AuthProvider extends ChangeNotifier {
   String? get error => _error;
 
   /// Login with credentials
-  Future<bool> login(String loginId, String password, {bool rememberMe = false}) async {
+  Future<bool> login(
+    String loginId,
+    String password, {
+    bool rememberMe = false,
+  }) async {
     _isLoading = true;
     _error = null;
     notifyListeners();
 
     try {
-      // POST /api/auth/login
-      final result = await Http.post('${Config.apiAuth}/login', {
-        'loginid': loginId,
-        'passwd': password,
-      });
+      // LoginManager 사용하여 로그인
+      final user = await LoginManager.login(loginId, password);
 
-      if (result != null && result['token'] != null) {
+      // 디버그: 로그인 응답 확인
+      debugPrint('=== Login Response ===');
+      debugPrint('User ID: ${user.id}');
+      debugPrint('User Name: ${user.name}');
+      debugPrint('User Email: ${user.email}');
+      debugPrint('Token exists: ${user.extra['token'] != null}');
+      debugPrint('Token: ${user.extra['token']}');
+      debugPrint('Extra: ${user.extra}');
+
+      // 로그인 성공 확인 (user.id가 0이 아니면 성공)
+      if (user.id != 0 && user.extra['token'] != null) {
+        // 사용자 정보 저장
+        _currentUser = user;
+        _currentUser!.extra['rememberMe'] = rememberMe;
+
         // 토큰 저장
-        _token = result['token'];
+        _token = user.extra['token'] as String;
         CConfig().token = _token!;
-
-        // 사용자 정보 파싱
-        if (result['user'] != null) {
-          _currentUser = User.fromJson(result['user']);
-          _currentUser!.extra['rememberMe'] = rememberMe;
-        }
 
         _isAuthenticated = true;
 
@@ -55,14 +65,18 @@ class AuthProvider extends ChangeNotifier {
 
         _isLoading = false;
         notifyListeners();
+
+        debugPrint('Login successful!');
         return true;
       } else {
+        debugPrint('Login failed - user.id: ${user.id}, token: ${user.extra['token']}');
         _error = '로그인에 실패했습니다. 아이디와 비밀번호를 확인해주세요.';
         _isLoading = false;
         notifyListeners();
         return false;
       }
     } catch (e) {
+      debugPrint('Login error: $e');
       _error = '네트워크 오류가 발생했습니다: ${e.toString()}';
       _isLoading = false;
       notifyListeners();
@@ -95,34 +109,66 @@ class AuthProvider extends ChangeNotifier {
   }
 
   /// Social login (Kakao, Naver, Google, Apple)
-  Future<bool> socialLogin(String provider) async {
+  Future<bool> socialLogin(
+    String provider,
+    String accessToken, {
+    bool rememberMe = false,
+  }) async {
     _isLoading = true;
     _error = null;
     notifyListeners();
 
     try {
-      // TODO: Implement actual social login API
-      await Future.delayed(const Duration(seconds: 1));
+      User user;
 
-      _currentUser = User(
-        id: 1,
-        loginid: '${provider}_user',
-        name: '${provider.toUpperCase()} User',
-        email: 'user@$provider.com',
-        tel: '010-0000-0000',
-        date: DateTime.now().toString(),
-        extra: {
-          'socialProvider': provider,
-        },
-      );
-      _token = 'mock_social_token_${DateTime.now().millisecondsSinceEpoch}';
-      _isAuthenticated = true;
+      // 제공자별로 적절한 LoginManager 메서드 호출
+      switch (provider.toLowerCase()) {
+        case 'kakao':
+          user = await LoginManager.kakaoLogin('kakao', accessToken);
+          break;
+        case 'naver':
+          user = await LoginManager.naverLogin('naver', accessToken);
+          break;
+        case 'google':
+          user = await LoginManager.googleLogin('google', accessToken);
+          break;
+        case 'apple':
+          user = await LoginManager.appleLogin('apple', accessToken);
+          break;
+        default:
+          _error = '지원하지 않는 로그인 제공자입니다.';
+          _isLoading = false;
+          notifyListeners();
+          return false;
+      }
 
-      _isLoading = false;
-      notifyListeners();
-      return true;
+      // 로그인 성공 확인
+      if (user.id != 0 && user.extra['token'] != null) {
+        _currentUser = user;
+        _currentUser!.extra['rememberMe'] = rememberMe;
+        _currentUser!.extra['socialProvider'] = provider;
+
+        _token = user.extra['token'] as String;
+        CConfig().token = _token!;
+
+        _isAuthenticated = true;
+
+        // 자동 로그인 정보 저장
+        if (rememberMe) {
+          await _saveAuthData();
+        }
+
+        _isLoading = false;
+        notifyListeners();
+        return true;
+      } else {
+        _error = '소셜 로그인에 실패했습니다.';
+        _isLoading = false;
+        notifyListeners();
+        return false;
+      }
     } catch (e) {
-      _error = e.toString();
+      _error = '네트워크 오류가 발생했습니다: ${e.toString()}';
       _isLoading = false;
       notifyListeners();
       return false;
@@ -245,7 +291,9 @@ class AuthProvider extends ChangeNotifier {
   Future<bool> checkLoginIdExists(String loginId) async {
     try {
       // GET /api/user/search/loginid?loginid=xxx
-      final result = await Http.get('${Config.apiUser}/search/loginid', {'loginid': loginId});
+      final result = await Http.get('${Config.apiUser}/search/loginid', {
+        'loginid': loginId,
+      });
 
       if (result != null && result is List && result.isNotEmpty) {
         return true; // 이미 존재함
@@ -257,7 +305,11 @@ class AuthProvider extends ChangeNotifier {
   }
 
   /// Reset password
-  Future<bool> resetPassword(String loginId, String verificationCode, String newPassword) async {
+  Future<bool> resetPassword(
+    String loginId,
+    String verificationCode,
+    String newPassword,
+  ) async {
     _isLoading = true;
     _error = null;
     notifyListeners();
@@ -278,7 +330,11 @@ class AuthProvider extends ChangeNotifier {
   }
 
   /// Find user ID by name and phone
-  Future<String?> findUserId(String name, String phone, String verificationCode) async {
+  Future<String?> findUserId(
+    String name,
+    String phone,
+    String verificationCode,
+  ) async {
     _isLoading = true;
     _error = null;
     notifyListeners();
@@ -316,7 +372,9 @@ class AuthProvider extends ChangeNotifier {
       final savedToken = prefs.getString('auth_token');
       final savedUserData = prefs.getString('user_data');
 
-      if (savedToken != null && savedToken.isNotEmpty && savedUserData != null) {
+      if (savedToken != null &&
+          savedToken.isNotEmpty &&
+          savedUserData != null) {
         // 저장된 토큰과 사용자 정보 복원
         _token = savedToken;
         CConfig().token = _token!;
