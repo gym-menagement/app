@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../components/gym_layout.dart';
 import '../components/gym_textfield.dart';
 import '../components/gym_button.dart';
 import '../components/social_login_button.dart';
+import '../components/gym_snackbar.dart';
 import '../config/app_colors.dart';
 import '../config/app_text_styles.dart';
 import '../config/app_spacing.dart';
+import '../providers/auth_provider.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -57,17 +60,35 @@ class _LoginScreenState extends State<LoginScreen> {
     });
 
     try {
-      // TODO: Implement actual login API call
-      await Future.delayed(const Duration(seconds: 2));
+      final authProvider = context.read<AuthProvider>();
 
-      // On success, navigate to home
-      if (mounted) {
-        Navigator.pushReplacementNamed(context, '/gym_search');
+      // 로그인 API 호출
+      final success = await authProvider.login(
+        _idController.text.trim(),
+        _passwordController.text,
+        rememberMe: _rememberMe,
+      );
+
+      if (!mounted) return;
+
+      if (success) {
+        // 로그인 성공 - 홈 화면으로 이동
+        Navigator.of(context).pushReplacementNamed('/home');
+
+        GymSnackbar.showSuccess(
+          context: context,
+          message: '로그인 성공!',
+        );
+      } else {
+        // 로그인 실패 - 에러 메시지 표시
+        setState(() {
+          _passwordError = authProvider.error ?? '로그인에 실패했습니다';
+        });
       }
     } catch (e) {
       if (mounted) {
         setState(() {
-          _passwordError = '아이디 또는 비밀번호가 올바르지 않습니다';
+          _passwordError = '네트워크 오류가 발생했습니다';
         });
       }
     } finally {

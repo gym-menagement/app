@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
-import '../components/toss_components.dart';
+import '../components/gym_components.dart';
 import '../config/app_colors.dart';
 import '../config/app_spacing.dart';
 import '../config/app_text_styles.dart';
 
 /// Design System Demo Screen
-/// Showcases all Toss design system components
+/// Showcases all Gym design system components
 class DesignSystemDemoScreen extends StatefulWidget {
   const DesignSystemDemoScreen({super.key});
 
@@ -28,7 +28,7 @@ class _DesignSystemDemoScreenState extends State<DesignSystemDemoScreen> {
     return Scaffold(
       backgroundColor: AppColors.backgroundDimmed,
       appBar: AppBar(
-        title: const Text('Toss Design System'),
+        title: const Text('Gym Design System'),
         backgroundColor: AppColors.background,
         elevation: 0,
       ),
@@ -142,12 +142,12 @@ class _DesignSystemDemoScreenState extends State<DesignSystemDemoScreen> {
               title: 'Cards',
               child: Column(
                 children: [
-                  TossCard(
+                  GymCard(
                     padding: const EdgeInsets.all(AppSpacing.lg),
                     child: const Text('Simple Card'),
                   ),
                   const SizedBox(height: AppSpacing.md),
-                  TossCardWithTitle(
+                  GymCardWithTitle(
                     title: 'Card with Title',
                     subtitle: 'This is a subtitle',
                     action: IconButton(
@@ -166,34 +166,34 @@ class _DesignSystemDemoScreenState extends State<DesignSystemDemoScreen> {
                 spacing: AppSpacing.sm,
                 runSpacing: AppSpacing.sm,
                 children: [
-                  TossChip(
+                  GymChip(
                     label: 'Default Chip',
                     onTap: () {},
                   ),
-                  const TossChip(
+                  const GymChip(
                     label: 'Selected',
                     selected: true,
                   ),
-                  TossChip(
+                  GymChip(
                     label: 'With Icon',
                     icon: Icons.star,
                     onTap: () {},
                   ),
-                  TossChip(
+                  GymChip(
                     label: 'Deletable',
                     onDelete: () {},
                   ),
-                  const TossChip(
+                  const GymChip(
                     label: 'Outlined',
-                    style: TossChipStyle.outlined,
+                    style: GymChipStyle.outlined,
                   ),
-                  const TossChip(
+                  const GymChip(
                     label: 'Small',
-                    size: TossChipSize.small,
+                    size: GymChipSize.small,
                   ),
-                  const TossChip(
+                  const GymChip(
                     label: 'Large',
-                    size: TossChipSize.large,
+                    size: GymChipSize.large,
                   ),
                 ],
               ),
@@ -203,29 +203,29 @@ class _DesignSystemDemoScreenState extends State<DesignSystemDemoScreen> {
               title: 'Avatars',
               child: Row(
                 children: [
-                  TossAvatar(
+                  GymAvatar(
                     name: 'John Doe',
-                    size: TossAvatarSize.small,
+                    size: GymAvatarSize.small,
                     onTap: () {},
                   ),
                   const SizedBox(width: AppSpacing.md),
-                  const TossAvatar(
+                  const GymAvatar(
                     name: 'Jane Smith',
-                    size: TossAvatarSize.medium,
+                    size: GymAvatarSize.medium,
                     showBadge: true,
                   ),
                   const SizedBox(width: AppSpacing.md),
-                  const TossAvatar(
+                  const GymAvatar(
                     name: 'Bob Wilson',
-                    size: TossAvatarSize.large,
+                    size: GymAvatarSize.large,
                   ),
                   const SizedBox(width: AppSpacing.md),
-                  TossAvatarGroup(
+                  GymAvatarGroup(
                     avatars: const [
-                      TossAvatar(name: 'A'),
-                      TossAvatar(name: 'B'),
-                      TossAvatar(name: 'C'),
-                      TossAvatar(name: 'D'),
+                      GymAvatar(name: 'A'),
+                      GymAvatar(name: 'B'),
+                      GymAvatar(name: 'C'),
+                      GymAvatar(name: 'D'),
                     ],
                   ),
                 ],
@@ -236,9 +236,9 @@ class _DesignSystemDemoScreenState extends State<DesignSystemDemoScreen> {
               title: 'Dividers',
               child: Column(
                 children: [
-                  const TossDivider(),
+                  const GymDivider(),
                   const SizedBox(height: AppSpacing.lg),
-                  TossDividerWithText(
+                  GymDividerWithText(
                     text: 'OR',
                     color: AppColors.grey400,
                   ),
@@ -254,7 +254,7 @@ class _DesignSystemDemoScreenState extends State<DesignSystemDemoScreen> {
                     text: 'Show Alert Dialog',
                     style: GymButtonStyle.outlined,
                     onPressed: () {
-                      TossDialog.showAlert(
+                      GymDialog.showAlert(
                         context: context,
                         title: 'Alert',
                         message: 'This is an alert dialog',
@@ -266,12 +266,12 @@ class _DesignSystemDemoScreenState extends State<DesignSystemDemoScreen> {
                     text: 'Show Confirm Dialog',
                     style: GymButtonStyle.outlined,
                     onPressed: () {
-                      TossDialog.showConfirm(
+                      GymDialog.showConfirm(
                         context: context,
                         title: 'Confirm',
                         message: 'Are you sure you want to continue?',
                         onConfirm: () {
-                          TossSnackbar.showSuccess(
+                          GymSnackbar.showSuccess(
                             context: context,
                             message: 'Confirmed!',
                           );
@@ -284,7 +284,7 @@ class _DesignSystemDemoScreenState extends State<DesignSystemDemoScreen> {
                     text: 'Show Bottom Sheet',
                     style: GymButtonStyle.outlined,
                     onPressed: () {
-                      TossBottomSheet.show(
+                      GymBottomSheet.show(
                         context: context,
                         title: 'Bottom Sheet',
                         child: const Padding(
@@ -299,36 +299,36 @@ class _DesignSystemDemoScreenState extends State<DesignSystemDemoScreen> {
                     text: 'Show Options Sheet',
                     style: GymButtonStyle.outlined,
                     onPressed: () {
-                      TossBottomSheet.showOptions(
+                      GymBottomSheet.showOptions(
                         context: context,
                         title: 'Select an option',
                         options: [
-                          TossBottomSheetOption(
+                          GymBottomSheetOption(
                             label: 'Option 1',
                             icon: Icons.check,
                             onTap: () {
-                              TossSnackbar.showInfo(
+                              GymSnackbar.showInfo(
                                 context: context,
                                 message: 'Option 1 selected',
                               );
                             },
                           ),
-                          TossBottomSheetOption(
+                          GymBottomSheetOption(
                             label: 'Option 2',
                             icon: Icons.star,
                             onTap: () {
-                              TossSnackbar.showInfo(
+                              GymSnackbar.showInfo(
                                 context: context,
                                 message: 'Option 2 selected',
                               );
                             },
                           ),
-                          TossBottomSheetOption(
+                          GymBottomSheetOption(
                             label: 'Delete',
                             icon: Icons.delete,
                             isDestructive: true,
                             onTap: () {
-                              TossSnackbar.showError(
+                              GymSnackbar.showError(
                                 context: context,
                                 message: 'Deleted!',
                               );
@@ -351,7 +351,7 @@ class _DesignSystemDemoScreenState extends State<DesignSystemDemoScreen> {
                     purpose: GymButtonPurpose.success,
                     style: GymButtonStyle.outlined,
                     onPressed: () {
-                      TossSnackbar.showSuccess(
+                      GymSnackbar.showSuccess(
                         context: context,
                         message: 'Operation successful!',
                       );
@@ -363,7 +363,7 @@ class _DesignSystemDemoScreenState extends State<DesignSystemDemoScreen> {
                     purpose: GymButtonPurpose.error,
                     style: GymButtonStyle.outlined,
                     onPressed: () {
-                      TossSnackbar.showError(
+                      GymSnackbar.showError(
                         context: context,
                         message: 'Something went wrong!',
                         actionLabel: 'Retry',
@@ -377,7 +377,7 @@ class _DesignSystemDemoScreenState extends State<DesignSystemDemoScreen> {
                     purpose: GymButtonPurpose.warning,
                     style: GymButtonStyle.outlined,
                     onPressed: () {
-                      TossSnackbar.showWarning(
+                      GymSnackbar.showWarning(
                         context: context,
                         message: 'Please check your input',
                       );
@@ -388,7 +388,7 @@ class _DesignSystemDemoScreenState extends State<DesignSystemDemoScreen> {
                     text: 'Show Info',
                     style: GymButtonStyle.outlined,
                     onPressed: () {
-                      TossSnackbar.showInfo(
+                      GymSnackbar.showInfo(
                         context: context,
                         message: 'This is an informational message',
                       );
@@ -405,9 +405,9 @@ class _DesignSystemDemoScreenState extends State<DesignSystemDemoScreen> {
                   const Row(
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: [
-                      TossLoading(size: 24),
-                      TossLoading(),
-                      TossLoading(size: 60),
+                      GymLoading(size: 24),
+                      GymLoading(),
+                      GymLoading(size: 60),
                     ],
                   ),
                   const SizedBox(height: AppSpacing.lg),
@@ -444,7 +444,7 @@ class _DesignSystemDemoScreenState extends State<DesignSystemDemoScreen> {
           style: AppTextStyles.h2,
         ),
         const SizedBox(height: AppSpacing.lg),
-        TossCard(
+        GymCard(
           child: child,
         ),
       ],
