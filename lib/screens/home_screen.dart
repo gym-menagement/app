@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../components/gym_bottom_navigation.dart';
 import '../config/app_colors.dart';
 import 'profile_screen.dart';
+import 'gym_search_screen.dart';
 
 /// Main home screen with bottom navigation
 class HomeScreen extends StatefulWidget {
@@ -46,7 +47,7 @@ class _HomeScreenState extends State<HomeScreen> {
     super.initState();
     _screens = [
       _buildPlaceholderScreen('홈', Icons.home),
-      _buildPlaceholderScreen('찾기', Icons.search),
+      const GymSearchScreen(), // 체육관 찾기 화면
       _buildPlaceholderScreen('멤버십', Icons.card_membership),
       const ProfileScreen(), // 마이 페이지
     ];
