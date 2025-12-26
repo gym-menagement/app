@@ -7,10 +7,10 @@ class Config {
   /// 개발 환경에 맞게 변경하세요.
   ///
   /// 예시:
-  /// - 로컬: 'http://localhost:9004'
-  /// - 개발: 'http://10.0.1.62:9004'
+  /// - 로컬: 'http://localhost:8004'
+  /// - 개발: 'http://10.0.1.62:8004'
   /// - 운영: 'https://api.yourdomain.com'
-  static const serverUrl = 'http://10.0.1.62:9004';
+  static const serverUrl = 'http://10.0.1.62:8004';
 
   /// API 엔드포인트 상수
   static const apiAuth = '/api/auth';

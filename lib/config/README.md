@@ -18,10 +18,10 @@
 // lib/config/config.dart
 class Config {
   // 개발 환경에 맞게 변경
-  static const serverUrl = 'http://10.0.1.62:9004';
+  static const serverUrl = 'http://10.0.1.62:8004';
 
   // 또는
-  // static const serverUrl = 'http://localhost:9004';  // 로컬
+  // static const serverUrl = 'http://localhost:8004';  // 로컬
   // static const serverUrl = 'https://api.yourdomain.com';  // 운영
 }
 ```
