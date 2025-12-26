@@ -1,8 +1,30 @@
 import 'dart:io';
 
+/// 앱 전체 설정 관리 클래스
+/// 서버 URL, 플랫폼 정보 등 전역 설정을 관리합니다.
 class Config {
+  /// API 서버 URL
+  /// 개발 환경에 맞게 변경하세요.
+  ///
+  /// 예시:
+  /// - 로컬: 'http://localhost:9004'
+  /// - 개발: 'http://10.0.1.62:9004'
+  /// - 운영: 'https://api.yourdomain.com'
   static const serverUrl = 'http://10.0.1.62:9004';
 
+  /// API 엔드포인트 상수
+  static const apiAuth = '/api/auth';
+  static const apiUser = '/api/user';
+  static const apiGym = '/api/gym';
+  static const apiMembership = '/api/membership';
+  static const apiPayment = '/api/payment';
+  static const apiAttendance = '/api/attendance';
+  static const apiHealth = '/api/health';
+  static const apiNotice = '/api/notice';
+  static const apiInquiry = '/api/inquiry';
+
+  /// 현재 플랫폼 확인
+  /// Android, iOS, Web 중 하나를 반환
   static String platform() {
     try {
       if (Platform.isAndroid) {
@@ -16,4 +38,23 @@ class Config {
 
     return 'web';
   }
+
+  /// 플랫폼별 체크
+  static bool get isAndroid {
+    try {
+      return Platform.isAndroid;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  static bool get isIOS {
+    try {
+      return Platform.isIOS;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  static bool get isWeb => platform() == 'web';
 }
