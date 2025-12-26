@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
+import 'config.dart';
 
 class CConfig {
-  CConfig._privateConstructor();
+  CConfig._privateConstructor() {
+    // Config의 serverUrl을 기본값으로 사용
+    serverUrl = Config.serverUrl;
+  }
   static final CConfig _instance = CConfig._privateConstructor();
 
   factory CConfig() {
