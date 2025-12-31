@@ -1,13 +1,11 @@
 import 'package:app/config/http.dart';
 
-
 enum UsehealthStatus {
   none(0, ''),
   terminated(1, '종료'),
   use(2, '사용중'),
   paused(3, '일시정지'),
-  expired(4, '만료'),
-;
+  expired(4, '만료');
 
   const UsehealthStatus(this.code, this.label);
 
@@ -18,7 +16,10 @@ enum UsehealthStatus {
   String toString() => label;
 
   static UsehealthStatus fromCode(int code) {
-    return UsehealthStatus.values.firstWhere((e) => e.code == code, orElse: () => UsehealthStatus.none);
+    return UsehealthStatus.values.firstWhere(
+      (e) => e.code == code,
+      orElse: () => UsehealthStatus.none,
+    );
   }
 }
 
@@ -84,7 +85,10 @@ class Usehealth {
       qrcode: json['qrcode'] as String,
       lastuseddate: json['lastuseddate'] as String,
       date: json['date'] as String,
-      extra: json['extra'] == null ? <String, dynamic>{} : json['extra'] as Map<String, dynamic>,
+      extra:
+          json['extra'] == null
+              ? <String, dynamic>{}
+              : json['extra'] as Map<String, dynamic>,
     );
   }
 
@@ -125,11 +129,13 @@ class UsehealthManager {
       'page': page,
       'pagesize': pagesize,
     }, params);
-    if (result == null || result['items'] == null) {
+    if (result == null || result['content'] == null) {
       return List<Usehealth>.empty(growable: true);
     }
 
-    return result['items'].map<Usehealth>((json) => Usehealth.fromJson(json)).toList();
+    return result['content']
+        .map<Usehealth>((json) => Usehealth.fromJson(json))
+        .toList();
   }
 
   static Future<int> count({String? params}) async {
@@ -147,7 +153,7 @@ class UsehealthManager {
       return Usehealth();
     }
 
-    return Usehealth.fromJson(result['item']);
+    return Usehealth.fromJson(result);
   }
 
   static Future<int> insert(Usehealth item) async {

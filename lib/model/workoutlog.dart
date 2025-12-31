@@ -1,6 +1,5 @@
 import 'package:app/config/http.dart';
 
-
 class Workoutlog {
   int id;
   int gym;
@@ -51,7 +50,10 @@ class Workoutlog {
       calories: json['calories'] as int,
       note: json['note'] as String,
       date: json['date'] as String,
-      extra: json['extra'] == null ? <String, dynamic>{} : json['extra'] as Map<String, dynamic>,
+      extra:
+          json['extra'] == null
+              ? <String, dynamic>{}
+              : json['extra'] as Map<String, dynamic>,
     );
   }
 
@@ -88,11 +90,13 @@ class WorkoutlogManager {
       'page': page,
       'pagesize': pagesize,
     }, params);
-    if (result == null || result['items'] == null) {
+    if (result == null || result['content'] == null) {
       return List<Workoutlog>.empty(growable: true);
     }
 
-    return result['items'].map<Workoutlog>((json) => Workoutlog.fromJson(json)).toList();
+    return result['content']
+        .map<Workoutlog>((json) => Workoutlog.fromJson(json))
+        .toList();
   }
 
   static Future<int> count({String? params}) async {
@@ -110,7 +114,7 @@ class WorkoutlogManager {
       return Workoutlog();
     }
 
-    return Workoutlog.fromJson(result['item']);
+    return Workoutlog.fromJson(result);
   }
 
   static Future<int> insert(Workoutlog item) async {
