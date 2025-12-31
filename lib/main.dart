@@ -10,6 +10,8 @@ import 'screens/home_screen.dart';
 import 'providers/auth_provider.dart';
 import 'providers/gym_provider.dart';
 import 'providers/membership_provider.dart';
+import 'providers/usehealth_provider.dart';
+import 'providers/workout_provider.dart';
 import 'config/app_colors.dart';
 
 void main() {
@@ -19,6 +21,8 @@ void main() {
         ChangeNotifierProvider(create: (_) => AuthProvider()),
         ChangeNotifierProvider(create: (_) => GymProvider()),
         ChangeNotifierProvider(create: (_) => MembershipProvider()),
+        ChangeNotifierProvider(create: (_) => UsehealthProvider()),
+        ChangeNotifierProvider(create: (_) => WorkoutProvider()),
       ],
       child: const MyApp(),
     ),
@@ -31,6 +35,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       title: 'Gym App',
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: AppColors.primary),
@@ -91,11 +96,7 @@ class _SplashScreenState extends State<SplashScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              Icons.fitness_center,
-              size: 100,
-              color: Colors.white,
-            ),
+            Icon(Icons.fitness_center, size: 100, color: Colors.white),
             const SizedBox(height: 24),
             Text(
               'Gym App',
@@ -106,9 +107,7 @@ class _SplashScreenState extends State<SplashScreen> {
               ),
             ),
             const SizedBox(height: 48),
-            CircularProgressIndicator(
-              color: Colors.white,
-            ),
+            CircularProgressIndicator(color: Colors.white),
           ],
         ),
       ),
