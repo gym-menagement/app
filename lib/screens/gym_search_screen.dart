@@ -50,14 +50,15 @@ class _GymSearchScreenState extends State<GymSearchScreen> {
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
-      builder: (context) => _FilterBottomSheet(
-        sortBy: gymProvider.sortBy,
-        selectedFacilities: gymProvider.selectedFacilities,
-        onApply: (sortBy, facilities) {
-          gymProvider.setSortBy(sortBy);
-          gymProvider.setFacilities(facilities);
-        },
-      ),
+      builder:
+          (context) => _FilterBottomSheet(
+            sortBy: gymProvider.sortBy,
+            selectedFacilities: gymProvider.selectedFacilities,
+            onApply: (sortBy, facilities) {
+              gymProvider.setSortBy(sortBy);
+              gymProvider.setFacilities(facilities);
+            },
+          ),
     );
   }
 
@@ -104,18 +105,19 @@ class _GymSearchScreenState extends State<GymSearchScreen> {
                             Icons.search,
                             color: AppColors.grey500,
                           ),
-                          suffixIcon: isSearching
-                              ? IconButton(
-                                  icon: const Icon(
-                                    Icons.clear,
-                                    color: AppColors.grey500,
-                                  ),
-                                  onPressed: () {
-                                    _searchController.clear();
-                                    gymProvider.clearSearch();
-                                  },
-                                )
-                              : null,
+                          suffixIcon:
+                              isSearching
+                                  ? IconButton(
+                                    icon: const Icon(
+                                      Icons.clear,
+                                      color: AppColors.grey500,
+                                    ),
+                                    onPressed: () {
+                                      _searchController.clear();
+                                      gymProvider.clearSearch();
+                                    },
+                                  )
+                                  : null,
                           filled: true,
                           fillColor: AppColors.grey100,
                           border: OutlineInputBorder(
@@ -183,75 +185,74 @@ class _GymSearchScreenState extends State<GymSearchScreen> {
                 ),
 
               // Results count
-              Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: AppSpacing.md,
-                  vertical: AppSpacing.sm,
-                ),
-                child: Row(
-                  children: [
-                    Text(
-                      '검색 결과 ${gymProvider.filteredGyms.length}개',
-                      style: AppTextStyles.bodyMedium.copyWith(
-                        color: AppColors.grey700,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
+              // Padding(
+              //   padding: const EdgeInsets.symmetric(
+              //     horizontal: AppSpacing.md,
+              //     vertical: AppSpacing.sm,
+              //   ),
+              //   child: Row(
+              //     children: [
+              //       Text(
+              //         '검색 결과 ${gymProvider.filteredGyms.length}개',
+              //         style: AppTextStyles.bodyMedium.copyWith(
+              //           color: AppColors.grey700,
+              //           fontWeight: FontWeight.w600,
+              //         ),
+              //       ),
+              //     ],
+              //   ),
+              // ),
 
               // Gym List
               Expanded(
-                child: gymProvider.isLoading
-                    ? const Center(child: CircularProgressIndicator())
-                    : gymProvider.filteredGyms.isEmpty
+                child:
+                    gymProvider.isLoading
+                        ? const Center(child: CircularProgressIndicator())
+                        : gymProvider.filteredGyms.isEmpty
                         ? _buildEmptyState(isSearching)
                         : RefreshIndicator(
-                            onRefresh: () => gymProvider.loadGyms(),
-                            child: ListView.builder(
-                              controller: _scrollController,
-                              padding: const EdgeInsets.all(AppSpacing.md),
-                              itemCount: gymProvider.filteredGyms.length,
-                              itemBuilder: (context, index) {
-                                final gym = gymProvider.filteredGyms[index];
-                                return Padding(
-                                  padding: const EdgeInsets.only(
-                                    bottom: AppSpacing.md,
-                                  ),
-                                  child: GymListCard(
-                                    gym: gym,
-                                    isFavorite: gymProvider.isFavorite(gym.id),
-                                    distance: gym.extra['distance'] as double?,
-                                    showDistance: true,
-                                    onTap: () {
-                                      // TODO: Navigate to gym detail
-                                      ScaffoldMessenger.of(context)
-                                          .showSnackBar(
-                                        SnackBar(
-                                          content: Text('${gym.name} 상세 페이지'),
+                          onRefresh: () => gymProvider.loadGyms(),
+                          child: ListView.builder(
+                            controller: _scrollController,
+                            padding: const EdgeInsets.all(AppSpacing.md),
+                            itemCount: gymProvider.filteredGyms.length,
+                            itemBuilder: (context, index) {
+                              final gym = gymProvider.filteredGyms[index];
+                              return Padding(
+                                padding: const EdgeInsets.only(
+                                  bottom: AppSpacing.md,
+                                ),
+                                child: GymListCard(
+                                  gym: gym,
+                                  isFavorite: gymProvider.isFavorite(gym.id),
+                                  distance: gym.extra['distance'] as double?,
+                                  showDistance: true,
+                                  onTap: () {
+                                    // TODO: Navigate to gym detail
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text('${gym.name} 상세 페이지'),
+                                      ),
+                                    );
+                                  },
+                                  onFavorite: () {
+                                    gymProvider.toggleFavorite(gym.id);
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text(
+                                          gymProvider.isFavorite(gym.id)
+                                              ? '즐겨찾기에 추가되었습니다'
+                                              : '즐겨찾기에서 제거되었습니다',
                                         ),
-                                      );
-                                    },
-                                    onFavorite: () {
-                                      gymProvider.toggleFavorite(gym.id);
-                                      ScaffoldMessenger.of(context)
-                                          .showSnackBar(
-                                        SnackBar(
-                                          content: Text(
-                                            gymProvider.isFavorite(gym.id)
-                                                ? '즐겨찾기에 추가되었습니다'
-                                                : '즐겨찾기에서 제거되었습니다',
-                                          ),
-                                          duration: const Duration(seconds: 1),
-                                        ),
-                                      );
-                                    },
-                                  ),
-                                );
-                              },
-                            ),
+                                        duration: const Duration(seconds: 1),
+                                      ),
+                                    );
+                                  },
+                                ),
+                              );
+                            },
                           ),
+                        ),
               ),
             ],
           );
@@ -277,9 +278,7 @@ class _GymSearchScreenState extends State<GymSearchScreen> {
           ),
           const SizedBox(height: AppSpacing.sm),
           Text(
-            isSearching
-                ? '다른 검색어로 시도해보세요'
-                : '위치 권한을 확인하거나 다른 지역을 검색해보세요',
+            isSearching ? '다른 검색어로 시도해보세요' : '위치 권한을 확인하거나 다른 지역을 검색해보세요',
             style: AppTextStyles.bodyMedium.copyWith(color: AppColors.grey500),
             textAlign: TextAlign.center,
           ),
@@ -401,9 +400,10 @@ class _FilterBottomSheetState extends State<_FilterBottomSheet> {
           Wrap(
             spacing: AppSpacing.sm,
             runSpacing: AppSpacing.sm,
-            children: _availableFacilities.map((facility) {
-              return _buildFacilityChip(facility);
-            }).toList(),
+            children:
+                _availableFacilities.map((facility) {
+                  return _buildFacilityChip(facility);
+                }).toList(),
           ),
 
           const SizedBox(height: AppSpacing.xl),
