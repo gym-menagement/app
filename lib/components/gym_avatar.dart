@@ -32,6 +32,7 @@ class GymAvatar extends StatelessWidget {
   Widget build(BuildContext context) {
     final avatarSize = _getSize();
     final fontSize = _getFontSize();
+    final hasValidImage = imageUrl != null && imageUrl!.isNotEmpty;
 
     Widget avatar = Container(
       width: avatarSize,
@@ -39,14 +40,14 @@ class GymAvatar extends StatelessWidget {
       decoration: BoxDecoration(
         color: backgroundColor ?? AppColors.grey200,
         shape: BoxShape.circle,
-        image: imageUrl != null
+        image: hasValidImage
             ? DecorationImage(
                 image: NetworkImage(imageUrl!),
                 fit: BoxFit.cover,
               )
             : null,
       ),
-      child: imageUrl == null
+      child: !hasValidImage
           ? Center(
               child: Text(
                 _getInitials(),
