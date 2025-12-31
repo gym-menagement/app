@@ -29,6 +29,7 @@ class GymTextField extends StatefulWidget {
     this.focusNode,
     this.textInputAction,
     this.autofocus = false,
+    this.textAlign = TextAlign.start,
   });
 
   final TextEditingController? controller;
@@ -49,6 +50,7 @@ class GymTextField extends StatefulWidget {
   final FocusNode? focusNode;
   final TextInputAction? textInputAction;
   final bool autofocus;
+  final TextAlign textAlign;
 
   @override
   State<GymTextField> createState() => _GymTextFieldState();
@@ -81,16 +83,20 @@ class _GymTextFieldState extends State<GymTextField> {
           const SizedBox(height: AppSpacing.sm),
         ],
         Container(
-          height: widget.maxLines == 1 ? AppSpacing.textFieldHeight : null,
           decoration: BoxDecoration(
             color: widget.enabled ? AppColors.background : AppColors.grey100,
-            borderRadius: BorderRadius.circular(AppSpacing.radiusMedium),
+            borderRadius: BorderRadius.circular(AppSpacing.radiusLarge),
             border: Border.all(
-              color: hasError
-                  ? AppColors.error
-                  : AppColors.border,
-              width: AppSpacing.borderThin,
+              color: hasError ? AppColors.error : AppColors.border,
+              width: 1.5,
             ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.02),
+                blurRadius: 8,
+                offset: const Offset(0, 2),
+              ),
+            ],
           ),
           child: TextField(
             controller: widget.controller,
@@ -102,28 +108,39 @@ class _GymTextFieldState extends State<GymTextField> {
             maxLength: widget.maxLength,
             autofocus: widget.autofocus,
             textInputAction: widget.textInputAction,
+            // textAlign: widget.textAlign,
             keyboardType: _getKeyboardType(),
             inputFormatters: _getInputFormatters(),
-            style: AppTextStyles.bodyMedium.copyWith(
-              color: widget.enabled ? AppColors.textPrimary : AppColors.textDisabled,
+            style: AppTextStyles.bodyLarge.copyWith(
+              color:
+                  widget.enabled
+                      ? AppColors.textPrimary
+                      : AppColors.textDisabled,
+              fontWeight: FontWeight.w500,
+              height: 1.5,
             ),
             decoration: InputDecoration(
               hintText: widget.hintText,
-              hintStyle: AppTextStyles.bodyMedium.copyWith(
+              hintStyle: AppTextStyles.bodyLarge.copyWith(
                 color: AppColors.textTertiary,
+                fontWeight: FontWeight.w400,
               ),
-              prefixIcon: widget.prefixIcon != null
-                  ? Icon(
-                      widget.prefixIcon,
-                      color: widget.enabled ? AppColors.grey600 : AppColors.textDisabled,
-                      size: AppSpacing.iconMedium,
-                    )
-                  : null,
+              prefixIcon:
+                  widget.prefixIcon != null
+                      ? Icon(
+                        widget.prefixIcon,
+                        color:
+                            widget.enabled
+                                ? AppColors.grey600
+                                : AppColors.textDisabled,
+                        size: 22,
+                      )
+                      : null,
               suffixIcon: _buildSuffixIcon(),
               filled: false,
               contentPadding: EdgeInsets.symmetric(
                 horizontal: AppSpacing.lg,
-                vertical: widget.maxLines == 1 ? 0 : AppSpacing.md,
+                vertical: widget.maxLines == 1 ? 18 : AppSpacing.md,
               ),
               border: InputBorder.none,
               enabledBorder: InputBorder.none,
@@ -151,10 +168,7 @@ class _GymTextFieldState extends State<GymTextField> {
                 ),
                 const SizedBox(width: AppSpacing.xs),
                 Expanded(
-                  child: Text(
-                    widget.errorText!,
-                    style: AppTextStyles.error,
-                  ),
+                  child: Text(widget.errorText!, style: AppTextStyles.error),
                 ),
               ],
             ),
