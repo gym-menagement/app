@@ -1,8 +1,10 @@
+import 'package:app/screens/membership_screen.dart';
 import 'package:flutter/material.dart';
 import '../components/gym_bottom_navigation.dart';
 import '../config/app_colors.dart';
 import 'profile_screen.dart';
 import 'gym_search_screen.dart';
+import 'workout_screen.dart';
 
 /// Main home screen with bottom navigation
 class HomeScreen extends StatefulWidget {
@@ -13,7 +15,7 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  int _currentIndex = 3; // 마이 페이지를 기본으로 표시
+  int _currentIndex = 2; // 마이 페이지를 기본으로 표시
 
   // 네비게이션 아이템들
   final List<GymBottomNavItem> _navItems = [
@@ -46,55 +48,17 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     super.initState();
     _screens = [
-      _buildPlaceholderScreen('홈', Icons.home),
+      const WorkoutScreen(), // 운동 기록 화면
       const GymSearchScreen(), // 체육관 찾기 화면
-      _buildPlaceholderScreen('멤버십', Icons.card_membership),
+      const MembershipScreen(), // 멤버십 화면
       const ProfileScreen(), // 마이 페이지
     ];
-  }
-
-  Widget _buildPlaceholderScreen(String title, IconData icon) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(title),
-        backgroundColor: AppColors.primary,
-        foregroundColor: Colors.white,
-      ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(icon, size: 80, color: AppColors.grey400),
-            const SizedBox(height: 16),
-            Text(
-              '$title 화면',
-              style: const TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.w600,
-                color: AppColors.grey700,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              '준비 중입니다',
-              style: TextStyle(
-                fontSize: 14,
-                color: AppColors.grey500,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: IndexedStack(
-        index: _currentIndex,
-        children: _screens,
-      ),
+      body: IndexedStack(index: _currentIndex, children: _screens),
       bottomNavigationBar: GymBottomNavigation(
         currentIndex: _currentIndex,
         items: _navItems,
