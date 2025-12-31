@@ -20,9 +20,9 @@ class _HomeScreenState extends State<HomeScreen> {
   // 네비게이션 아이템들
   final List<GymBottomNavItem> _navItems = [
     const GymBottomNavItem(
-      icon: Icons.home_outlined,
-      activeIcon: Icons.home,
-      label: '홈',
+      icon: Icons.fitness_center_outlined,
+      activeIcon: Icons.fitness_center,
+      label: '운동일지',
     ),
     const GymBottomNavItem(
       icon: Icons.search_outlined,
