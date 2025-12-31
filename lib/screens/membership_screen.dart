@@ -1,20 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:qr_flutter/qr_flutter.dart';
-import 'dart:convert';
-import '../components/gym_layout.dart';
-import '../components/gym_button.dart';
+import '../components/gym_card.dart';
 import '../config/app_colors.dart';
 import '../config/app_text_styles.dart';
 import '../config/app_spacing.dart';
-import '../model/membership.dart';
-import '../model/gym.dart';
-
-enum MembershipStatus {
-  active,
-  paused,
-  expired,
-  cancelled,
-}
+import '../model/usehealth.dart';
+import '../providers/usehealth_provider.dart';
+import '../providers/auth_provider.dart';
+import 'membership_screen_fullscreen_qr.dart';
 
 class MembershipScreen extends StatefulWidget {
   const MembershipScreen({super.key});
@@ -24,732 +18,295 @@ class MembershipScreen extends StatefulWidget {
 }
 
 class _MembershipScreenState extends State<MembershipScreen> {
-  bool _isLoading = true;
-  Membership? _activeMembership;
-  Gym? _gym;
-  List<Membership> _membershipHistory = [];
-  Map<String, dynamic>? _stats;
+  bool _isActiveExpanded = true;
+  bool _isPausedExpanded = true;
+  bool _isExpiredExpanded = true;
 
   @override
   void initState() {
     super.initState();
-    _loadMembershipData();
-  }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final authProvider = context.read<AuthProvider>();
+      final usehealthProvider = context.read<UsehealthProvider>();
 
-  Future<void> _loadMembershipData() async {
-    setState(() => _isLoading = true);
+      // AuthProvider에서 userId 가져오기
+      final userId = authProvider.currentUser?.id;
 
-    try {
-      // TODO: Implement actual API call
-      await Future.delayed(const Duration(seconds: 1));
+      if (userId != null) {
+        // UsehealthProvider에 userId 설정
+        usehealthProvider.setUserId(userId);
 
-      // Mock data - active membership (all extended fields in extra)
-      final mockActiveMembership = Membership(
-        id: 1,
-        user: 1,
-        gym: 1,
-        date: DateTime.now().toString(),
-        extra: {
-          'plan': '6개월 이용권',
-          'startDate': DateTime.now().subtract(const Duration(days: 30)).toIso8601String(),
-          'endDate': DateTime.now().add(const Duration(days: 150)).toIso8601String(),
-          'price': 480000,
-          'status': 'active',
-          'features': ['무제한 이용', 'PT 5회', '락커 제공', '운동복 제공'],
-          'totalVisits': 45,
-          'pauseAvailable': true,
-        },
-      );
-
-      // Mock gym data
-      final mockGym = Gym(
-        id: 1,
-        name: '강남 피트니스',
-        address: '서울 강남구 테헤란로 123',
-        tel: '02-1234-5678',
-        user: 1,
-        date: DateTime.now().toString(),
-        extra: {},
-      );
-
-      // Mock membership history
-      final mockHistory = [
-        Membership(
-          id: 2,
-          user: 1,
-          gym: 1,
-          date: DateTime.now().subtract(const Duration(days: 210)).toString(),
-          extra: {
-            'plan': '3개월 이용권',
-            'startDate': DateTime.now().subtract(const Duration(days: 210)).toIso8601String(),
-            'endDate': DateTime.now().subtract(const Duration(days: 30)).toIso8601String(),
-            'price': 270000,
-            'status': 'expired',
-          },
-        ),
-      ];
-
-      // Mock statistics
-      final mockStats = {
-        'totalVisitsThisMonth': 12,
-        'averageVisitsPerWeek': 3.5,
-        'currentStreak': 5,
-        'longestStreak': 14,
-      };
-
-      if (mounted) {
-        setState(() {
-          _activeMembership = mockActiveMembership;
-          _gym = mockGym;
-          _membershipHistory = mockHistory;
-          _stats = mockStats;
-          _isLoading = false;
-        });
+        if (usehealthProvider.usehealths.isEmpty) {
+          usehealthProvider.loadUsehealths();
+        }
       }
-    } catch (e) {
-      if (mounted) {
-        setState(() => _isLoading = false);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('데이터 로드 실패: ${e.toString()}'),
-            backgroundColor: AppColors.error,
-          ),
-        );
-      }
-    }
+    });
   }
 
-  DateTime _getStartDate(Membership membership) {
-    final startDateStr = membership.extra['startDate'] as String?;
-    return startDateStr != null ? DateTime.parse(startDateStr) : DateTime.now();
-  }
-
-  DateTime _getEndDate(Membership membership) {
-    final endDateStr = membership.extra['endDate'] as String?;
-    return endDateStr != null ? DateTime.parse(endDateStr) : DateTime.now();
-  }
-
-  String _getPlan(Membership membership) {
-    return membership.extra['plan'] as String? ?? '';
-  }
-
-  MembershipStatus _getStatus(Membership membership) {
-    final statusStr = membership.extra['status'] as String? ?? 'active';
-    return MembershipStatus.values.firstWhere(
-      (e) => e.toString() == 'MembershipStatus.$statusStr',
-      orElse: () => MembershipStatus.active,
-    );
-  }
-
-  int _getRemainingDays() {
-    if (_activeMembership == null) return 0;
-    return _getEndDate(_activeMembership!).difference(DateTime.now()).inDays;
-  }
-
-  Color _getStatusColor() {
-    final remainingDays = _getRemainingDays();
-    if (remainingDays <= 0) return AppColors.grey500;
-    if (remainingDays <= 7) return AppColors.warning;
-    return AppColors.primary;
-  }
-
-  String _getQRData() {
-    if (_activeMembership == null || _gym == null) return '';
-
-    final data = {
-      'membershipId': _activeMembership!.id,
-      'userId': _activeMembership!.user,
-      'gymId': _gym!.id,
-      'validUntil': _getEndDate(_activeMembership!).toIso8601String(),
-      'signature': 'mock_signature_${_activeMembership!.id}',
-    };
-
-    return jsonEncode(data);
-  }
-
-  void _showQRCodeDialog() {
-    showDialog(
+  void _showUsehealthDetail(Usehealth usehealth) {
+    showModalBottomSheet(
       context: context,
-      builder: (context) => Dialog(
-        child: Container(
-          padding: const EdgeInsets.all(AppSpacing.xl),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                '체육관 입장 QR',
-                style: AppTextStyles.h3,
-              ),
-              const SizedBox(height: AppSpacing.md),
-              Text(
-                _gym?.name ?? '',
-                style: AppTextStyles.bodyLarge.copyWith(
-                  color: AppColors.grey700,
-                ),
-              ),
-              const SizedBox(height: AppSpacing.lg),
-              Container(
-                padding: const EdgeInsets.all(AppSpacing.md),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(AppSpacing.radiusMedium),
-                  border: Border.all(color: AppColors.grey300),
-                ),
-                child: QrImageView(
-                  data: _getQRData(),
-                  version: QrVersions.auto,
-                  size: 250.0,
-                  backgroundColor: Colors.white,
-                ),
-              ),
-              const SizedBox(height: AppSpacing.lg),
-              Text(
-                '출입 시 이 QR코드를 스캔해주세요',
-                style: AppTextStyles.bodySmall.copyWith(
-                  color: AppColors.grey600,
-                ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: AppSpacing.lg),
-              GymButton(
-                text: '닫기',
-                onPressed: () => Navigator.pop(context),
-                style: GymButtonStyle.outlined,
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  void _handleExtendMembership() {
-    if (_gym == null) return;
-
-    Navigator.pushNamed(
-      context,
-      '/payment',
-      arguments: _gym,
-    ).then((_) => _loadMembershipData());
-  }
-
-  void _handlePauseMembership() {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('이용권 일시정지'),
-        content: const Text(
-          '이용권을 일시정지하시겠습니까?\n정지 기간만큼 이용 기간이 연장됩니다.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('취소'),
-          ),
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-              // TODO: Implement pause API
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('일시정지 신청이 완료되었습니다')),
-              );
-            },
-            child: const Text('확인'),
-          ),
-        ],
-      ),
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => _UsehealthDetailSheet(usehealth: usehealth),
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    return GymLayout(
-      title: '내 이용권',
-      scrollable: true,
-      body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : _activeMembership == null
-              ? _buildEmptyState()
-              : _buildContent(),
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('내 이용권'),
+        backgroundColor: AppColors.primary,
+        foregroundColor: Colors.white,
+        elevation: 0,
+      ),
+      body: Consumer<UsehealthProvider>(
+        builder: (context, provider, child) {
+          if (provider.isLoading) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
+          if (provider.errorMessage != null) {
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.error_outline, size: 80, color: AppColors.grey400),
+                  const SizedBox(height: AppSpacing.md),
+                  Text(
+                    '오류가 발생했습니다',
+                    style: AppTextStyles.titleMedium.copyWith(
+                      color: AppColors.grey700,
+                    ),
+                  ),
+                  const SizedBox(height: AppSpacing.sm),
+                  Text(
+                    provider.errorMessage ?? '',
+                    style: AppTextStyles.bodyMedium.copyWith(
+                      color: AppColors.grey500,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ],
+              ),
+            );
+          }
+
+          if (provider.usehealths.isEmpty) {
+            return _buildEmptyState();
+          }
+
+          return RefreshIndicator(
+            onRefresh: provider.refresh,
+            child: ListView(
+              padding: const EdgeInsets.all(AppSpacing.md),
+              children: [
+                // 사용중인 이용권 섹션
+                if (provider.activeUsehealths.isNotEmpty)
+                  _buildCollapsibleSection(
+                    title: '사용중인 이용권',
+                    count: provider.activeUsehealths.length,
+                    isExpanded: _isActiveExpanded,
+                    onToggle: () {
+                      setState(() {
+                        _isActiveExpanded = !_isActiveExpanded;
+                      });
+                    },
+                    children: provider.activeUsehealths,
+                    color: AppColors.primary,
+                  ),
+
+                // 일시정지된 이용권 섹션
+                if (provider.pausedUsehealths.isNotEmpty)
+                  _buildCollapsibleSection(
+                    title: '일시정지된 이용권',
+                    count: provider.pausedUsehealths.length,
+                    isExpanded: _isPausedExpanded,
+                    onToggle: () {
+                      setState(() {
+                        _isPausedExpanded = !_isPausedExpanded;
+                      });
+                    },
+                    children: provider.pausedUsehealths,
+                    color: AppColors.warning,
+                  ),
+
+                // 만료된 이용권 섹션
+                if (provider.expiredUsehealths.isNotEmpty)
+                  _buildCollapsibleSection(
+                    title: '만료된 이용권',
+                    count: provider.expiredUsehealths.length,
+                    isExpanded: _isExpiredExpanded,
+                    onToggle: () {
+                      setState(() {
+                        _isExpiredExpanded = !_isExpiredExpanded;
+                      });
+                    },
+                    children: provider.expiredUsehealths,
+                    color: AppColors.grey500,
+                  ),
+              ],
+            ),
+          );
+        },
+      ),
     );
   }
 
   Widget _buildEmptyState() {
     return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(AppSpacing.xl),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.fitness_center_outlined,
-              size: 120,
-              color: AppColors.grey400,
-            ),
-            const SizedBox(height: AppSpacing.lg),
-            Text(
-              '활성 이용권이 없습니다',
-              style: AppTextStyles.h3.copyWith(color: AppColors.grey700),
-            ),
-            const SizedBox(height: AppSpacing.sm),
-            Text(
-              '체육관을 검색하고\n이용권을 구매해보세요',
-              style: AppTextStyles.bodyLarge.copyWith(color: AppColors.grey500),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: AppSpacing.xl),
-            GymButton(
-              text: '체육관 검색하기',
-              onPressed: () => Navigator.pushNamed(context, '/gym_search'),
-              size: GymButtonSize.large,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildContent() {
-    return Padding(
-      padding: const EdgeInsets.all(AppSpacing.md),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          _buildActiveMembershipCard(),
-          const SizedBox(height: AppSpacing.lg),
-          _buildUsageProgress(),
-          const SizedBox(height: AppSpacing.lg),
-          _buildActionButtons(),
-          const SizedBox(height: AppSpacing.xl),
-          _buildStatistics(),
-          const SizedBox(height: AppSpacing.xl),
-          _buildHistorySection(),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildActiveMembershipCard() {
-    final remainingDays = _getRemainingDays();
-    final statusColor = _getStatusColor();
-
-    return Container(
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            statusColor,
-            statusColor.withOpacity(0.7),
-          ],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.circular(AppSpacing.radiusLarge),
-        boxShadow: [
-          BoxShadow(
-            color: statusColor.withOpacity(0.3),
-            blurRadius: 12,
-            offset: const Offset(0, 4),
+          Icon(
+            Icons.fitness_center_outlined,
+            size: 80,
+            color: AppColors.grey400,
+          ),
+          const SizedBox(height: AppSpacing.md),
+          Text(
+            '이용권이 없습니다',
+            style: AppTextStyles.titleMedium.copyWith(color: AppColors.grey700),
+          ),
+          const SizedBox(height: AppSpacing.sm),
+          Text(
+            '체육관을 검색하고 이용권을 구매해보세요',
+            style: AppTextStyles.bodyMedium.copyWith(color: AppColors.grey500),
+            textAlign: TextAlign.center,
           ),
         ],
       ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: _showQRCodeDialog,
-          borderRadius: BorderRadius.circular(AppSpacing.radiusLarge),
-          child: Padding(
-            padding: const EdgeInsets.all(AppSpacing.lg),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    );
+  }
+
+  Widget _buildCollapsibleSection({
+    required String title,
+    required int count,
+    required bool isExpanded,
+    required VoidCallback onToggle,
+    required List<Usehealth> children,
+    required Color color,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        GymCard(
+          onTap: onToggle,
+          padding: const EdgeInsets.all(AppSpacing.md),
+          elevation: 1,
+          child: Row(
+            children: [
+              Expanded(
+                child: Row(
                   children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            _gym?.name ?? '',
-                            style: AppTextStyles.h3.copyWith(
-                              color: Colors.white,
-                            ),
-                          ),
-                          const SizedBox(height: AppSpacing.xs),
-                          Text(
-                            _getPlan(_activeMembership!),
-                            style: AppTextStyles.bodyLarge.copyWith(
-                              color: Colors.white.withOpacity(0.9),
-                            ),
-                          ),
-                        ],
+                    Container(
+                      width: 4,
+                      height: 20,
+                      decoration: BoxDecoration(
+                        color: color,
+                        borderRadius: BorderRadius.circular(2),
                       ),
                     ),
+                    const SizedBox(width: AppSpacing.sm),
+                    Text(
+                      title,
+                      style: AppTextStyles.titleMedium.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(width: AppSpacing.xs),
                     Container(
                       padding: const EdgeInsets.symmetric(
                         horizontal: AppSpacing.sm,
                         vertical: AppSpacing.xs,
                       ),
                       decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.2),
-                        borderRadius:
-                            BorderRadius.circular(AppSpacing.radiusSmall),
+                        color: color.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(
+                          AppSpacing.radiusSmall,
+                        ),
                       ),
                       child: Text(
-                        '이용중',
+                        '$count',
                         style: AppTextStyles.labelSmall.copyWith(
-                          color: Colors.white,
+                          color: color,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
                     ),
                   ],
-                ),
-                const SizedBox(height: AppSpacing.lg),
-                Row(
-                  children: [
-                    Expanded(
-                      child: _buildDateInfo(
-                        '시작일',
-                        _formatDate(_getStartDate(_activeMembership!)),
-                      ),
-                    ),
-                    Container(
-                      width: 1,
-                      height: 30,
-                      color: Colors.white.withOpacity(0.3),
-                      margin: const EdgeInsets.symmetric(
-                        horizontal: AppSpacing.md,
-                      ),
-                    ),
-                    Expanded(
-                      child: _buildDateInfo(
-                        '종료일',
-                        _formatDate(_getEndDate(_activeMembership!)),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: AppSpacing.lg),
-                Container(
-                  padding: const EdgeInsets.all(AppSpacing.md),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.15),
-                    borderRadius: BorderRadius.circular(AppSpacing.radiusMedium),
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Row(
-                        children: [
-                          const Icon(
-                            Icons.calendar_today,
-                            color: Colors.white,
-                            size: 20,
-                          ),
-                          const SizedBox(width: AppSpacing.sm),
-                          Text(
-                            '남은 기간',
-                            style: AppTextStyles.bodyMedium.copyWith(
-                              color: Colors.white.withOpacity(0.9),
-                            ),
-                          ),
-                        ],
-                      ),
-                      Text(
-                        '$remainingDays일',
-                        style: AppTextStyles.h2.copyWith(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: AppSpacing.md),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Icon(
-                      Icons.qr_code,
-                      color: Colors.white,
-                      size: 20,
-                    ),
-                    const SizedBox(width: AppSpacing.xs),
-                    Text(
-                      'QR 코드 보기',
-                      style: AppTextStyles.bodyMedium.copyWith(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildDateInfo(String label, String value) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: AppTextStyles.bodySmall.copyWith(
-            color: Colors.white.withOpacity(0.8),
-          ),
-        ),
-        const SizedBox(height: AppSpacing.xs),
-        Text(
-          value,
-          style: AppTextStyles.bodyMedium.copyWith(
-            color: Colors.white,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildUsageProgress() {
-    final totalDays = _getEndDate(_activeMembership!)
-        .difference(_getStartDate(_activeMembership!))
-        .inDays;
-    final usedDays =
-        DateTime.now().difference(_getStartDate(_activeMembership!)).inDays;
-    final progress = (usedDays / totalDays).clamp(0.0, 1.0);
-
-    return Container(
-      padding: const EdgeInsets.all(AppSpacing.md),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(AppSpacing.radiusMedium),
-        border: Border.all(color: AppColors.grey300),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                '이용 진행률',
-                style: AppTextStyles.titleMedium.copyWith(
-                  fontWeight: FontWeight.bold,
                 ),
               ),
-              Text(
-                '${(progress * 100).toInt()}%',
-                style: AppTextStyles.titleMedium.copyWith(
-                  color: AppColors.primary,
-                  fontWeight: FontWeight.bold,
-                ),
+              Icon(
+                isExpanded
+                    ? Icons.keyboard_arrow_up
+                    : Icons.keyboard_arrow_down,
+                color: AppColors.grey600,
               ),
             ],
           ),
-          const SizedBox(height: AppSpacing.sm),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(AppSpacing.radiusSmall),
-            child: LinearProgressIndicator(
-              value: progress,
-              backgroundColor: AppColors.grey200,
-              valueColor: AlwaysStoppedAnimation<Color>(
-                _getStatusColor(),
-              ),
-              minHeight: 8,
-            ),
-          ),
-          const SizedBox(height: AppSpacing.sm),
-          Text(
-            '$usedDays일 사용 / $totalDays일',
-            style: AppTextStyles.bodySmall.copyWith(
-              color: AppColors.grey600,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildActionButtons() {
-    final pauseAvailable =
-        _activeMembership?.extra['pauseAvailable'] as bool? ?? false;
-
-    return Row(
-      children: [
-        Expanded(
-          flex: 2,
-          child: GymButton(
-            text: '연장하기',
-            onPressed: _handleExtendMembership,
-            size: GymButtonSize.large,
-          ),
         ),
-        if (pauseAvailable) ...[
-          const SizedBox(width: AppSpacing.sm),
-          Expanded(
-            child: GymButton(
-              text: '일시정지',
-              onPressed: _handlePauseMembership,
-              style: GymButtonStyle.outlined,
-              size: GymButtonSize.large,
-            ),
-          ),
-        ],
-      ],
-    );
-  }
-
-  Widget _buildStatistics() {
-    return Container(
-      padding: const EdgeInsets.all(AppSpacing.lg),
-      decoration: BoxDecoration(
-        color: AppColors.grey100,
-        borderRadius: BorderRadius.circular(AppSpacing.radiusMedium),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            '이용 통계',
-            style: AppTextStyles.titleMedium.copyWith(
-              fontWeight: FontWeight.bold,
-            ),
-          ),
+        if (isExpanded) ...[
           const SizedBox(height: AppSpacing.md),
-          Row(
-            children: [
-              Expanded(
-                child: _buildStatCard(
-                  icon: Icons.calendar_month,
-                  label: '이번 달 방문',
-                  value: '${_stats?['totalVisitsThisMonth'] ?? 0}회',
-                  color: AppColors.primary,
-                ),
-              ),
-              const SizedBox(width: AppSpacing.sm),
-              Expanded(
-                child: _buildStatCard(
-                  icon: Icons.trending_up,
-                  label: '주평균 방문',
-                  value: '${_stats?['averageVisitsPerWeek'] ?? 0}회',
-                  color: AppColors.success,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: AppSpacing.sm),
-          Row(
-            children: [
-              Expanded(
-                child: _buildStatCard(
-                  icon: Icons.local_fire_department,
-                  label: '현재 연속 방문',
-                  value: '${_stats?['currentStreak'] ?? 0}일',
-                  color: AppColors.warning,
-                ),
-              ),
-              const SizedBox(width: AppSpacing.sm),
-              Expanded(
-                child: _buildStatCard(
-                  icon: Icons.emoji_events,
-                  label: '최장 연속 방문',
-                  value: '${_stats?['longestStreak'] ?? 0}일',
-                  color: AppColors.warning,
-                ),
-              ),
-            ],
-          ),
+          ...children.map((usehealth) {
+            return Padding(
+              padding: const EdgeInsets.only(bottom: AppSpacing.md),
+              child: _buildUsehealthCard(usehealth),
+            );
+          }),
         ],
-      ),
+        const SizedBox(height: AppSpacing.md),
+      ],
     );
   }
 
-  Widget _buildStatCard({
-    required IconData icon,
-    required String label,
-    required String value,
-    required Color color,
-  }) {
-    return Container(
-      padding: const EdgeInsets.all(AppSpacing.md),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(AppSpacing.radiusMedium),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Icon(icon, color: color, size: 24),
-          const SizedBox(height: AppSpacing.sm),
-          Text(
-            label,
-            style: AppTextStyles.bodySmall.copyWith(
-              color: AppColors.grey600,
-            ),
-          ),
-          const SizedBox(height: AppSpacing.xs),
-          Text(
-            value,
-            style: AppTextStyles.titleMedium.copyWith(
-              color: color,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
+  Widget _buildUsehealthCard(Usehealth usehealth) {
+    final statusColor = _getStatusColor(usehealth.status);
+    final remainingDays = _getRemainingDays(usehealth);
 
-  Widget _buildHistorySection() {
-    if (_membershipHistory.isEmpty) {
-      return const SizedBox.shrink();
+    // extra에서 gym, health 정보 추출
+    String gymName = '체육관';
+    String membershipName = '이용권';
+
+    if (usehealth.extra['gym'] != null && usehealth.extra['gym'] is Map) {
+      final gymData = usehealth.extra['gym'] as Map<String, dynamic>;
+      gymName = gymData['name'] as String? ?? '체육관';
     }
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          '이용권 내역',
-          style: AppTextStyles.titleLarge.copyWith(
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        const SizedBox(height: AppSpacing.md),
-        ..._membershipHistory.map((membership) {
-          return Padding(
-            padding: const EdgeInsets.only(bottom: AppSpacing.md),
-            child: _buildHistoryCard(membership),
-          );
-        }),
-      ],
-    );
-  }
+    if (usehealth.extra['health'] != null && usehealth.extra['health'] is Map) {
+      final healthData = usehealth.extra['health'] as Map<String, dynamic>;
+      membershipName = healthData['name'] as String? ?? '이용권';
+    }
 
-  Widget _buildHistoryCard(Membership membership) {
-    final status = _getStatus(membership);
-
-    return Container(
+    return GymCard(
+      onTap: () => _showUsehealthDetail(usehealth),
       padding: const EdgeInsets.all(AppSpacing.md),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(AppSpacing.radiusMedium),
-        border: Border.all(color: AppColors.grey300),
-      ),
+      elevation: 2,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // Header
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                _gym?.name ?? '',
-                style: AppTextStyles.titleMedium.copyWith(
-                  fontWeight: FontWeight.bold,
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      gymName,
+                      style: AppTextStyles.titleMedium.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: AppSpacing.xs),
+                    Text(
+                      membershipName,
+                      style: AppTextStyles.bodyMedium.copyWith(
+                        color: AppColors.grey600,
+                      ),
+                    ),
+                  ],
                 ),
               ),
               Container(
@@ -758,77 +315,417 @@ class _MembershipScreenState extends State<MembershipScreen> {
                   vertical: AppSpacing.xs,
                 ),
                 decoration: BoxDecoration(
-                  color: _getStatusBackgroundColor(status),
+                  color: statusColor.withOpacity(0.1),
                   borderRadius: BorderRadius.circular(AppSpacing.radiusSmall),
                 ),
                 child: Text(
-                  _getStatusLabel(status),
+                  usehealth.status.label,
                   style: AppTextStyles.labelSmall.copyWith(
-                    color: _getStatusTextColor(status),
+                    color: statusColor,
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
               ),
             ],
           ),
+
+          const SizedBox(height: AppSpacing.md),
+
+          // 기간 정보
+          Row(
+            children: [
+              const Icon(
+                Icons.calendar_today,
+                size: 16,
+                color: AppColors.grey500,
+              ),
+              const SizedBox(width: AppSpacing.xs),
+              Text(
+                '${_formatDate(usehealth.startday)} ~ ${_formatDate(usehealth.endday)}',
+                style: AppTextStyles.bodySmall.copyWith(
+                  color: AppColors.grey600,
+                ),
+              ),
+            ],
+          ),
+
           const SizedBox(height: AppSpacing.sm),
-          Text(
-            _getPlan(membership),
-            style: AppTextStyles.bodyMedium.copyWith(
-              color: AppColors.grey700,
+
+          // 진행률
+          if (usehealth.status == UsehealthStatus.use) ...[
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      '남은 기간',
+                      style: AppTextStyles.bodySmall.copyWith(
+                        color: AppColors.grey600,
+                      ),
+                    ),
+                    Text(
+                      '$remainingDays일',
+                      style: AppTextStyles.bodySmall.copyWith(
+                        color: AppColors.primary,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: AppSpacing.xs),
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(AppSpacing.radiusSmall),
+                  child: LinearProgressIndicator(
+                    value: _getProgressValue(usehealth),
+                    backgroundColor: AppColors.grey200,
+                    valueColor: AlwaysStoppedAnimation<Color>(statusColor),
+                    minHeight: 6,
+                  ),
+                ),
+              ],
             ),
-          ),
-          const SizedBox(height: AppSpacing.xs),
-          Text(
-            '${_formatDate(_getStartDate(membership))} ~ ${_formatDate(_getEndDate(membership))}',
-            style: AppTextStyles.bodySmall.copyWith(
-              color: AppColors.grey600,
+          ],
+
+          // 횟수권인 경우
+          if (usehealth.totalcount > 0) ...[
+            const SizedBox(height: AppSpacing.sm),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  '사용 횟수',
+                  style: AppTextStyles.bodySmall.copyWith(
+                    color: AppColors.grey600,
+                  ),
+                ),
+                Text(
+                  '${usehealth.usedcount} / ${usehealth.totalcount}회',
+                  style: AppTextStyles.bodySmall.copyWith(
+                    color: AppColors.primary,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
             ),
-          ),
+          ],
         ],
       ),
     );
   }
 
-  String _formatDate(DateTime date) {
-    return '${date.year}.${date.month.toString().padLeft(2, '0')}.${date.day.toString().padLeft(2, '0')}';
-  }
-
-  String _getStatusLabel(MembershipStatus status) {
+  Color _getStatusColor(UsehealthStatus status) {
     switch (status) {
-      case MembershipStatus.active:
-        return '이용중';
-      case MembershipStatus.paused:
-        return '일시정지';
-      case MembershipStatus.expired:
-        return '만료';
-      case MembershipStatus.cancelled:
-        return '취소됨';
-    }
-  }
-
-  Color _getStatusBackgroundColor(MembershipStatus status) {
-    switch (status) {
-      case MembershipStatus.active:
-        return AppColors.primaryLight;
-      case MembershipStatus.paused:
-        return AppColors.warningLight;
-      case MembershipStatus.expired:
-        return AppColors.grey200;
-      case MembershipStatus.cancelled:
-        return AppColors.errorLight;
-    }
-  }
-
-  Color _getStatusTextColor(MembershipStatus status) {
-    switch (status) {
-      case MembershipStatus.active:
+      case UsehealthStatus.use:
         return AppColors.primary;
-      case MembershipStatus.paused:
+      case UsehealthStatus.paused:
         return AppColors.warning;
-      case MembershipStatus.expired:
-        return AppColors.grey600;
-      case MembershipStatus.cancelled:
+      case UsehealthStatus.expired:
+        return AppColors.grey500;
+      case UsehealthStatus.terminated:
         return AppColors.error;
+      default:
+        return AppColors.grey500;
+    }
+  }
+
+  int _getRemainingDays(Usehealth usehealth) {
+    try {
+      final endDate = DateTime.parse(usehealth.endday);
+      return endDate.difference(DateTime.now()).inDays;
+    } catch (e) {
+      return 0;
+    }
+  }
+
+  double _getProgressValue(Usehealth usehealth) {
+    try {
+      final startDate = DateTime.parse(usehealth.startday);
+      final endDate = DateTime.parse(usehealth.endday);
+      final total = endDate.difference(startDate).inDays;
+      final used = DateTime.now().difference(startDate).inDays;
+      return (used / total).clamp(0.0, 1.0);
+    } catch (e) {
+      return 0.0;
+    }
+  }
+
+  String _formatDate(String dateStr) {
+    try {
+      final date = DateTime.parse(dateStr);
+      return '${date.year}.${date.month.toString().padLeft(2, '0')}.${date.day.toString().padLeft(2, '0')}';
+    } catch (e) {
+      return dateStr;
+    }
+  }
+}
+
+// 상세보기 Bottom Sheet
+class _UsehealthDetailSheet extends StatelessWidget {
+  final Usehealth usehealth;
+
+  const _UsehealthDetailSheet({required this.usehealth});
+
+  @override
+  Widget build(BuildContext context) {
+    final statusColor = _getStatusColor(usehealth.status);
+
+    // extra에서 gym, health 정보 추출
+    String gymName = '체육관';
+    String membershipName = '이용권';
+
+    if (usehealth.extra['gym'] != null && usehealth.extra['gym'] is Map) {
+      final gymData = usehealth.extra['gym'] as Map<String, dynamic>;
+      gymName = gymData['name'] as String? ?? '체육관';
+    }
+
+    if (usehealth.extra['health'] != null && usehealth.extra['health'] is Map) {
+      final healthData = usehealth.extra['health'] as Map<String, dynamic>;
+      membershipName = healthData['name'] as String? ?? '이용권';
+    }
+
+    return Container(
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.vertical(
+          top: Radius.circular(AppSpacing.radiusLarge),
+        ),
+      ),
+      child: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(AppSpacing.lg),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // Handle bar
+              Center(
+                child: Container(
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: AppColors.grey300,
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: AppSpacing.lg),
+
+              // QR 코드
+              GestureDetector(
+                onTap: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (context) => FullScreenQRCode(
+                        qrData: usehealth.qrcode.isEmpty
+                            ? 'usehealth_${usehealth.id}'
+                            : usehealth.qrcode,
+                        gymName: gymName,
+                      ),
+                      fullscreenDialog: true,
+                    ),
+                  );
+                },
+                child: Container(
+                  padding: const EdgeInsets.all(AppSpacing.lg),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(AppSpacing.radiusMedium),
+                    border: Border.all(color: AppColors.grey300, width: 2),
+                  ),
+                  child: Column(
+                    children: [
+                      Text(
+                        '체육관 입장 QR',
+                        style: AppTextStyles.titleMedium.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: AppSpacing.md),
+                      Container(
+                        padding: const EdgeInsets.all(AppSpacing.md),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(
+                            AppSpacing.radiusSmall,
+                          ),
+                        ),
+                        child: QrImageView(
+                          data: usehealth.qrcode.isEmpty
+                              ? 'usehealth_${usehealth.id}'
+                              : usehealth.qrcode,
+                          version: QrVersions.auto,
+                          size: 200.0,
+                          backgroundColor: Colors.white,
+                        ),
+                      ),
+                      const SizedBox(height: AppSpacing.md),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            '출입 시 이 QR코드를 스캔해주세요',
+                            style: AppTextStyles.bodySmall.copyWith(
+                              color: AppColors.grey600,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                          const SizedBox(width: AppSpacing.xs),
+                          Icon(
+                            Icons.fullscreen,
+                            size: 16,
+                            color: AppColors.grey500,
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: AppSpacing.lg),
+
+              // 이용권 정보
+              Container(
+                padding: const EdgeInsets.all(AppSpacing.md),
+                decoration: BoxDecoration(
+                  color: AppColors.grey100,
+                  borderRadius: BorderRadius.circular(AppSpacing.radiusMedium),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      '이용권 정보',
+                      style: AppTextStyles.titleMedium.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: AppSpacing.md),
+                    _buildInfoRow('체육관', gymName),
+                    const SizedBox(height: AppSpacing.sm),
+                    _buildInfoRow('이용권', membershipName),
+                    const SizedBox(height: AppSpacing.sm),
+                    _buildInfoRow(
+                      '상태',
+                      usehealth.status.label,
+                      valueColor: statusColor,
+                    ),
+                    const SizedBox(height: AppSpacing.sm),
+                    _buildInfoRow('시작일', _formatDate(usehealth.startday)),
+                    const SizedBox(height: AppSpacing.sm),
+                    _buildInfoRow('종료일', _formatDate(usehealth.endday)),
+                    const SizedBox(height: AppSpacing.sm),
+                    _buildInfoRow(
+                      '남은 기간',
+                      '${_getRemainingDays(usehealth)}일',
+                      valueColor: AppColors.primary,
+                    ),
+                    if (usehealth.totalcount > 0) ...[
+                      const SizedBox(height: AppSpacing.sm),
+                      _buildInfoRow(
+                        '사용 횟수',
+                        '${usehealth.usedcount} / ${usehealth.totalcount}회',
+                        valueColor: AppColors.primary,
+                      ),
+                      const SizedBox(height: AppSpacing.sm),
+                      _buildInfoRow(
+                        '남은 횟수',
+                        '${usehealth.remainingcount}회',
+                        valueColor: AppColors.success,
+                      ),
+                    ],
+                    if (usehealth.lastuseddate.isNotEmpty) ...[
+                      const SizedBox(height: AppSpacing.sm),
+                      _buildInfoRow(
+                        '최근 사용일',
+                        _formatDate(usehealth.lastuseddate),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+
+              const SizedBox(height: AppSpacing.lg),
+
+              // 닫기 버튼
+              ElevatedButton(
+                onPressed: () => Navigator.pop(context),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primary,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(
+                      AppSpacing.radiusMedium,
+                    ),
+                  ),
+                ),
+                child: Text(
+                  '닫기',
+                  style: AppTextStyles.bodyLarge.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildInfoRow(String label, String value, {Color? valueColor}) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          label,
+          style: AppTextStyles.bodyMedium.copyWith(color: AppColors.grey600),
+        ),
+        Text(
+          value,
+          style: AppTextStyles.bodyMedium.copyWith(
+            color: valueColor ?? AppColors.grey900,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Color _getStatusColor(UsehealthStatus status) {
+    switch (status) {
+      case UsehealthStatus.use:
+        return AppColors.primary;
+      case UsehealthStatus.paused:
+        return AppColors.warning;
+      case UsehealthStatus.expired:
+        return AppColors.grey500;
+      case UsehealthStatus.terminated:
+        return AppColors.error;
+      default:
+        return AppColors.grey500;
+    }
+  }
+
+  int _getRemainingDays(Usehealth usehealth) {
+    try {
+      final endDate = DateTime.parse(usehealth.endday);
+      return endDate.difference(DateTime.now()).inDays;
+    } catch (e) {
+      return 0;
+    }
+  }
+
+  String _formatDate(String dateStr) {
+    try {
+      final date = DateTime.parse(dateStr);
+      return '${date.year}.${date.month.toString().padLeft(2, '0')}.${date.day.toString().padLeft(2, '0')}';
+    } catch (e) {
+      return dateStr;
     }
   }
 }
