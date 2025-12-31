@@ -56,11 +56,11 @@ class DiscountManager {
       'page': page,
       'pagesize': pagesize,
     }, params);
-    if (result == null || result['items'] == null) {
+    if (result == null || result['content'] == null) {
       return List<Discount>.empty(growable: true);
     }
 
-    return result['items'].map<Discount>((json) => Discount.fromJson(json)).toList();
+    return result['content'].map<Discount>((json) => Discount.fromJson(json)).toList();
   }
 
   static Future<int> count({String? params}) async {
@@ -78,7 +78,7 @@ class DiscountManager {
       return Discount();
     }
 
-    return Discount.fromJson(result['item']);
+    return Discount.fromJson(result);
   }
 
   static Future<int> insert(Discount item) async {

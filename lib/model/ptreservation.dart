@@ -113,11 +113,11 @@ class PtreservationManager {
       'page': page,
       'pagesize': pagesize,
     }, params);
-    if (result == null || result['items'] == null) {
+    if (result == null || result['content'] == null) {
       return List<Ptreservation>.empty(growable: true);
     }
 
-    return result['items'].map<Ptreservation>((json) => Ptreservation.fromJson(json)).toList();
+    return result['content'].map<Ptreservation>((json) => Ptreservation.fromJson(json)).toList();
   }
 
   static Future<int> count({String? params}) async {
@@ -135,7 +135,7 @@ class PtreservationManager {
       return Ptreservation();
     }
 
-    return Ptreservation.fromJson(result['item']);
+    return Ptreservation.fromJson(result);
   }
 
   static Future<int> insert(Ptreservation item) async {

@@ -60,11 +60,11 @@ class PaymentManager {
       'page': page,
       'pagesize': pagesize,
     }, params);
-    if (result == null || result['items'] == null) {
+    if (result == null || result['content'] == null) {
       return List<Payment>.empty(growable: true);
     }
 
-    return result['items'].map<Payment>((json) => Payment.fromJson(json)).toList();
+    return result['content'].map<Payment>((json) => Payment.fromJson(json)).toList();
   }
 
   static Future<int> count({String? params}) async {
@@ -82,7 +82,7 @@ class PaymentManager {
       return Payment();
     }
 
-    return Payment.fromJson(result['item']);
+    return Payment.fromJson(result);
   }
 
   static Future<int> insert(Payment item) async {

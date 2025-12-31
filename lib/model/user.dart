@@ -212,11 +212,11 @@ class UserManager {
       'page': page,
       'pagesize': pagesize,
     }, params);
-    if (result == null || result['items'] == null) {
+    if (result == null || result['content'] == null) {
       return List<User>.empty(growable: true);
     }
 
-    return result['items'].map<User>((json) => User.fromJson(json)).toList();
+    return result['content'].map<User>((json) => User.fromJson(json)).toList();
   }
 
   static Future<int> count({String? params}) async {
@@ -234,7 +234,7 @@ class UserManager {
       return User();
     }
 
-    return User.fromJson(result['item']);
+    return User.fromJson(result);
   }
 
   static Future<int> insert(User item) async {

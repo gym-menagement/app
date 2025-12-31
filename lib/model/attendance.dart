@@ -155,11 +155,11 @@ class AttendanceManager {
       'page': page,
       'pagesize': pagesize,
     }, params);
-    if (result == null || result['items'] == null) {
+    if (result == null || result['content'] == null) {
       return List<Attendance>.empty(growable: true);
     }
 
-    return result['items'].map<Attendance>((json) => Attendance.fromJson(json)).toList();
+    return result['content'].map<Attendance>((json) => Attendance.fromJson(json)).toList();
   }
 
   static Future<int> count({String? params}) async {
@@ -177,7 +177,7 @@ class AttendanceManager {
       return Attendance();
     }
 
-    return Attendance.fromJson(result['item']);
+    return Attendance.fromJson(result);
   }
 
   static Future<int> insert(Attendance item) async {

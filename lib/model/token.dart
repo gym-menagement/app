@@ -76,11 +76,11 @@ class TokenManager {
       'page': page,
       'pagesize': pagesize,
     }, params);
-    if (result == null || result['items'] == null) {
+    if (result == null || result['content'] == null) {
       return List<Token>.empty(growable: true);
     }
 
-    return result['items'].map<Token>((json) => Token.fromJson(json)).toList();
+    return result['content'].map<Token>((json) => Token.fromJson(json)).toList();
   }
 
   static Future<int> count({String? params}) async {
@@ -98,7 +98,7 @@ class TokenManager {
       return Token();
     }
 
-    return Token.fromJson(result['item']);
+    return Token.fromJson(result);
   }
 
   static Future<int> insert(Token item) async {

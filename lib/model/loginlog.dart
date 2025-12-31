@@ -56,11 +56,11 @@ class LoginlogManager {
       'page': page,
       'pagesize': pagesize,
     }, params);
-    if (result == null || result['items'] == null) {
+    if (result == null || result['content'] == null) {
       return List<Loginlog>.empty(growable: true);
     }
 
-    return result['items'].map<Loginlog>((json) => Loginlog.fromJson(json)).toList();
+    return result['content'].map<Loginlog>((json) => Loginlog.fromJson(json)).toList();
   }
 
   static Future<int> count({String? params}) async {
@@ -78,7 +78,7 @@ class LoginlogManager {
       return Loginlog();
     }
 
-    return Loginlog.fromJson(result['item']);
+    return Loginlog.fromJson(result);
   }
 
   static Future<int> insert(Loginlog item) async {

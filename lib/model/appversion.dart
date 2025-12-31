@@ -118,11 +118,11 @@ class AppversionManager {
       'page': page,
       'pagesize': pagesize,
     }, params);
-    if (result == null || result['items'] == null) {
+    if (result == null || result['content'] == null) {
       return List<Appversion>.empty(growable: true);
     }
 
-    return result['items'].map<Appversion>((json) => Appversion.fromJson(json)).toList();
+    return result['content'].map<Appversion>((json) => Appversion.fromJson(json)).toList();
   }
 
   static Future<int> count({String? params}) async {
@@ -140,7 +140,7 @@ class AppversionManager {
       return Appversion();
     }
 
-    return Appversion.fromJson(result['item']);
+    return Appversion.fromJson(result);
   }
 
   static Future<int> insert(Appversion item) async {

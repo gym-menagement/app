@@ -96,11 +96,11 @@ class SettingManager {
       'page': page,
       'pagesize': pagesize,
     }, params);
-    if (result == null || result['items'] == null) {
+    if (result == null || result['content'] == null) {
       return List<Setting>.empty(growable: true);
     }
 
-    return result['items'].map<Setting>((json) => Setting.fromJson(json)).toList();
+    return result['content'].map<Setting>((json) => Setting.fromJson(json)).toList();
   }
 
   static Future<int> count({String? params}) async {
@@ -118,7 +118,7 @@ class SettingManager {
       return Setting();
     }
 
-    return Setting.fromJson(result['item']);
+    return Setting.fromJson(result);
   }
 
   static Future<int> insert(Setting item) async {

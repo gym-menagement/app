@@ -78,11 +78,11 @@ class RoleManager {
       'page': page,
       'pagesize': pagesize,
     }, params);
-    if (result == null || result['items'] == null) {
+    if (result == null || result['content'] == null) {
       return List<Role>.empty(growable: true);
     }
 
-    return result['items'].map<Role>((json) => Role.fromJson(json)).toList();
+    return result['content'].map<Role>((json) => Role.fromJson(json)).toList();
   }
 
   static Future<int> count({String? params}) async {
@@ -100,7 +100,7 @@ class RoleManager {
       return Role();
     }
 
-    return Role.fromJson(result['item']);
+    return Role.fromJson(result);
   }
 
   static Future<int> insert(Role item) async {

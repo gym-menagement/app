@@ -60,11 +60,11 @@ class TermManager {
       'page': page,
       'pagesize': pagesize,
     }, params);
-    if (result == null || result['items'] == null) {
+    if (result == null || result['content'] == null) {
       return List<Term>.empty(growable: true);
     }
 
-    return result['items'].map<Term>((json) => Term.fromJson(json)).toList();
+    return result['content'].map<Term>((json) => Term.fromJson(json)).toList();
   }
 
   static Future<int> count({String? params}) async {
@@ -82,7 +82,7 @@ class TermManager {
       return Term();
     }
 
-    return Term.fromJson(result['item']);
+    return Term.fromJson(result);
   }
 
   static Future<int> insert(Term item) async {

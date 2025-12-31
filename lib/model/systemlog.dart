@@ -94,11 +94,11 @@ class SystemlogManager {
       'page': page,
       'pagesize': pagesize,
     }, params);
-    if (result == null || result['items'] == null) {
+    if (result == null || result['content'] == null) {
       return List<Systemlog>.empty(growable: true);
     }
 
-    return result['items'].map<Systemlog>((json) => Systemlog.fromJson(json)).toList();
+    return result['content'].map<Systemlog>((json) => Systemlog.fromJson(json)).toList();
   }
 
   static Future<int> count({String? params}) async {
@@ -116,7 +116,7 @@ class SystemlogManager {
       return Systemlog();
     }
 
-    return Systemlog.fromJson(result['item']);
+    return Systemlog.fromJson(result);
   }
 
   static Future<int> insert(Systemlog item) async {

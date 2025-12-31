@@ -56,11 +56,11 @@ class OrderManager {
       'page': page,
       'pagesize': pagesize,
     }, params);
-    if (result == null || result['items'] == null) {
+    if (result == null || result['content'] == null) {
       return List<Order>.empty(growable: true);
     }
 
-    return result['items'].map<Order>((json) => Order.fromJson(json)).toList();
+    return result['content'].map<Order>((json) => Order.fromJson(json)).toList();
   }
 
   static Future<int> count({String? params}) async {
@@ -78,7 +78,7 @@ class OrderManager {
       return Order();
     }
 
-    return Order.fromJson(result['item']);
+    return Order.fromJson(result);
   }
 
   static Future<int> insert(Order item) async {

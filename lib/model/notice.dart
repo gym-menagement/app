@@ -197,11 +197,11 @@ class NoticeManager {
       'page': page,
       'pagesize': pagesize,
     }, params);
-    if (result == null || result['items'] == null) {
+    if (result == null || result['content'] == null) {
       return List<Notice>.empty(growable: true);
     }
 
-    return result['items'].map<Notice>((json) => Notice.fromJson(json)).toList();
+    return result['content'].map<Notice>((json) => Notice.fromJson(json)).toList();
   }
 
   static Future<int> count({String? params}) async {
@@ -219,7 +219,7 @@ class NoticeManager {
       return Notice();
     }
 
-    return Notice.fromJson(result['item']);
+    return Notice.fromJson(result);
   }
 
   static Future<int> insert(Notice item) async {

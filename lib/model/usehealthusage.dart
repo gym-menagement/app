@@ -112,11 +112,11 @@ class UsehealthusageManager {
       'page': page,
       'pagesize': pagesize,
     }, params);
-    if (result == null || result['items'] == null) {
+    if (result == null || result['content'] == null) {
       return List<Usehealthusage>.empty(growable: true);
     }
 
-    return result['items'].map<Usehealthusage>((json) => Usehealthusage.fromJson(json)).toList();
+    return result['content'].map<Usehealthusage>((json) => Usehealthusage.fromJson(json)).toList();
   }
 
   static Future<int> count({String? params}) async {
@@ -134,7 +134,7 @@ class UsehealthusageManager {
       return Usehealthusage();
     }
 
-    return Usehealthusage.fromJson(result['item']);
+    return Usehealthusage.fromJson(result);
   }
 
   static Future<int> insert(Usehealthusage item) async {

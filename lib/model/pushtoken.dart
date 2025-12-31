@@ -95,11 +95,11 @@ class PushtokenManager {
       'page': page,
       'pagesize': pagesize,
     }, params);
-    if (result == null || result['items'] == null) {
+    if (result == null || result['content'] == null) {
       return List<Pushtoken>.empty(growable: true);
     }
 
-    return result['items'].map<Pushtoken>((json) => Pushtoken.fromJson(json)).toList();
+    return result['content'].map<Pushtoken>((json) => Pushtoken.fromJson(json)).toList();
   }
 
   static Future<int> count({String? params}) async {
@@ -117,7 +117,7 @@ class PushtokenManager {
       return Pushtoken();
     }
 
-    return Pushtoken.fromJson(result['item']);
+    return Pushtoken.fromJson(result);
   }
 
   static Future<int> insert(Pushtoken item) async {

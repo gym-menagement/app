@@ -52,11 +52,11 @@ class MembershipManager {
       'page': page,
       'pagesize': pagesize,
     }, params);
-    if (result == null || result['items'] == null) {
+    if (result == null || result['content'] == null) {
       return List<Membership>.empty(growable: true);
     }
 
-    return result['items'].map<Membership>((json) => Membership.fromJson(json)).toList();
+    return result['content'].map<Membership>((json) => Membership.fromJson(json)).toList();
   }
 
   static Future<int> count({String? params}) async {
@@ -74,7 +74,7 @@ class MembershipManager {
       return Membership();
     }
 
-    return Membership.fromJson(result['item']);
+    return Membership.fromJson(result);
   }
 
   static Future<int> insert(Membership item) async {

@@ -60,11 +60,11 @@ class StopManager {
       'page': page,
       'pagesize': pagesize,
     }, params);
-    if (result == null || result['items'] == null) {
+    if (result == null || result['content'] == null) {
       return List<Stop>.empty(growable: true);
     }
 
-    return result['items'].map<Stop>((json) => Stop.fromJson(json)).toList();
+    return result['content'].map<Stop>((json) => Stop.fromJson(json)).toList();
   }
 
   static Future<int> count({String? params}) async {
@@ -82,7 +82,7 @@ class StopManager {
       return Stop();
     }
 
-    return Stop.fromJson(result['item']);
+    return Stop.fromJson(result);
   }
 
   static Future<int> insert(Stop item) async {

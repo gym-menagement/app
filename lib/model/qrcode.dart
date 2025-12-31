@@ -95,11 +95,11 @@ class QrcodeManager {
       'page': page,
       'pagesize': pagesize,
     }, params);
-    if (result == null || result['items'] == null) {
+    if (result == null || result['content'] == null) {
       return List<Qrcode>.empty(growable: true);
     }
 
-    return result['items'].map<Qrcode>((json) => Qrcode.fromJson(json)).toList();
+    return result['content'].map<Qrcode>((json) => Qrcode.fromJson(json)).toList();
   }
 
   static Future<int> count({String? params}) async {
@@ -117,7 +117,7 @@ class QrcodeManager {
       return Qrcode();
     }
 
-    return Qrcode.fromJson(result['item']);
+    return Qrcode.fromJson(result);
   }
 
   static Future<int> insert(Qrcode item) async {

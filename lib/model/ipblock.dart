@@ -121,11 +121,11 @@ class IpblockManager {
       'page': page,
       'pagesize': pagesize,
     }, params);
-    if (result == null || result['items'] == null) {
+    if (result == null || result['content'] == null) {
       return List<Ipblock>.empty(growable: true);
     }
 
-    return result['items'].map<Ipblock>((json) => Ipblock.fromJson(json)).toList();
+    return result['content'].map<Ipblock>((json) => Ipblock.fromJson(json)).toList();
   }
 
   static Future<int> count({String? params}) async {
@@ -143,7 +143,7 @@ class IpblockManager {
       return Ipblock();
     }
 
-    return Ipblock.fromJson(result['item']);
+    return Ipblock.fromJson(result);
   }
 
   static Future<int> insert(Ipblock item) async {

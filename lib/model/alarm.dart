@@ -105,11 +105,11 @@ class AlarmManager {
       'page': page,
       'pagesize': pagesize,
     }, params);
-    if (result == null || result['items'] == null) {
+    if (result == null || result['content'] == null) {
       return List<Alarm>.empty(growable: true);
     }
 
-    return result['items'].map<Alarm>((json) => Alarm.fromJson(json)).toList();
+    return result['content'].map<Alarm>((json) => Alarm.fromJson(json)).toList();
   }
 
   static Future<int> count({String? params}) async {
@@ -127,7 +127,7 @@ class AlarmManager {
       return Alarm();
     }
 
-    return Alarm.fromJson(result['item']);
+    return Alarm.fromJson(result);
   }
 
   static Future<int> insert(Alarm item) async {

@@ -91,11 +91,11 @@ class TrainermemberManager {
       'page': page,
       'pagesize': pagesize,
     }, params);
-    if (result == null || result['items'] == null) {
+    if (result == null || result['content'] == null) {
       return List<Trainermember>.empty(growable: true);
     }
 
-    return result['items'].map<Trainermember>((json) => Trainermember.fromJson(json)).toList();
+    return result['content'].map<Trainermember>((json) => Trainermember.fromJson(json)).toList();
   }
 
   static Future<int> count({String? params}) async {
@@ -113,7 +113,7 @@ class TrainermemberManager {
       return Trainermember();
     }
 
-    return Trainermember.fromJson(result['item']);
+    return Trainermember.fromJson(result);
   }
 
   static Future<int> insert(Trainermember item) async {

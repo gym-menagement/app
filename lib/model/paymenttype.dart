@@ -52,11 +52,11 @@ class PaymenttypeManager {
       'page': page,
       'pagesize': pagesize,
     }, params);
-    if (result == null || result['items'] == null) {
+    if (result == null || result['content'] == null) {
       return List<Paymenttype>.empty(growable: true);
     }
 
-    return result['items'].map<Paymenttype>((json) => Paymenttype.fromJson(json)).toList();
+    return result['content'].map<Paymenttype>((json) => Paymenttype.fromJson(json)).toList();
   }
 
   static Future<int> count({String? params}) async {
@@ -74,7 +74,7 @@ class PaymenttypeManager {
       return Paymenttype();
     }
 
-    return Paymenttype.fromJson(result['item']);
+    return Paymenttype.fromJson(result);
   }
 
   static Future<int> insert(Paymenttype item) async {

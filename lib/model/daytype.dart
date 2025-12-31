@@ -52,11 +52,11 @@ class DaytypeManager {
       'page': page,
       'pagesize': pagesize,
     }, params);
-    if (result == null || result['items'] == null) {
+    if (result == null || result['content'] == null) {
       return List<Daytype>.empty(growable: true);
     }
 
-    return result['items'].map<Daytype>((json) => Daytype.fromJson(json)).toList();
+    return result['content'].map<Daytype>((json) => Daytype.fromJson(json)).toList();
   }
 
   static Future<int> count({String? params}) async {
@@ -74,7 +74,7 @@ class DaytypeManager {
       return Daytype();
     }
 
-    return Daytype.fromJson(result['item']);
+    return Daytype.fromJson(result);
   }
 
   static Future<int> insert(Daytype item) async {

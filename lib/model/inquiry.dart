@@ -125,11 +125,11 @@ class InquiryManager {
       'page': page,
       'pagesize': pagesize,
     }, params);
-    if (result == null || result['items'] == null) {
+    if (result == null || result['content'] == null) {
       return List<Inquiry>.empty(growable: true);
     }
 
-    return result['items'].map<Inquiry>((json) => Inquiry.fromJson(json)).toList();
+    return result['content'].map<Inquiry>((json) => Inquiry.fromJson(json)).toList();
   }
 
   static Future<int> count({String? params}) async {
@@ -147,7 +147,7 @@ class InquiryManager {
       return Inquiry();
     }
 
-    return Inquiry.fromJson(result['item']);
+    return Inquiry.fromJson(result);
   }
 
   static Future<int> insert(Inquiry item) async {

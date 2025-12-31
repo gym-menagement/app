@@ -60,11 +60,11 @@ class GymManager {
       'page': page,
       'pagesize': pagesize,
     }, params);
-    if (result == null || result['items'] == null) {
+    if (result == null || result['content'] == null) {
       return List<Gym>.empty(growable: true);
     }
 
-    return result['items'].map<Gym>((json) => Gym.fromJson(json)).toList();
+    return result['content'].map<Gym>((json) => Gym.fromJson(json)).toList();
   }
 
   static Future<int> count({String? params}) async {
@@ -82,7 +82,7 @@ class GymManager {
       return Gym();
     }
 
-    return Gym.fromJson(result['item']);
+    return Gym.fromJson(result);
   }
 
   static Future<int> insert(Gym item) async {

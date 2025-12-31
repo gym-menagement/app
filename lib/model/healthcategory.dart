@@ -52,11 +52,11 @@ class HealthcategoryManager {
       'page': page,
       'pagesize': pagesize,
     }, params);
-    if (result == null || result['items'] == null) {
+    if (result == null || result['content'] == null) {
       return List<Healthcategory>.empty(growable: true);
     }
 
-    return result['items'].map<Healthcategory>((json) => Healthcategory.fromJson(json)).toList();
+    return result['content'].map<Healthcategory>((json) => Healthcategory.fromJson(json)).toList();
   }
 
   static Future<int> count({String? params}) async {
@@ -74,7 +74,7 @@ class HealthcategoryManager {
       return Healthcategory();
     }
 
-    return Healthcategory.fromJson(result['item']);
+    return Healthcategory.fromJson(result);
   }
 
   static Future<int> insert(Healthcategory item) async {

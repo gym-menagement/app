@@ -112,11 +112,11 @@ class MemberbodyManager {
       'page': page,
       'pagesize': pagesize,
     }, params);
-    if (result == null || result['items'] == null) {
+    if (result == null || result['content'] == null) {
       return List<Memberbody>.empty(growable: true);
     }
 
-    return result['items'].map<Memberbody>((json) => Memberbody.fromJson(json)).toList();
+    return result['content'].map<Memberbody>((json) => Memberbody.fromJson(json)).toList();
   }
 
   static Future<int> count({String? params}) async {
@@ -134,7 +134,7 @@ class MemberbodyManager {
       return Memberbody();
     }
 
-    return Memberbody.fromJson(result['item']);
+    return Memberbody.fromJson(result);
   }
 
   static Future<int> insert(Memberbody item) async {
