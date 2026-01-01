@@ -1,726 +1,415 @@
 import 'package:flutter/material.dart';
-import '../components/gym_layout.dart';
+import 'package:provider/provider.dart';
 import '../components/gym_button.dart';
+import '../components/gym_card.dart';
+import '../components/gym_snackbar.dart';
 import '../config/app_colors.dart';
 import '../config/app_text_styles.dart';
 import '../config/app_spacing.dart';
+import '../model/gym.dart';
+import '../model/health.dart';
+import '../model/order.dart';
+import '../model/payment.dart' as payment_model;
+import '../model/paymentform.dart';
+import '../model/usehealth.dart';
+import '../providers/auth_provider.dart';
+import '../providers/usehealth_provider.dart';
 
+/// 결제 화면
 class PaymentScreen extends StatefulWidget {
-  const PaymentScreen({super.key});
+  final Gym gym;
+  final Health health;
+
+  const PaymentScreen({
+    super.key,
+    required this.gym,
+    required this.health,
+  });
 
   @override
   State<PaymentScreen> createState() => _PaymentScreenState();
 }
 
 class _PaymentScreenState extends State<PaymentScreen> {
-  final _pageController = PageController();
-  int _currentStep = 0;
-  bool _isLoading = false;
-
-  // Mock gym info (normally passed via route arguments)
-  final String _gymName = '강남 피트니스';
-  final String _gymAddress = '서울 강남구 테헤란로 123';
-  final String _gymPhone = '02-1234-5678';
-
-  // Step 1: Plan Selection
-  int? _selectedPlanIndex;
-  final List<Map<String, dynamic>> _membershipPlans = [
-    {
-      'name': '1개월 이용권',
-      'duration': 30,
-      'price': 100000,
-      'discountPrice': null,
-      'popular': false,
-      'features': ['자유 이용', '락커 제공'],
-    },
-    {
-      'name': '3개월 이용권',
-      'duration': 90,
-      'price': 270000,
-      'discountPrice': 250000,
-      'popular': true,
-      'features': ['자유 이용', '락커 제공', '운동복 무료 세탁'],
-    },
-    {
-      'name': '6개월 이용권',
-      'duration': 180,
-      'price': 540000,
-      'discountPrice': 450000,
-      'popular': false,
-      'features': ['자유 이용', '락커 제공', '운동복 무료 세탁', 'PT 1회 무료'],
-    },
-    {
-      'name': '12개월 이용권',
-      'duration': 365,
-      'price': 1080000,
-      'discountPrice': 800000,
-      'popular': false,
-      'features': ['자유 이용', '락커 제공', '운동복 무료 세탁', 'PT 3회 무료', '주차 무료'],
-    },
-  ];
-
-  // Step 2: Payment Method
+  bool _isProcessing = false;
   String? _selectedPaymentMethod;
+
   final List<Map<String, dynamic>> _paymentMethods = [
-    {'id': 'card', 'name': '신용/체크카드', 'icon': Icons.credit_card},
-    {'id': 'transfer', 'name': '계좌이체', 'icon': Icons.account_balance},
-    {'id': 'kakaopay', 'name': '카카오페이', 'icon': Icons.payment},
-    {'id': 'naverpay', 'name': '네이버페이', 'icon': Icons.payment},
-    {'id': 'tosspay', 'name': '토스페이', 'icon': Icons.payment},
+    {
+      'id': 'card',
+      'name': '신용/체크카드',
+      'icon': Icons.credit_card,
+    },
+    {
+      'id': 'transfer',
+      'name': '계좌이체',
+      'icon': Icons.account_balance,
+    },
+    {
+      'id': 'kakao',
+      'name': '카카오페이',
+      'icon': Icons.chat_bubble,
+      'color': Color(0xFFFEE500),
+    },
+    {
+      'id': 'naver',
+      'name': '네이버페이',
+      'icon': Icons.shopping_bag,
+      'color': Color(0xFF03C75A),
+    },
   ];
 
-  bool _agreeTerms = false;
-  bool _agreeRefund = false;
-
-  // Step 3: Payment Result
-  String _orderNumber = '';
-
-  @override
-  void dispose() {
-    _pageController.dispose();
-    super.dispose();
+  String _formatPrice(int price) {
+    return '${price.toString().replaceAllMapped(
+      RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
+      (Match m) => '${m[1]},',
+    )}원';
   }
 
-  int _getFinalPrice() {
-    if (_selectedPlanIndex == null) return 0;
-    final plan = _membershipPlans[_selectedPlanIndex!];
-    return (plan['discountPrice'] ?? plan['price']) as int;
+  String _getTermLabel(int term) {
+    if (term >= 12) {
+      return '${term ~/ 12}년';
+    } else {
+      return '$term개월';
+    }
   }
 
-  void _nextStep() {
-    if (_currentStep == 0) {
-      if (_selectedPlanIndex == null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('이용권을 선택해주세요'),
-            backgroundColor: AppColors.error,
-          ),
-        );
-        return;
-      }
-    } else if (_currentStep == 1) {
-      if (_selectedPaymentMethod == null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('결제 수단을 선택해주세요'),
-            backgroundColor: AppColors.error,
-          ),
-        );
-        return;
-      }
-
-      if (!_agreeTerms || !_agreeRefund) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('필수 약관에 동의해주세요'),
-            backgroundColor: AppColors.error,
-          ),
-        );
-        return;
-      }
-
-      _processPayment();
+  Future<void> _handlePayment() async {
+    if (_selectedPaymentMethod == null) {
+      GymSnackbar.showError(
+        context: context,
+        message: '결제 수단을 선택해주세요',
+      );
       return;
     }
 
-    setState(() => _currentStep++);
-    _pageController.animateToPage(
-      _currentStep,
-      duration: const Duration(milliseconds: 300),
-      curve: Curves.easeInOut,
-    );
-  }
+    setState(() => _isProcessing = true);
 
-  void _previousStep() {
-    if (_currentStep > 0) {
-      setState(() => _currentStep--);
-      _pageController.animateToPage(
-        _currentStep,
-        duration: const Duration(milliseconds: 300),
-        curve: Curves.easeInOut,
+    try {
+      final authProvider = context.read<AuthProvider>();
+      final user = authProvider.currentUser;
+
+      if (user == null) {
+        throw Exception('로그인이 필요합니다');
+      }
+
+      final hasDiscount = widget.health.discount > 0;
+      final finalPrice =
+          hasDiscount ? widget.health.costdiscount : widget.health.cost;
+
+      print('=== 결제 프로세스 시작 ===');
+      print('User ID: ${user.id}');
+      print('Gym ID: ${widget.gym.id}');
+      print('Health ID: ${widget.health.id}');
+      print('Final Price: $finalPrice');
+
+      final now = DateTime.now();
+      final currentDate = now.toIso8601String();
+
+      // 1. Order 생성
+      final order = Order(
+        user: user.id,
+        gym: widget.gym.id,
+        health: widget.health.id,
+        date: currentDate,
       );
+
+      print('\n1. Order 생성 요청');
+      print('Order Data: ${order.toJson()}');
+      final orderId = await OrderManager.insert(order);
+      print('Order ID: $orderId');
+
+      // 2. Payment 생성
+      final payment = payment_model.Payment(
+        gym: widget.gym.id,
+        order: orderId,
+        user: user.id,
+        cost: finalPrice,
+        date: currentDate,
+        extra: {
+          'paymentMethod': _selectedPaymentMethod,
+          'healthName': widget.health.name,
+        },
+      );
+
+      print('\n2. Payment 생성 요청');
+      print('Payment Data: ${payment.toJson()}');
+      final paymentId = await payment_model.PaymentManager.insert(payment);
+      print('Payment ID: $paymentId');
+
+      // 3. Paymentform 생성
+      final paymentform = Paymentform(
+        gym: widget.gym.id,
+        payment: paymentId,
+        type: _getPaymentTypeCode(_selectedPaymentMethod!),
+        cost: finalPrice,
+        date: currentDate,
+      );
+
+      print('\n3. Paymentform 생성 요청');
+      print('Paymentform Data: ${paymentform.toJson()}');
+      final paymentformId = await PaymentformManager.insert(paymentform);
+      print('Paymentform ID: $paymentformId');
+
+      // 4. Usehealth 생성 (이용권 활성화)
+      // 시작일: 오늘 00:00:00
+      final startDay = DateTime(now.year, now.month, now.day).toIso8601String();
+
+      // 종료일: term개월 후 23:59:59
+      final endDateTime = now.add(Duration(days: widget.health.term * 30));
+      final endDay = DateTime(endDateTime.year, endDateTime.month, endDateTime.day, 23, 59, 59).toIso8601String();
+
+      // QR 코드 생성 (user_gym_health_timestamp 형식)
+      final qrcodeValue = 'QR_${user.id}_${widget.gym.id}_${widget.health.id}_${now.millisecondsSinceEpoch}';
+
+      final usehealth = Usehealth(
+        order: orderId,
+        health: widget.health.id,
+        membership: user.id, // 사용자 ID를 membership으로 사용
+        user: user.id,
+        term: widget.health.term,
+        discount: widget.health.discount,
+        startday: startDay,
+        endday: endDay,
+        gym: widget.gym.id,
+        status: UsehealthStatus.use,
+        totalcount: widget.health.count,
+        usedcount: 0,
+        remainingcount: widget.health.count,
+        qrcode: qrcodeValue,
+        lastuseddate: currentDate, // 생성 시점을 마지막 사용일로 설정
+        date: currentDate,
+      );
+
+      print('\n4. Usehealth 생성 요청');
+      print('Usehealth Data: ${usehealth.toJson()}');
+      final usehealthId = await UsehealthManager.insert(usehealth);
+      print('Usehealth ID: $usehealthId');
+
+      print('\n=== 결제 프로세스 완료 ===');
+
+      if (!mounted) return;
+
+      // UsehealthProvider 새로고침
+      final usehealthProvider = context.read<UsehealthProvider>();
+      await usehealthProvider.refresh();
+      print('Usehealth 데이터 새로고침 완료');
+
+      if (!mounted) return;
+
+      // 결제 성공
+      GymSnackbar.showSuccess(
+        context: context,
+        message: '결제가 완료되었습니다',
+      );
+
+      // 홈 화면으로 이동 (모든 스택 제거)
+      Navigator.of(context).pushNamedAndRemoveUntil(
+        '/home',
+        (route) => false,
+      );
+    } catch (e, stackTrace) {
+      print('\n=== 결제 오류 발생 ===');
+      print('Error: $e');
+      print('StackTrace: $stackTrace');
+
+      if (mounted) {
+        GymSnackbar.showError(
+          context: context,
+          message: '결제 처리 중 오류가 발생했습니다: $e',
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isProcessing = false);
+      }
     }
   }
 
-  Future<void> _processPayment() async {
-    setState(() => _isLoading = true);
-
-    try {
-      // TODO: Implement actual payment gateway integration
-      await Future.delayed(const Duration(seconds: 2));
-
-      // Generate order number
-      final timestamp = DateTime.now().millisecondsSinceEpoch;
-      _orderNumber = 'ORD${timestamp.toString().substring(7)}';
-
-      if (mounted) {
-        setState(() {
-          _currentStep = 2;
-          _isLoading = false;
-        });
-        _pageController.animateToPage(
-          _currentStep,
-          duration: const Duration(milliseconds: 300),
-          curve: Curves.easeInOut,
-        );
-      }
-    } catch (e) {
-      if (mounted) {
-        setState(() => _isLoading = false);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('결제 실패: ${e.toString()}'),
-            backgroundColor: AppColors.error,
-          ),
-        );
-      }
+  int _getPaymentTypeCode(String paymentMethod) {
+    // 결제 수단 코드 매핑 (실제 시스템에 맞게 조정 필요)
+    switch (paymentMethod) {
+      case 'card':
+        return 1; // 신용/체크카드
+      case 'transfer':
+        return 2; // 계좌이체
+      case 'kakao':
+        return 3; // 카카오페이
+      case 'naver':
+        return 4; // 네이버페이
+      default:
+        return 1;
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return GymLayout(
-      title: '이용권 결제',
-      scrollable: false,
+    final hasDiscount = widget.health.discount > 0;
+    final finalPrice =
+        hasDiscount ? widget.health.costdiscount : widget.health.cost;
+
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('결제'),
+        backgroundColor: AppColors.primary,
+        foregroundColor: Colors.white,
+        elevation: 0,
+      ),
       body: Column(
         children: [
-          // Progress Indicator
-          if (_currentStep < 2) _buildProgressIndicator(),
-
-          // Content
           Expanded(
-            child: PageView(
-              controller: _pageController,
-              physics: const NeverScrollableScrollPhysics(),
-              children: [
-                _buildStep1PlanSelection(),
-                _buildStep2PaymentMethod(),
-                _buildStep3Result(),
-              ],
-            ),
-          ),
-
-          // Navigation Buttons
-          if (_currentStep < 2) _buildNavigationButtons(),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildProgressIndicator() {
-    return Container(
-      padding: const EdgeInsets.all(AppSpacing.lg),
-      child: Row(
-        children: [
-          _buildStepIndicator(0, '이용권 선택'),
-          _buildStepLine(0),
-          _buildStepIndicator(1, '결제 수단'),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildStepIndicator(int step, String label) {
-    final isActive = _currentStep >= step;
-    final isCurrent = _currentStep == step;
-
-    return Expanded(
-      child: Column(
-        children: [
-          Container(
-            width: 32,
-            height: 32,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: isActive ? AppColors.primary : AppColors.grey300,
-              border: Border.all(
-                color: isCurrent ? AppColors.primary : Colors.transparent,
-                width: 2,
-              ),
-            ),
-            child: Center(
-              child: Text(
-                '${step + 1}',
-                style: AppTextStyles.labelMedium.copyWith(
-                  color: isActive ? AppColors.onPrimary : AppColors.grey500,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-          ),
-          const SizedBox(height: AppSpacing.xs),
-          Text(
-            label,
-            style: AppTextStyles.labelSmall.copyWith(
-              color: isActive ? AppColors.primary : AppColors.grey500,
-              fontWeight: isCurrent ? FontWeight.bold : FontWeight.normal,
-            ),
-            textAlign: TextAlign.center,
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildStepLine(int step) {
-    final isActive = _currentStep > step;
-    return Expanded(
-      child: Container(
-        height: 2,
-        margin: const EdgeInsets.only(bottom: 24),
-        color: isActive ? AppColors.primary : AppColors.grey300,
-      ),
-    );
-  }
-
-  Widget _buildStep1PlanSelection() {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(AppSpacing.lg),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          // Gym Info Card
-          Card(
-            child: Padding(
+            child: SingleChildScrollView(
               padding: const EdgeInsets.all(AppSpacing.md),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Row(
-                    children: [
-                      const Icon(
-                        Icons.fitness_center,
-                        color: AppColors.primary,
-                        size: 24,
-                      ),
-                      const SizedBox(width: AppSpacing.sm),
-                      Expanded(
-                        child: Text(
-                          _gymName,
-                          style: AppTextStyles.titleMedium.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: AppSpacing.sm),
-                  Row(
-                    children: [
-                      const Icon(
-                        Icons.location_on_outlined,
-                        size: 16,
-                        color: AppColors.grey500,
-                      ),
-                      const SizedBox(width: AppSpacing.xs),
-                      Expanded(
-                        child: Text(
-                          _gymAddress,
-                          style: AppTextStyles.bodySmall.copyWith(
-                            color: AppColors.grey700,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: AppSpacing.xs),
-                  Row(
-                    children: [
-                      const Icon(
-                        Icons.phone_outlined,
-                        size: 16,
-                        color: AppColors.grey500,
-                      ),
-                      const SizedBox(width: AppSpacing.xs),
-                      Text(
-                        _gymPhone,
-                        style: AppTextStyles.bodySmall.copyWith(
-                          color: AppColors.grey700,
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-          ),
-
-          const SizedBox(height: AppSpacing.lg),
-
-          Text(
-            '이용권을 선택해주세요',
-            style: AppTextStyles.h3,
-          ),
-
-          const SizedBox(height: AppSpacing.md),
-
-          // Plan Cards
-          ...List.generate(_membershipPlans.length, (index) {
-            return Padding(
-              padding: const EdgeInsets.only(bottom: AppSpacing.md),
-              child: _buildPlanCard(index),
-            );
-          }),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildPlanCard(int index) {
-    final plan = _membershipPlans[index];
-    final isSelected = _selectedPlanIndex == index;
-    final hasDiscount = plan['discountPrice'] != null;
-
-    return Card(
-      elevation: isSelected ? 4 : 1,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(AppSpacing.radiusMedium),
-        side: BorderSide(
-          color: isSelected ? AppColors.primary : Colors.transparent,
-          width: 2,
-        ),
-      ),
-      child: InkWell(
-        onTap: () {
-          setState(() => _selectedPlanIndex = index);
-        },
-        borderRadius: BorderRadius.circular(AppSpacing.radiusMedium),
-        child: Padding(
-          padding: const EdgeInsets.all(AppSpacing.md),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Expanded(
-                    child: Row(
-                      children: [
-                        Radio<int>(
-                          value: index,
-                          groupValue: _selectedPlanIndex,
-                          onChanged: (value) {
-                            setState(() => _selectedPlanIndex = value);
-                          },
-                          activeColor: AppColors.primary,
-                        ),
-                        Text(
-                          plan['name'],
-                          style: AppTextStyles.titleMedium.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  if (plan['popular'] == true)
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: AppSpacing.sm,
-                        vertical: 4,
-                      ),
-                      decoration: BoxDecoration(
-                        color: AppColors.primary,
-                        borderRadius: BorderRadius.circular(
-                          AppSpacing.radiusSmall,
-                        ),
-                      ),
-                      child: Text(
-                        '인기',
-                        style: AppTextStyles.labelSmall.copyWith(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                ],
-              ),
-
-              const SizedBox(height: AppSpacing.sm),
-
-              // Price
-              Row(
-                children: [
-                  if (hasDiscount) ...[
-                    Text(
-                      '${_formatPrice(plan['price'])}원',
-                      style: AppTextStyles.bodyMedium.copyWith(
-                        color: AppColors.grey500,
-                        decoration: TextDecoration.lineThrough,
-                      ),
-                    ),
-                    const SizedBox(width: AppSpacing.sm),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: AppSpacing.xs,
-                        vertical: 2,
-                      ),
-                      decoration: BoxDecoration(
-                        color: AppColors.error,
-                        borderRadius: BorderRadius.circular(
-                          AppSpacing.radiusSmall,
-                        ),
-                      ),
-                      child: Text(
-                        '${((1 - plan['discountPrice'] / plan['price']) * 100).toInt()}%',
-                        style: AppTextStyles.labelSmall.copyWith(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  ],
-                ],
-              ),
-
-              Text(
-                '${_formatPrice(plan['discountPrice'] ?? plan['price'])}원',
-                style: AppTextStyles.h3.copyWith(
-                  color: AppColors.primary,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-
-              const SizedBox(height: AppSpacing.sm),
-
-              // Features
-              ...((plan['features'] as List).map((feature) {
-                return Padding(
-                  padding: const EdgeInsets.only(bottom: 4),
-                  child: Row(
-                    children: [
-                      const Icon(
-                        Icons.check_circle,
-                        size: 16,
-                        color: AppColors.success,
-                      ),
-                      const SizedBox(width: AppSpacing.xs),
-                      Text(
-                        feature,
-                        style: AppTextStyles.bodySmall.copyWith(
-                          color: AppColors.grey700,
-                        ),
-                      ),
-                    ],
-                  ),
-                );
-              })),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildStep2PaymentMethod() {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(AppSpacing.lg),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          // Selected Plan Summary
-          Card(
-            color: AppColors.primaryLight,
-            child: Padding(
-              padding: const EdgeInsets.all(AppSpacing.md),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
+                  // 주문 정보
                   Text(
-                    '선택한 이용권',
-                    style: AppTextStyles.labelMedium.copyWith(
-                      color: AppColors.grey700,
+                    '주문 정보',
+                    style: AppTextStyles.h4.copyWith(
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
-                  const SizedBox(height: AppSpacing.sm),
-                  if (_selectedPlanIndex != null) ...[
-                    Text(
-                      _membershipPlans[_selectedPlanIndex!]['name'],
-                      style: AppTextStyles.titleMedium.copyWith(
-                        fontWeight: FontWeight.bold,
+                  const SizedBox(height: AppSpacing.md),
+                  GymCard(
+                    elevation: 2,
+                    child: Padding(
+                      padding: const EdgeInsets.all(AppSpacing.lg),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Icon(
+                                Icons.fitness_center,
+                                color: AppColors.primary,
+                                size: 20,
+                              ),
+                              const SizedBox(width: AppSpacing.sm),
+                              Expanded(
+                                child: Text(
+                                  widget.gym.name,
+                                  style: AppTextStyles.titleMedium.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: AppSpacing.md),
+                          const Divider(),
+                          const SizedBox(height: AppSpacing.md),
+                          _buildInfoRow('이용권', widget.health.name),
+                          const SizedBox(height: AppSpacing.sm),
+                          _buildInfoRow('기간', _getTermLabel(widget.health.term)),
+                          if (widget.health.count > 0) ...[
+                            const SizedBox(height: AppSpacing.sm),
+                            _buildInfoRow('횟수', '${widget.health.count}회'),
+                          ],
+                        ],
                       ),
                     ),
-                    const SizedBox(height: AppSpacing.xs),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          '결제 금액',
-                          style: AppTextStyles.bodyMedium,
-                        ),
-                        Text(
-                          '${_formatPrice(_getFinalPrice())}원',
-                          style: AppTextStyles.h3.copyWith(
-                            color: AppColors.primary,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ],
+                  ),
+
+                  const SizedBox(height: AppSpacing.xl),
+
+                  // 결제 수단 선택
+                  Text(
+                    '결제 수단',
+                    style: AppTextStyles.h4.copyWith(
+                      fontWeight: FontWeight.bold,
                     ),
-                  ],
+                  ),
+                  const SizedBox(height: AppSpacing.md),
+                  ...(_paymentMethods.map((method) {
+                    final isSelected = _selectedPaymentMethod == method['id'];
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+                      child: _buildPaymentMethodCard(method, isSelected),
+                    );
+                  })),
+
+                  const SizedBox(height: AppSpacing.xl),
+
+                  // 결제 금액
+                  Text(
+                    '결제 금액',
+                    style: AppTextStyles.h4.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: AppSpacing.md),
+                  GymCard(
+                    elevation: 2,
+                    child: Padding(
+                      padding: const EdgeInsets.all(AppSpacing.lg),
+                      child: Column(
+                        children: [
+                          _buildPriceRow(
+                            '상품 금액',
+                            _formatPrice(widget.health.cost),
+                          ),
+                          if (hasDiscount) ...[
+                            const SizedBox(height: AppSpacing.sm),
+                            _buildPriceRow(
+                              '할인 금액 (${widget.health.discount}%)',
+                              '-${_formatPrice(widget.health.cost - widget.health.costdiscount)}',
+                              color: AppColors.error,
+                            ),
+                          ],
+                          const SizedBox(height: AppSpacing.md),
+                          const Divider(),
+                          const SizedBox(height: AppSpacing.md),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                '최종 결제 금액',
+                                style: AppTextStyles.titleLarge.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              Text(
+                                _formatPrice(finalPrice),
+                                style: AppTextStyles.h2.copyWith(
+                                  color: AppColors.primary,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+
+                  const SizedBox(height: AppSpacing.xxl),
                 ],
               ),
             ),
           ),
 
-          const SizedBox(height: AppSpacing.lg),
-
-          Text(
-            '결제 수단을 선택해주세요',
-            style: AppTextStyles.h3,
-          ),
-
-          const SizedBox(height: AppSpacing.md),
-
-          // Payment Methods
-          ...List.generate(_paymentMethods.length, (index) {
-            final method = _paymentMethods[index];
-            final isSelected = _selectedPaymentMethod == method['id'];
-
-            return Card(
-              elevation: isSelected ? 2 : 0,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(AppSpacing.radiusMedium),
-                side: BorderSide(
-                  color: isSelected ? AppColors.primary : AppColors.grey300,
-                  width: isSelected ? 2 : 1,
-                ),
-              ),
-              child: InkWell(
-                onTap: () {
-                  setState(() => _selectedPaymentMethod = method['id']);
-                },
-                borderRadius: BorderRadius.circular(AppSpacing.radiusMedium),
-                child: Padding(
-                  padding: const EdgeInsets.all(AppSpacing.md),
-                  child: Row(
-                    children: [
-                      Radio<String>(
-                        value: method['id'],
-                        groupValue: _selectedPaymentMethod,
-                        onChanged: (value) {
-                          setState(() => _selectedPaymentMethod = value);
-                        },
-                        activeColor: AppColors.primary,
-                      ),
-                      Icon(
-                        method['icon'],
-                        color: isSelected
-                            ? AppColors.primary
-                            : AppColors.grey500,
-                      ),
-                      const SizedBox(width: AppSpacing.sm),
-                      Text(
-                        method['name'],
-                        style: AppTextStyles.titleMedium.copyWith(
-                          fontWeight:
-                              isSelected ? FontWeight.bold : FontWeight.normal,
-                          color: isSelected
-                              ? AppColors.primary
-                              : AppColors.grey900,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            );
-          }).toList(),
-
-          const SizedBox(height: AppSpacing.lg),
-
-          const Divider(),
-
-          const SizedBox(height: AppSpacing.md),
-
-          // Terms Agreement
-          Text(
-            '약관 동의',
-            style: AppTextStyles.titleMedium.copyWith(
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-
-          const SizedBox(height: AppSpacing.sm),
-
-          CheckboxListTile(
-            value: _agreeTerms,
-            onChanged: (value) {
-              setState(() => _agreeTerms = value ?? false);
-            },
-            title: Row(
-              children: [
-                const Text('결제 약관 동의'),
-                Container(
-                  margin: const EdgeInsets.only(left: AppSpacing.xs),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: AppSpacing.xs,
-                    vertical: 2,
-                  ),
-                  decoration: BoxDecoration(
-                    color: AppColors.error,
-                    borderRadius: BorderRadius.circular(4),
-                  ),
-                  child: Text(
-                    '필수',
-                    style: AppTextStyles.labelSmall.copyWith(
-                      color: Colors.white,
-                    ),
-                  ),
+          // 결제 버튼
+          Container(
+            padding: const EdgeInsets.all(AppSpacing.md),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.05),
+                  blurRadius: 10,
+                  offset: const Offset(0, -2),
                 ),
               ],
             ),
-            controlAffinity: ListTileControlAffinity.leading,
-            activeColor: AppColors.primary,
-            contentPadding: EdgeInsets.zero,
-            secondary: IconButton(
-              icon: const Icon(Icons.chevron_right),
-              onPressed: () {
-                // TODO: Show terms detail
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('결제 약관 내용')),
-                );
-              },
-            ),
-          ),
-
-          CheckboxListTile(
-            value: _agreeRefund,
-            onChanged: (value) {
-              setState(() => _agreeRefund = value ?? false);
-            },
-            title: Row(
-              children: [
-                const Text('환불 정책 동의'),
-                Container(
-                  margin: const EdgeInsets.only(left: AppSpacing.xs),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: AppSpacing.xs,
-                    vertical: 2,
-                  ),
-                  decoration: BoxDecoration(
-                    color: AppColors.error,
-                    borderRadius: BorderRadius.circular(4),
-                  ),
-                  child: Text(
-                    '필수',
-                    style: AppTextStyles.labelSmall.copyWith(
-                      color: Colors.white,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            controlAffinity: ListTileControlAffinity.leading,
-            activeColor: AppColors.primary,
-            contentPadding: EdgeInsets.zero,
-            secondary: IconButton(
-              icon: const Icon(Icons.chevron_right),
-              onPressed: () {
-                // TODO: Show refund policy detail
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('환불 정책 내용')),
-                );
-              },
+            child: SafeArea(
+              child: GymButton(
+                text: '${_formatPrice(finalPrice)} 결제하기',
+                onPressed: _isProcessing ? null : _handlePayment,
+                loading: _isProcessing,
+                size: GymButtonSize.large,
+                fullWidth: true,
+              ),
             ),
           ),
         ],
@@ -728,144 +417,14 @@ class _PaymentScreenState extends State<PaymentScreen> {
     );
   }
 
-  Widget _buildStep3Result() {
-    return Center(
-      child: SingleChildScrollView(
-        padding: const EdgeInsets.all(AppSpacing.xl),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Container(
-              width: 100,
-              height: 100,
-              decoration: BoxDecoration(
-                color: AppColors.success.withOpacity(0.1),
-                shape: BoxShape.circle,
-              ),
-              child: const Icon(
-                Icons.check_circle,
-                size: 60,
-                color: AppColors.success,
-              ),
-            ),
-
-            const SizedBox(height: AppSpacing.xl),
-
-            Text(
-              '결제가 완료되었습니다',
-              style: AppTextStyles.h2,
-            ),
-
-            const SizedBox(height: AppSpacing.lg),
-
-            // Receipt
-            Card(
-              child: Padding(
-                padding: const EdgeInsets.all(AppSpacing.lg),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Center(
-                      child: Text(
-                        '영수증',
-                        style: AppTextStyles.titleMedium.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-
-                    const SizedBox(height: AppSpacing.lg),
-                    const Divider(),
-                    const SizedBox(height: AppSpacing.md),
-
-                    _buildReceiptRow('주문번호', _orderNumber),
-                    const SizedBox(height: AppSpacing.sm),
-                    _buildReceiptRow('체육관', _gymName),
-                    const SizedBox(height: AppSpacing.sm),
-                    if (_selectedPlanIndex != null)
-                      _buildReceiptRow(
-                        '이용권',
-                        _membershipPlans[_selectedPlanIndex!]['name'],
-                      ),
-                    const SizedBox(height: AppSpacing.sm),
-                    if (_selectedPaymentMethod != null)
-                      _buildReceiptRow(
-                        '결제 수단',
-                        _paymentMethods.firstWhere(
-                          (m) => m['id'] == _selectedPaymentMethod,
-                        )['name'],
-                      ),
-                    const SizedBox(height: AppSpacing.sm),
-                    _buildReceiptRow(
-                      '결제일시',
-                      DateTime.now().toString().substring(0, 16),
-                    ),
-
-                    const SizedBox(height: AppSpacing.md),
-                    const Divider(),
-                    const SizedBox(height: AppSpacing.md),
-
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          '결제 금액',
-                          style: AppTextStyles.titleMedium.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        Text(
-                          '${_formatPrice(_getFinalPrice())}원',
-                          style: AppTextStyles.h3.copyWith(
-                            color: AppColors.primary,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ),
-
-            const SizedBox(height: AppSpacing.xl),
-
-            GymButton(
-              text: '이용권 확인하기',
-              onPressed: () {
-                Navigator.pushReplacementNamed(context, '/membership');
-              },
-              size: GymButtonSize.large,
-            ),
-
-            const SizedBox(height: AppSpacing.md),
-
-            GymButton(
-              text: '홈으로 가기',
-              onPressed: () {
-                Navigator.pushNamedAndRemoveUntil(
-                  context,
-                  '/',
-                  (route) => false,
-                );
-              },
-              style: GymButtonStyle.outlined,
-              size: GymButtonSize.large,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildReceiptRow(String label, String value) {
+  Widget _buildInfoRow(String label, String value) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Text(
           label,
           style: AppTextStyles.bodyMedium.copyWith(
-            color: AppColors.grey700,
+            color: AppColors.grey600,
           ),
         ),
         Text(
@@ -878,49 +437,94 @@ class _PaymentScreenState extends State<PaymentScreen> {
     );
   }
 
-  Widget _buildNavigationButtons() {
-    return Container(
-      padding: const EdgeInsets.all(AppSpacing.lg),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, -2),
+  Widget _buildPriceRow(String label, String value, {Color? color}) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          label,
+          style: AppTextStyles.bodyMedium.copyWith(
+            color: color ?? AppColors.grey700,
           ),
-        ],
-      ),
-      child: Row(
-        children: [
-          if (_currentStep > 0)
-            Expanded(
-              child: GymButton(
-                text: '이전',
-                onPressed: _previousStep,
-                style: GymButtonStyle.outlined,
-                disabled: _isLoading,
-              ),
-            ),
-          if (_currentStep > 0) const SizedBox(width: AppSpacing.md),
-          Expanded(
-            flex: _currentStep == 0 ? 1 : 2,
-            child: GymButton(
-              text: _currentStep == 1 ? '결제하기' : '다음',
-              onPressed: _nextStep,
-              loading: _isLoading,
-              size: GymButtonSize.large,
-            ),
+        ),
+        Text(
+          value,
+          style: AppTextStyles.bodyLarge.copyWith(
+            color: color ?? AppColors.grey900,
+            fontWeight: FontWeight.w600,
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
-  String _formatPrice(int price) {
-    return price.toString().replaceAllMapped(
-          RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
-          (Match m) => '${m[1]},',
-        );
+  Widget _buildPaymentMethodCard(
+    Map<String, dynamic> method,
+    bool isSelected,
+  ) {
+    return GestureDetector(
+      onTap: _isProcessing
+          ? null
+          : () {
+              setState(() {
+                _selectedPaymentMethod = method['id'] as String;
+              });
+            },
+      child: GymCard(
+        elevation: isSelected ? 3 : 1,
+        child: Container(
+          decoration: BoxDecoration(
+            border: Border.all(
+              color: isSelected ? AppColors.primary : Colors.transparent,
+              width: 2,
+            ),
+            borderRadius: BorderRadius.circular(AppSpacing.radiusMedium),
+          ),
+          padding: const EdgeInsets.all(AppSpacing.md),
+          child: Row(
+            children: [
+              Container(
+                width: 48,
+                height: 48,
+                decoration: BoxDecoration(
+                  color: (method['color'] as Color?) ?? AppColors.grey100,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Icon(
+                  method['icon'] as IconData,
+                  color: (method['color'] as Color?) != null
+                      ? Colors.white
+                      : AppColors.grey700,
+                  size: 24,
+                ),
+              ),
+              const SizedBox(width: AppSpacing.md),
+              Expanded(
+                child: Text(
+                  method['name'] as String,
+                  style: AppTextStyles.bodyLarge.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+              if (isSelected)
+                Container(
+                  width: 24,
+                  height: 24,
+                  decoration: BoxDecoration(
+                    color: AppColors.primary,
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    Icons.check,
+                    color: Colors.white,
+                    size: 16,
+                  ),
+                ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 }
