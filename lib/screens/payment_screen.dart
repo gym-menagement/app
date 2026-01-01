@@ -50,13 +50,13 @@ class _PaymentScreenState extends State<PaymentScreen> {
       'id': 'kakao',
       'name': '카카오페이',
       'icon': Icons.chat_bubble,
-      'color': Color(0xFFFEE500),
+      'color': AppColors.kakao,
     },
     {
       'id': 'naver',
       'name': '네이버페이',
       'icon': Icons.shopping_bag,
-      'color': Color(0xFF03C75A),
+      'color': AppColors.naver,
     },
   ];
 
