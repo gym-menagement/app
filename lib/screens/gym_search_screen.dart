@@ -7,6 +7,7 @@ import '../config/app_text_styles.dart';
 import '../config/app_spacing.dart';
 import '../providers/gym_provider.dart';
 import '../model/gym.dart';
+import 'membership_plan_screen.dart';
 
 class GymSearchScreen extends StatefulWidget {
   const GymSearchScreen({super.key});
@@ -228,10 +229,12 @@ class _GymSearchScreenState extends State<GymSearchScreen> {
                                   distance: gym.extra['distance'] as double?,
                                   showDistance: true,
                                   onTap: () {
-                                    // TODO: Navigate to gym detail
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(
-                                        content: Text('${gym.name} 상세 페이지'),
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => MembershipPlanScreen(
+                                          gym: gym,
+                                        ),
                                       ),
                                     );
                                   },

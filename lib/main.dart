@@ -5,7 +5,6 @@ import 'screens/signup_screen.dart';
 import 'screens/find_id_pw_screen.dart';
 import 'screens/gym_search_screen.dart';
 import 'screens/membership_screen.dart';
-import 'screens/payment_screen.dart';
 import 'screens/home_screen.dart';
 import 'providers/auth_provider.dart';
 import 'providers/gym_provider.dart';
@@ -51,7 +50,6 @@ class MyApp extends StatelessWidget {
         '/home': (context) => const HomeScreen(),
         '/gym_search': (context) => const GymSearchScreen(),
         '/membership': (context) => const MembershipScreen(),
-        '/payment': (context) => const PaymentScreen(),
       },
     );
   }
