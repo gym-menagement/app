@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:qr_flutter/qr_flutter.dart';
+import '../components/gym_button.dart';
 import '../components/gym_card.dart';
 import '../config/app_colors.dart';
 import '../config/app_text_styles.dart';
@@ -48,7 +49,17 @@ class _MembershipScreenState extends State<MembershipScreen> {
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (context) => _UsehealthDetailSheet(usehealth: usehealth),
+      isDismissible: true,
+      enableDrag: true,
+      builder: (context) => DraggableScrollableSheet(
+        initialChildSize: 0.9,
+        minChildSize: 0.5,
+        maxChildSize: 0.9,
+        builder: (context, scrollController) => _UsehealthDetailSheet(
+          usehealth: usehealth,
+          scrollController: scrollController,
+        ),
+      ),
     );
   }
 
@@ -464,14 +475,109 @@ class _MembershipScreenState extends State<MembershipScreen> {
 // 상세보기 Bottom Sheet
 class _UsehealthDetailSheet extends StatelessWidget {
   final Usehealth usehealth;
+  final ScrollController scrollController;
 
-  const _UsehealthDetailSheet({required this.usehealth});
+  const _UsehealthDetailSheet({
+    required this.usehealth,
+    required this.scrollController,
+  });
+
+  Future<void> _handlePauseToggle(BuildContext context) async {
+    final provider = context.read<UsehealthProvider>();
+    final newStatus = usehealth.status == UsehealthStatus.use
+        ? UsehealthStatus.paused
+        : UsehealthStatus.use;
+
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(
+          newStatus == UsehealthStatus.paused ? '이용권 일시정지' : '이용권 재개',
+        ),
+        content: Text(
+          newStatus == UsehealthStatus.paused
+              ? '이용권을 일시정지하시겠습니까?\n일시정지 기간에는 이용권을 사용할 수 없습니다.'
+              : '이용권을 재개하시겠습니까?',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('취소'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: Text(
+              newStatus == UsehealthStatus.paused ? '일시정지' : '재개',
+              style: TextStyle(
+                color: newStatus == UsehealthStatus.paused
+                    ? AppColors.warning
+                    : AppColors.success,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed != true) return;
+
+    try {
+      final updatedUsehealth = Usehealth(
+        id: usehealth.id,
+        order: usehealth.order,
+        health: usehealth.health,
+        membership: usehealth.membership,
+        user: usehealth.user,
+        term: usehealth.term,
+        discount: usehealth.discount,
+        startday: usehealth.startday,
+        endday: usehealth.endday,
+        gym: usehealth.gym,
+        status: newStatus,
+        totalcount: usehealth.totalcount,
+        usedcount: usehealth.usedcount,
+        remainingcount: usehealth.remainingcount,
+        qrcode: usehealth.qrcode,
+        lastuseddate: usehealth.lastuseddate,
+        date: usehealth.date,
+        extra: usehealth.extra,
+      );
+
+      await UsehealthManager.update(updatedUsehealth);
+      await provider.refresh();
+
+      if (context.mounted) {
+        Navigator.pop(context);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              newStatus == UsehealthStatus.paused
+                  ? '이용권이 일시정지되었습니다'
+                  : '이용권이 재개되었습니다',
+            ),
+            backgroundColor: newStatus == UsehealthStatus.paused
+                ? AppColors.warning
+                : AppColors.success,
+          ),
+        );
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('오류가 발생했습니다: $e'),
+            backgroundColor: AppColors.error,
+          ),
+        );
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     final statusColor = _getStatusColor(usehealth.status);
 
-    // extra에서 gym, health 정보 추출
     String gymName = '체육관';
     String membershipName = '이용권';
 
@@ -493,14 +599,12 @@ class _UsehealthDetailSheet extends StatelessWidget {
         ),
       ),
       child: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(AppSpacing.lg),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              // Handle bar
-              Center(
+        child: Column(
+          children: [
+            // Handle bar (고정)
+            Padding(
+              padding: const EdgeInsets.all(AppSpacing.lg),
+              child: Center(
                 child: Container(
                   width: 40,
                   height: 4,
@@ -510,168 +614,172 @@ class _UsehealthDetailSheet extends StatelessWidget {
                   ),
                 ),
               ),
+            ),
 
-              const SizedBox(height: AppSpacing.lg),
-
-              // QR 코드
-              GestureDetector(
-                onTap: () {
-                  Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (context) => FullScreenQRCode(
-                        qrData: usehealth.qrcode.isEmpty
-                            ? 'usehealth_${usehealth.id}'
-                            : usehealth.qrcode,
-                        gymName: gymName,
-                      ),
-                      fullscreenDialog: true,
-                    ),
-                  );
-                },
-                child: Container(
-                  padding: const EdgeInsets.all(AppSpacing.lg),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(AppSpacing.radiusMedium),
-                    border: Border.all(color: AppColors.grey300, width: 2),
-                  ),
-                  child: Column(
-                    children: [
-                      Text(
-                        '체육관 입장 QR',
-                        style: AppTextStyles.titleMedium.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: AppSpacing.md),
-                      Container(
-                        padding: const EdgeInsets.all(AppSpacing.md),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(
-                            AppSpacing.radiusSmall,
-                          ),
-                        ),
-                        child: QrImageView(
-                          data: usehealth.qrcode.isEmpty
+            // 스크롤 가능한 전체 컨텐츠 영역
+            Expanded(
+              child: SingleChildScrollView(
+                controller: scrollController,
+                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+                child: GestureDetector(
+                  onTap: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) => FullScreenQRCode(
+                          qrData: usehealth.qrcode.isEmpty
                               ? 'usehealth_${usehealth.id}'
                               : usehealth.qrcode,
-                          version: QrVersions.auto,
-                          size: 200.0,
-                          backgroundColor: Colors.white,
+                          gymName: gymName,
                         ),
+                        fullscreenDialog: true,
                       ),
-                      const SizedBox(height: AppSpacing.md),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text(
-                            '출입 시 이 QR코드를 스캔해주세요',
-                            style: AppTextStyles.bodySmall.copyWith(
-                              color: AppColors.grey600,
+                    );
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.all(AppSpacing.lg),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(AppSpacing.radiusMedium),
+                      border: Border.all(color: AppColors.grey300, width: 2),
+                    ),
+                    child: Column(
+                      children: [
+                        // QR 코드 컨텐츠
+                        Text(
+                          '체육관 입장 QR',
+                          style: AppTextStyles.titleMedium.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(height: AppSpacing.md),
+                        Container(
+                          padding: const EdgeInsets.all(AppSpacing.md),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(
+                              AppSpacing.radiusSmall,
                             ),
-                            textAlign: TextAlign.center,
                           ),
-                          const SizedBox(width: AppSpacing.xs),
-                          Icon(
-                            Icons.fullscreen,
-                            size: 16,
-                            color: AppColors.grey500,
+                          child: QrImageView(
+                            data: usehealth.qrcode.isEmpty
+                                ? 'usehealth_${usehealth.id}'
+                                : usehealth.qrcode,
+                            version: QrVersions.auto,
+                            size: 200.0,
+                            backgroundColor: Colors.white,
                           ),
-                        ],
-                      ),
-                    ],
+                        ),
+                        const SizedBox(height: AppSpacing.md),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              '출입 시 이 QR코드를 스캔해주세요',
+                              style: AppTextStyles.bodySmall.copyWith(
+                                color: AppColors.grey600,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                            const SizedBox(width: AppSpacing.xs),
+                            Icon(
+                              Icons.fullscreen,
+                              size: 16,
+                              color: AppColors.grey500,
+                            ),
+                          ],
+                        ),
+
+                        const SizedBox(height: AppSpacing.lg),
+
+                        // 이용권 정보
+                        Container(
+                          padding: const EdgeInsets.all(AppSpacing.md),
+                          decoration: BoxDecoration(
+                            color: AppColors.grey100,
+                            borderRadius: BorderRadius.circular(AppSpacing.radiusMedium),
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                '이용권 정보',
+                                style: AppTextStyles.titleMedium.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              const SizedBox(height: AppSpacing.md),
+                              _buildInfoRow('체육관', gymName),
+                              const SizedBox(height: AppSpacing.sm),
+                              _buildInfoRow('이용권', membershipName),
+                              const SizedBox(height: AppSpacing.sm),
+                              _buildInfoRow(
+                                '상태',
+                                usehealth.status.label,
+                                valueColor: statusColor,
+                              ),
+                              const SizedBox(height: AppSpacing.sm),
+                              _buildInfoRow('시작일', _formatDate(usehealth.startday)),
+                              const SizedBox(height: AppSpacing.sm),
+                              _buildInfoRow('종료일', _formatDate(usehealth.endday)),
+                              const SizedBox(height: AppSpacing.sm),
+                              _buildInfoRow(
+                                '남은 기간',
+                                '${_getRemainingDays(usehealth)}일',
+                                valueColor: AppColors.primary,
+                              ),
+                              if (usehealth.totalcount > 0) ...[
+                                const SizedBox(height: AppSpacing.sm),
+                                _buildInfoRow(
+                                  '사용 횟수',
+                                  '${usehealth.usedcount} / ${usehealth.totalcount}회',
+                                  valueColor: AppColors.primary,
+                                ),
+                                const SizedBox(height: AppSpacing.sm),
+                                _buildInfoRow(
+                                  '남은 횟수',
+                                  '${usehealth.remainingcount}회',
+                                  valueColor: AppColors.success,
+                                ),
+                              ],
+                              if (usehealth.lastuseddate.isNotEmpty) ...[
+                                const SizedBox(height: AppSpacing.sm),
+                                _buildInfoRow(
+                                  '최근 사용일',
+                                  _formatDate(usehealth.lastuseddate),
+                                ),
+                              ],
+                            ],
+                          ),
+                        ),
+
+                        const SizedBox(height: AppSpacing.lg),
+
+                        // 일시정지/재개 버튼 (상태가 사용중 또는 일시정지인 경우에만 표시)
+                        if (usehealth.status == UsehealthStatus.use ||
+                            usehealth.status == UsehealthStatus.paused)
+                          GymButton(
+                            text: usehealth.status == UsehealthStatus.use
+                                ? '이용권 일시정지'
+                                : '이용권 재개',
+                            onPressed: () => _handlePauseToggle(context),
+                            style: usehealth.status == UsehealthStatus.use
+                                ? GymButtonStyle.outlined
+                                : GymButtonStyle.filled,
+                            purpose: usehealth.status == UsehealthStatus.use
+                                ? GymButtonPurpose.warning
+                                : GymButtonPurpose.primary,
+                            size: GymButtonSize.large,
+                            fullWidth: true,
+                          ),
+
+                        const SizedBox(height: AppSpacing.lg),
+                      ],
+                    ),
                   ),
                 ),
               ),
-
-              const SizedBox(height: AppSpacing.lg),
-
-              // 이용권 정보
-              Container(
-                padding: const EdgeInsets.all(AppSpacing.md),
-                decoration: BoxDecoration(
-                  color: AppColors.grey100,
-                  borderRadius: BorderRadius.circular(AppSpacing.radiusMedium),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      '이용권 정보',
-                      style: AppTextStyles.titleMedium.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: AppSpacing.md),
-                    _buildInfoRow('체육관', gymName),
-                    const SizedBox(height: AppSpacing.sm),
-                    _buildInfoRow('이용권', membershipName),
-                    const SizedBox(height: AppSpacing.sm),
-                    _buildInfoRow(
-                      '상태',
-                      usehealth.status.label,
-                      valueColor: statusColor,
-                    ),
-                    const SizedBox(height: AppSpacing.sm),
-                    _buildInfoRow('시작일', _formatDate(usehealth.startday)),
-                    const SizedBox(height: AppSpacing.sm),
-                    _buildInfoRow('종료일', _formatDate(usehealth.endday)),
-                    const SizedBox(height: AppSpacing.sm),
-                    _buildInfoRow(
-                      '남은 기간',
-                      '${_getRemainingDays(usehealth)}일',
-                      valueColor: AppColors.primary,
-                    ),
-                    if (usehealth.totalcount > 0) ...[
-                      const SizedBox(height: AppSpacing.sm),
-                      _buildInfoRow(
-                        '사용 횟수',
-                        '${usehealth.usedcount} / ${usehealth.totalcount}회',
-                        valueColor: AppColors.primary,
-                      ),
-                      const SizedBox(height: AppSpacing.sm),
-                      _buildInfoRow(
-                        '남은 횟수',
-                        '${usehealth.remainingcount}회',
-                        valueColor: AppColors.success,
-                      ),
-                    ],
-                    if (usehealth.lastuseddate.isNotEmpty) ...[
-                      const SizedBox(height: AppSpacing.sm),
-                      _buildInfoRow(
-                        '최근 사용일',
-                        _formatDate(usehealth.lastuseddate),
-                      ),
-                    ],
-                  ],
-                ),
-              ),
-
-              const SizedBox(height: AppSpacing.lg),
-
-              // 닫기 버튼
-              ElevatedButton(
-                onPressed: () => Navigator.pop(context),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primary,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(
-                      AppSpacing.radiusMedium,
-                    ),
-                  ),
-                ),
-                child: Text(
-                  '닫기',
-                  style: AppTextStyles.bodyLarge.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
