@@ -5,6 +5,7 @@ import '../config/app_text_styles.dart';
 import '../config/app_spacing.dart';
 import '../model/gym.dart';
 import '../model/health.dart';
+import '../utils/formatters.dart';
 import 'membership_detail_screen.dart';
 
 /// 헬스장 이용권 선택 화면
@@ -65,20 +66,6 @@ class _MembershipPlanScreenState extends State<MembershipPlanScreen> {
     );
   }
 
-  String _getTermLabel(int term) {
-    if (term >= 12) {
-      return '${term ~/ 12}년';
-    } else {
-      return '${term}개월';
-    }
-  }
-
-  String _formatPrice(int price) {
-    return '${price.toString().replaceAllMapped(
-      RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
-      (Match m) => '${m[1]},',
-    )}원';
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -218,7 +205,7 @@ class _MembershipPlanScreenState extends State<MembershipPlanScreen> {
                                 borderRadius: BorderRadius.circular(4),
                               ),
                               child: Text(
-                                _getTermLabel(plan.term),
+                                getTermLabel(plan.term),
                                 style: AppTextStyles.labelSmall.copyWith(
                                   color: AppColors.primary,
                                   fontWeight: FontWeight.bold,
@@ -283,7 +270,7 @@ class _MembershipPlanScreenState extends State<MembershipPlanScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          _formatPrice(plan.cost),
+                          formatPrice(plan.cost),
                           style: AppTextStyles.bodyMedium.copyWith(
                             color: AppColors.grey500,
                             decoration: TextDecoration.lineThrough,
@@ -312,7 +299,7 @@ class _MembershipPlanScreenState extends State<MembershipPlanScreen> {
                             ),
                             const SizedBox(width: AppSpacing.sm),
                             Text(
-                              _formatPrice(finalPrice),
+                              formatPrice(finalPrice),
                               style: AppTextStyles.h2.copyWith(
                                 color: AppColors.primary,
                                 fontWeight: FontWeight.bold,
@@ -325,7 +312,7 @@ class _MembershipPlanScreenState extends State<MembershipPlanScreen> {
                   ] else ...[
                     const Spacer(),
                     Text(
-                      _formatPrice(finalPrice),
+                      formatPrice(finalPrice),
                       style: AppTextStyles.h2.copyWith(
                         color: AppColors.primary,
                         fontWeight: FontWeight.bold,

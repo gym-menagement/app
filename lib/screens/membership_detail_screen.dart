@@ -6,6 +6,7 @@ import '../config/app_text_styles.dart';
 import '../config/app_spacing.dart';
 import '../model/gym.dart';
 import '../model/health.dart';
+import '../utils/formatters.dart';
 import 'payment_screen.dart';
 
 /// 이용권 상세 정보 화면
@@ -18,21 +19,6 @@ class MembershipDetailScreen extends StatelessWidget {
     required this.gym,
     required this.health,
   });
-
-  String _formatPrice(int price) {
-    return '${price.toString().replaceAllMapped(
-      RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
-      (Match m) => '${m[1]},',
-    )}원';
-  }
-
-  String _getTermLabel(int term) {
-    if (term >= 12) {
-      return '${term ~/ 12}년';
-    } else {
-      return '$term개월';
-    }
-  }
 
   void _handlePayment(BuildContext context) {
     Navigator.push(
@@ -159,7 +145,7 @@ class MembershipDetailScreen extends StatelessWidget {
                                   ),
                                   const SizedBox(width: AppSpacing.xs),
                                   Text(
-                                    _getTermLabel(health.term),
+                                    getTermLabel(health.term),
                                     style: AppTextStyles.bodyMedium.copyWith(
                                       color: AppColors.primary,
                                       fontWeight: FontWeight.bold,
@@ -254,7 +240,7 @@ class MembershipDetailScreen extends StatelessWidget {
                                       ),
                                     ),
                                     Text(
-                                      _formatPrice(health.cost),
+                                      formatPrice(health.cost),
                                       style: AppTextStyles.bodyLarge.copyWith(
                                         color: hasDiscount ? AppColors.grey500 : AppColors.grey900,
                                         decoration: hasDiscount ? TextDecoration.lineThrough : null,
@@ -297,7 +283,7 @@ class MembershipDetailScreen extends StatelessWidget {
                                         ],
                                       ),
                                       Text(
-                                        '-${_formatPrice(health.cost - health.costdiscount)}',
+                                        '-${formatPrice(health.cost - health.costdiscount)}',
                                         style: AppTextStyles.bodyLarge.copyWith(
                                           color: AppColors.error,
                                           fontWeight: FontWeight.w600,
@@ -318,7 +304,7 @@ class MembershipDetailScreen extends StatelessWidget {
                                         ),
                                       ),
                                       Text(
-                                        _formatPrice(finalPrice),
+                                        formatPrice(finalPrice),
                                         style: AppTextStyles.h2.copyWith(
                                           color: AppColors.primary,
                                           fontWeight: FontWeight.bold,
@@ -353,7 +339,7 @@ class MembershipDetailScreen extends StatelessWidget {
                                 ),
                                 const SizedBox(height: AppSpacing.sm),
                                 _buildInfoItem(
-                                  '이용 기간은 구매일로부터 ${_getTermLabel(health.term)}입니다.',
+                                  '이용 기간은 구매일로부터 ${getTermLabel(health.term)}입니다.',
                                 ),
                                 if (health.count > 0) ...{
                                   const SizedBox(height: AppSpacing.sm),
@@ -403,7 +389,7 @@ class MembershipDetailScreen extends StatelessWidget {
                         ),
                       ),
                       Text(
-                        _formatPrice(finalPrice),
+                        formatPrice(finalPrice),
                         style: AppTextStyles.h3.copyWith(
                           color: AppColors.primary,
                           fontWeight: FontWeight.bold,

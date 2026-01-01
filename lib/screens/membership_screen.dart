@@ -9,6 +9,7 @@ import '../config/app_spacing.dart';
 import '../model/usehealth.dart';
 import '../providers/usehealth_provider.dart';
 import '../providers/auth_provider.dart';
+import '../utils/formatters.dart';
 import 'membership_screen_fullscreen_qr.dart';
 
 class MembershipScreen extends StatefulWidget {
@@ -274,7 +275,7 @@ class _MembershipScreenState extends State<MembershipScreen> {
 
   Widget _buildUsehealthCard(Usehealth usehealth) {
     final statusColor = _getStatusColor(usehealth.status);
-    final remainingDays = _getRemainingDays(usehealth);
+    final remainingDays = getRemainingDays(usehealth.endday);
 
     // extra에서 gym, health 정보 추출
     String gymName = '체육관';
@@ -352,7 +353,7 @@ class _MembershipScreenState extends State<MembershipScreen> {
               ),
               const SizedBox(width: AppSpacing.xs),
               Text(
-                '${_formatDate(usehealth.startday)} ~ ${_formatDate(usehealth.endday)}',
+                '${formatDate(usehealth.startday)} ~ ${formatDate(usehealth.endday)}',
                 style: AppTextStyles.bodySmall.copyWith(
                   color: AppColors.grey600,
                 ),
@@ -389,7 +390,7 @@ class _MembershipScreenState extends State<MembershipScreen> {
                 ClipRRect(
                   borderRadius: BorderRadius.circular(AppSpacing.radiusSmall),
                   child: LinearProgressIndicator(
-                    value: _getProgressValue(usehealth),
+                    value: getProgressRate(usehealth.startday, usehealth.endday),
                     backgroundColor: AppColors.grey200,
                     valueColor: AlwaysStoppedAnimation<Color>(statusColor),
                     minHeight: 6,
@@ -441,35 +442,6 @@ class _MembershipScreenState extends State<MembershipScreen> {
     }
   }
 
-  int _getRemainingDays(Usehealth usehealth) {
-    try {
-      final endDate = DateTime.parse(usehealth.endday);
-      return endDate.difference(DateTime.now()).inDays;
-    } catch (e) {
-      return 0;
-    }
-  }
-
-  double _getProgressValue(Usehealth usehealth) {
-    try {
-      final startDate = DateTime.parse(usehealth.startday);
-      final endDate = DateTime.parse(usehealth.endday);
-      final total = endDate.difference(startDate).inDays;
-      final used = DateTime.now().difference(startDate).inDays;
-      return (used / total).clamp(0.0, 1.0);
-    } catch (e) {
-      return 0.0;
-    }
-  }
-
-  String _formatDate(String dateStr) {
-    try {
-      final date = DateTime.parse(dateStr);
-      return '${date.year}.${date.month.toString().padLeft(2, '0')}.${date.day.toString().padLeft(2, '0')}';
-    } catch (e) {
-      return dateStr;
-    }
-  }
 }
 
 // 상세보기 Bottom Sheet
@@ -718,13 +690,13 @@ class _UsehealthDetailSheet extends StatelessWidget {
                                 valueColor: statusColor,
                               ),
                               const SizedBox(height: AppSpacing.sm),
-                              _buildInfoRow('시작일', _formatDate(usehealth.startday)),
+                              _buildInfoRow('시작일', formatDate(usehealth.startday)),
                               const SizedBox(height: AppSpacing.sm),
-                              _buildInfoRow('종료일', _formatDate(usehealth.endday)),
+                              _buildInfoRow('종료일', formatDate(usehealth.endday)),
                               const SizedBox(height: AppSpacing.sm),
                               _buildInfoRow(
                                 '남은 기간',
-                                '${_getRemainingDays(usehealth)}일',
+                                '${getRemainingDays(usehealth.endday)}일',
                                 valueColor: AppColors.primary,
                               ),
                               if (usehealth.totalcount > 0) ...[
@@ -745,7 +717,7 @@ class _UsehealthDetailSheet extends StatelessWidget {
                                 const SizedBox(height: AppSpacing.sm),
                                 _buildInfoRow(
                                   '최근 사용일',
-                                  _formatDate(usehealth.lastuseddate),
+                                  formatDate(usehealth.lastuseddate),
                                 ),
                               ],
                             ],
@@ -819,21 +791,4 @@ class _UsehealthDetailSheet extends StatelessWidget {
     }
   }
 
-  int _getRemainingDays(Usehealth usehealth) {
-    try {
-      final endDate = DateTime.parse(usehealth.endday);
-      return endDate.difference(DateTime.now()).inDays;
-    } catch (e) {
-      return 0;
-    }
-  }
-
-  String _formatDate(String dateStr) {
-    try {
-      final date = DateTime.parse(dateStr);
-      return '${date.year}.${date.month.toString().padLeft(2, '0')}.${date.day.toString().padLeft(2, '0')}';
-    } catch (e) {
-      return dateStr;
-    }
-  }
 }

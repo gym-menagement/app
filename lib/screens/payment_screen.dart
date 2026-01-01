@@ -14,6 +14,7 @@ import '../model/paymentform.dart';
 import '../model/usehealth.dart';
 import '../providers/auth_provider.dart';
 import '../providers/usehealth_provider.dart';
+import '../utils/formatters.dart';
 
 /// 결제 화면
 class PaymentScreen extends StatefulWidget {
@@ -58,21 +59,6 @@ class _PaymentScreenState extends State<PaymentScreen> {
       'color': Color(0xFF03C75A),
     },
   ];
-
-  String _formatPrice(int price) {
-    return '${price.toString().replaceAllMapped(
-      RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
-      (Match m) => '${m[1]},',
-    )}원';
-  }
-
-  String _getTermLabel(int term) {
-    if (term >= 12) {
-      return '${term ~/ 12}년';
-    } else {
-      return '$term개월';
-    }
-  }
 
   Future<void> _handlePayment() async {
     if (_selectedPaymentMethod == null) {
@@ -301,7 +287,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
                           const SizedBox(height: AppSpacing.md),
                           _buildInfoRow('이용권', widget.health.name),
                           const SizedBox(height: AppSpacing.sm),
-                          _buildInfoRow('기간', _getTermLabel(widget.health.term)),
+                          _buildInfoRow('기간', getTermLabel(widget.health.term)),
                           if (widget.health.count > 0) ...[
                             const SizedBox(height: AppSpacing.sm),
                             _buildInfoRow('횟수', '${widget.health.count}회'),
@@ -347,13 +333,13 @@ class _PaymentScreenState extends State<PaymentScreen> {
                         children: [
                           _buildPriceRow(
                             '상품 금액',
-                            _formatPrice(widget.health.cost),
+                            formatPrice(widget.health.cost),
                           ),
                           if (hasDiscount) ...[
                             const SizedBox(height: AppSpacing.sm),
                             _buildPriceRow(
                               '할인 금액 (${widget.health.discount}%)',
-                              '-${_formatPrice(widget.health.cost - widget.health.costdiscount)}',
+                              '-${formatPrice(widget.health.cost - widget.health.costdiscount)}',
                               color: AppColors.error,
                             ),
                           ],
@@ -370,7 +356,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
                                 ),
                               ),
                               Text(
-                                _formatPrice(finalPrice),
+                                formatPrice(finalPrice),
                                 style: AppTextStyles.h2.copyWith(
                                   color: AppColors.primary,
                                   fontWeight: FontWeight.bold,
@@ -404,7 +390,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
             ),
             child: SafeArea(
               child: GymButton(
-                text: '${_formatPrice(finalPrice)} 결제하기',
+                text: '${formatPrice(finalPrice)} 결제하기',
                 onPressed: _isProcessing ? null : _handlePayment,
                 loading: _isProcessing,
                 size: GymButtonSize.large,
