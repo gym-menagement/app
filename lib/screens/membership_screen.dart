@@ -274,7 +274,7 @@ class _MembershipScreenState extends State<MembershipScreen> {
   }
 
   Widget _buildUsehealthCard(Usehealth usehealth) {
-    final statusColor = _getStatusColor(usehealth.status);
+    final statusColor = usehealth.status.color;
     final remainingDays = getRemainingDays(usehealth.endday);
 
     // extra에서 gym, health 정보 추출
@@ -426,22 +426,6 @@ class _MembershipScreenState extends State<MembershipScreen> {
       ),
     );
   }
-
-  Color _getStatusColor(UsehealthStatus status) {
-    switch (status) {
-      case UsehealthStatus.use:
-        return AppColors.primary;
-      case UsehealthStatus.paused:
-        return AppColors.warning;
-      case UsehealthStatus.expired:
-        return AppColors.grey500;
-      case UsehealthStatus.terminated:
-        return AppColors.error;
-      default:
-        return AppColors.grey500;
-    }
-  }
-
 }
 
 // 상세보기 Bottom Sheet
@@ -548,7 +532,7 @@ class _UsehealthDetailSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final statusColor = _getStatusColor(usehealth.status);
+    final statusColor = usehealth.status.color;
 
     String gymName = '체육관';
     String membershipName = '이용권';
