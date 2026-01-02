@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../components/gym_button.dart';
 import '../components/gym_card.dart';
+import '../components/info_row.dart';
 import '../config/app_colors.dart';
 import '../config/app_text_styles.dart';
 import '../config/app_spacing.dart';
@@ -334,22 +335,22 @@ class MembershipDetailScreen extends StatelessWidget {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                _buildInfoItem(
-                                  '이용권은 구매 즉시 활성화됩니다.',
+                                const InfoItem(
+                                  text: '이용권은 구매 즉시 활성화됩니다.',
                                 ),
                                 const SizedBox(height: AppSpacing.sm),
-                                _buildInfoItem(
-                                  '이용 기간은 구매일로부터 ${getTermLabel(health.term)}입니다.',
+                                InfoItem(
+                                  text: '이용 기간은 구매일로부터 ${getTermLabel(health.term)}입니다.',
                                 ),
                                 if (health.count > 0) ...{
                                   const SizedBox(height: AppSpacing.sm),
-                                  _buildInfoItem(
-                                    '총 ${health.count}회 이용 가능합니다.',
+                                  InfoItem(
+                                    text: '총 ${health.count}회 이용 가능합니다.',
                                   ),
                                 },
                                 const SizedBox(height: AppSpacing.sm),
-                                _buildInfoItem(
-                                  '환불 및 양도는 헬스장 정책에 따릅니다.',
+                                const InfoItem(
+                                  text: '환불 및 양도는 헬스장 정책에 따릅니다.',
                                 ),
                               ],
                             ),
@@ -410,35 +411,6 @@ class MembershipDetailScreen extends StatelessWidget {
           ),
         ],
       ),
-    );
-  }
-
-  Widget _buildInfoItem(String text) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.only(top: 6),
-          child: Container(
-            width: 4,
-            height: 4,
-            decoration: BoxDecoration(
-              color: AppColors.grey600,
-              shape: BoxShape.circle,
-            ),
-          ),
-        ),
-        const SizedBox(width: AppSpacing.sm),
-        Expanded(
-          child: Text(
-            text,
-            style: AppTextStyles.bodyMedium.copyWith(
-              color: AppColors.grey700,
-              height: 1.5,
-            ),
-          ),
-        ),
-      ],
     );
   }
 }

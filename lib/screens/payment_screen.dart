@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../components/gym_button.dart';
 import '../components/gym_card.dart';
 import '../components/gym_snackbar.dart';
+import '../components/info_row.dart';
 import '../config/app_colors.dart';
 import '../config/app_text_styles.dart';
 import '../config/app_spacing.dart';
@@ -285,12 +286,12 @@ class _PaymentScreenState extends State<PaymentScreen> {
                           const SizedBox(height: AppSpacing.md),
                           const Divider(),
                           const SizedBox(height: AppSpacing.md),
-                          _buildInfoRow('이용권', widget.health.name),
+                          InfoRow(label: '이용권', value: widget.health.name),
                           const SizedBox(height: AppSpacing.sm),
-                          _buildInfoRow('기간', getTermLabel(widget.health.term)),
+                          InfoRow(label: '기간', value: getTermLabel(widget.health.term)),
                           if (widget.health.count > 0) ...[
                             const SizedBox(height: AppSpacing.sm),
-                            _buildInfoRow('횟수', '${widget.health.count}회'),
+                            InfoRow(label: '횟수', value: '${widget.health.count}회'),
                           ],
                         ],
                       ),
@@ -331,15 +332,15 @@ class _PaymentScreenState extends State<PaymentScreen> {
                       padding: const EdgeInsets.all(AppSpacing.lg),
                       child: Column(
                         children: [
-                          _buildPriceRow(
-                            '상품 금액',
-                            formatPrice(widget.health.cost),
+                          PriceRow(
+                            label: '상품 금액',
+                            value: formatPrice(widget.health.cost),
                           ),
                           if (hasDiscount) ...[
                             const SizedBox(height: AppSpacing.sm),
-                            _buildPriceRow(
-                              '할인 금액 (${widget.health.discount}%)',
-                              '-${formatPrice(widget.health.cost - widget.health.costdiscount)}',
+                            PriceRow(
+                              label: '할인 금액 (${widget.health.discount}%)',
+                              value: '-${formatPrice(widget.health.cost - widget.health.costdiscount)}',
                               color: AppColors.error,
                             ),
                           ],
@@ -400,47 +401,6 @@ class _PaymentScreenState extends State<PaymentScreen> {
           ),
         ],
       ),
-    );
-  }
-
-  Widget _buildInfoRow(String label, String value) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Text(
-          label,
-          style: AppTextStyles.bodyMedium.copyWith(
-            color: AppColors.grey600,
-          ),
-        ),
-        Text(
-          value,
-          style: AppTextStyles.bodyMedium.copyWith(
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildPriceRow(String label, String value, {Color? color}) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Text(
-          label,
-          style: AppTextStyles.bodyMedium.copyWith(
-            color: color ?? AppColors.grey700,
-          ),
-        ),
-        Text(
-          value,
-          style: AppTextStyles.bodyLarge.copyWith(
-            color: color ?? AppColors.grey900,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-      ],
     );
   }
 

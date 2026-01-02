@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import '../components/gym_button.dart';
 import '../components/gym_card.dart';
+import '../components/info_row.dart';
 import '../config/app_colors.dart';
 import '../config/app_text_styles.dart';
 import '../config/app_spacing.dart';
@@ -664,44 +665,44 @@ class _UsehealthDetailSheet extends StatelessWidget {
                                 ),
                               ),
                               const SizedBox(height: AppSpacing.md),
-                              _buildInfoRow('체육관', gymName),
+                              InfoRow(label: '체육관', value: gymName),
                               const SizedBox(height: AppSpacing.sm),
-                              _buildInfoRow('이용권', membershipName),
+                              InfoRow(label: '이용권', value: membershipName),
                               const SizedBox(height: AppSpacing.sm),
-                              _buildInfoRow(
-                                '상태',
-                                usehealth.status.label,
+                              InfoRow(
+                                label: '상태',
+                                value: usehealth.status.label,
                                 valueColor: statusColor,
                               ),
                               const SizedBox(height: AppSpacing.sm),
-                              _buildInfoRow('시작일', formatDate(usehealth.startday)),
+                              InfoRow(label: '시작일', value: formatDate(usehealth.startday)),
                               const SizedBox(height: AppSpacing.sm),
-                              _buildInfoRow('종료일', formatDate(usehealth.endday)),
+                              InfoRow(label: '종료일', value: formatDate(usehealth.endday)),
                               const SizedBox(height: AppSpacing.sm),
-                              _buildInfoRow(
-                                '남은 기간',
-                                '${getRemainingDays(usehealth.endday)}일',
+                              InfoRow(
+                                label: '남은 기간',
+                                value: '${getRemainingDays(usehealth.endday)}일',
                                 valueColor: AppColors.primary,
                               ),
                               if (usehealth.totalcount > 0) ...[
                                 const SizedBox(height: AppSpacing.sm),
-                                _buildInfoRow(
-                                  '사용 횟수',
-                                  '${usehealth.usedcount} / ${usehealth.totalcount}회',
+                                InfoRow(
+                                  label: '사용 횟수',
+                                  value: '${usehealth.usedcount} / ${usehealth.totalcount}회',
                                   valueColor: AppColors.primary,
                                 ),
                                 const SizedBox(height: AppSpacing.sm),
-                                _buildInfoRow(
-                                  '남은 횟수',
-                                  '${usehealth.remainingcount}회',
+                                InfoRow(
+                                  label: '남은 횟수',
+                                  value: '${usehealth.remainingcount}회',
                                   valueColor: AppColors.success,
                                 ),
                               ],
                               if (usehealth.lastuseddate.isNotEmpty) ...[
                                 const SizedBox(height: AppSpacing.sm),
-                                _buildInfoRow(
-                                  '최근 사용일',
-                                  formatDate(usehealth.lastuseddate),
+                                InfoRow(
+                                  label: '최근 사용일',
+                                  value: formatDate(usehealth.lastuseddate),
                                 ),
                               ],
                             ],
@@ -740,39 +741,4 @@ class _UsehealthDetailSheet extends StatelessWidget {
       ),
     );
   }
-
-  Widget _buildInfoRow(String label, String value, {Color? valueColor}) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Text(
-          label,
-          style: AppTextStyles.bodyMedium.copyWith(color: AppColors.grey600),
-        ),
-        Text(
-          value,
-          style: AppTextStyles.bodyMedium.copyWith(
-            color: valueColor ?? AppColors.grey900,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-      ],
-    );
-  }
-
-  Color _getStatusColor(UsehealthStatus status) {
-    switch (status) {
-      case UsehealthStatus.use:
-        return AppColors.primary;
-      case UsehealthStatus.paused:
-        return AppColors.warning;
-      case UsehealthStatus.expired:
-        return AppColors.grey500;
-      case UsehealthStatus.terminated:
-        return AppColors.error;
-      default:
-        return AppColors.grey500;
-    }
-  }
-
 }
