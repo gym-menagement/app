@@ -198,6 +198,28 @@ class ProfileScreen extends StatelessWidget {
                       ),
                     ),
 
+                    const SizedBox(height: AppSpacing.xl),
+
+                    // 설정 섹션
+                    _buildSectionTitle('설정', Icons.tune_outlined),
+                    const SizedBox(height: AppSpacing.md),
+                    GymCard(
+                      elevation: 2,
+                      child: Column(
+                        children: [
+                          _buildMenuRow(
+                            context,
+                            Icons.notifications_outlined,
+                            '알림 설정',
+                            '푸시 알림 및 알림 유형 설정',
+                            () {
+                              Navigator.pushNamed(context, '/notification_settings');
+                            },
+                          ),
+                        ],
+                      ),
+                    ),
+
                     const SizedBox(height: AppSpacing.xxxl),
 
                     // 로그아웃 버튼
@@ -295,6 +317,66 @@ class ProfileScreen extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildMenuRow(
+    BuildContext context,
+    IconData icon,
+    String title,
+    String description,
+    VoidCallback onTap,
+  ) {
+    return InkWell(
+      onTap: onTap,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.md,
+          vertical: AppSpacing.md,
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(AppSpacing.sm),
+              decoration: BoxDecoration(
+                color: AppColors.grey100,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Icon(
+                icon,
+                size: 20,
+                color: AppColors.grey600,
+              ),
+            ),
+            const SizedBox(width: AppSpacing.md),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: AppTextStyles.bodyMedium.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    description,
+                    style: AppTextStyles.bodySmall.copyWith(
+                      color: AppColors.grey600,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Icon(
+              Icons.chevron_right,
+              color: AppColors.grey400,
+              size: 20,
+            ),
+          ],
+        ),
       ),
     );
   }
