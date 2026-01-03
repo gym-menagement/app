@@ -6,14 +6,23 @@ import 'screens/find_id_pw_screen.dart';
 import 'screens/gym_search_screen.dart';
 import 'screens/membership_screen.dart';
 import 'screens/home_screen.dart';
+import 'screens/notification_settings_screen.dart';
 import 'providers/auth_provider.dart';
 import 'providers/gym_provider.dart';
 import 'providers/membership_provider.dart';
 import 'providers/usehealth_provider.dart';
 import 'providers/workout_provider.dart';
+import 'providers/notification_provider.dart';
+import 'services/notification_service.dart';
 import 'config/app_colors.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  // 알림 서비스 초기화 (Firebase 설정 없어도 로컬 알림 작동)
+  final notificationService = NotificationService();
+  await notificationService.initialize();
+
   runApp(
     MultiProvider(
       providers: [
@@ -22,6 +31,7 @@ void main() {
         ChangeNotifierProvider(create: (_) => MembershipProvider()),
         ChangeNotifierProvider(create: (_) => UsehealthProvider()),
         ChangeNotifierProvider(create: (_) => WorkoutProvider()),
+        ChangeNotifierProvider(create: (_) => NotificationProvider()),
       ],
       child: const MyApp(),
     ),
@@ -50,6 +60,7 @@ class MyApp extends StatelessWidget {
         '/home': (context) => const HomeScreen(),
         '/gym_search': (context) => const GymSearchScreen(),
         '/membership': (context) => const MembershipScreen(),
+        '/notification_settings': (context) => const NotificationSettingsScreen(),
       },
     );
   }
