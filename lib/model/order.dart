@@ -1,5 +1,55 @@
 import 'package:app/config/http.dart';
 
+/// 결제 상태
+enum OrderStatus {
+  none(0, ''),
+  pending(1, '대기'),
+  completed(2, '완료'),
+  cancelled(3, '취소'),
+  refunded(4, '환불'),
+;
+
+  const OrderStatus(this.code, this.label);
+
+  final int code;
+  final String label;
+
+  @override
+  String toString() => label;
+
+  static OrderStatus fromCode(int code) {
+    return OrderStatus.values.firstWhere(
+      (e) => e.code == code,
+      orElse: () => OrderStatus.none,
+    );
+  }
+}
+
+/// 결제 수단
+enum PaymentMethod {
+  none(0, ''),
+  card(1, '신용카드'),
+  kakao(2, '카카오페이'),
+  naver(3, '네이버페이'),
+  toss(4, '토스'),
+  bank(5, '계좌이체'),
+;
+
+  const PaymentMethod(this.code, this.label);
+
+  final int code;
+  final String label;
+
+  @override
+  String toString() => label;
+
+  static PaymentMethod fromCode(int code) {
+    return PaymentMethod.values.firstWhere(
+      (e) => e.code == code,
+      orElse: () => PaymentMethod.none,
+    );
+  }
+}
 
 class Order {
   int id;
@@ -7,6 +57,12 @@ class Order {
   int gym;
   int health;
   String date;
+  int originalPrice; // 정상가
+  int discount; // 할인 금액
+  int finalPrice; // 최종 결제 금액
+  OrderStatus status; // 결제 상태
+  PaymentMethod paymentMethod; // 결제 수단
+  String? receiptUrl; // 영수증 URL
   bool checked;
   Map<String, dynamic> extra;
 
@@ -16,6 +72,12 @@ class Order {
     this.gym = 0,
     this.health = 0,
     this.date = '',
+    this.originalPrice = 0,
+    this.discount = 0,
+    this.finalPrice = 0,
+    this.status = OrderStatus.none,
+    this.paymentMethod = PaymentMethod.none,
+    this.receiptUrl,
     this.extra = const {},
     this.checked = false,
   });
@@ -27,6 +89,12 @@ class Order {
       gym: json['gym'] as int,
       health: json['health'] as int,
       date: json['date'] as String,
+      originalPrice: json['original_price'] as int? ?? 0,
+      discount: json['discount'] as int? ?? 0,
+      finalPrice: json['final_price'] as int? ?? 0,
+      status: OrderStatus.fromCode(json['status'] as int? ?? 0),
+      paymentMethod: PaymentMethod.fromCode(json['payment_method'] as int? ?? 0),
+      receiptUrl: json['receipt_url'] as String?,
       extra: json['extra'] == null ? <String, dynamic>{} : json['extra'] as Map<String, dynamic>,
     );
   }
@@ -37,6 +105,12 @@ class Order {
     'gym': gym,
     'health': health,
     'date': date,
+    'original_price': originalPrice,
+    'discount': discount,
+    'final_price': finalPrice,
+    'status': status.code,
+    'payment_method': paymentMethod.code,
+    'receipt_url': receiptUrl,
   };
 
   Order clone() {
