@@ -25,3 +25,4 @@ export 'gym_loading.dart';
 export 'gym_avatar.dart';
 export 'gym_snackbar.dart';
 export 'gym_bottom_navigation.dart';
+export 'infinite_scroll_list.dart';
