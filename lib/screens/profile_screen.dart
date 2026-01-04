@@ -200,6 +200,28 @@ class ProfileScreen extends StatelessWidget {
 
                     const SizedBox(height: AppSpacing.xl),
 
+                    // 내 활동 섹션
+                    _buildSectionTitle('내 활동', Icons.receipt_long_outlined),
+                    const SizedBox(height: AppSpacing.md),
+                    GymCard(
+                      elevation: 2,
+                      child: Column(
+                        children: [
+                          _buildMenuRow(
+                            context,
+                            Icons.payment_outlined,
+                            '결제 내역',
+                            '이용권 구매 및 결제 내역 확인',
+                            () {
+                              Navigator.pushNamed(context, '/payment_history');
+                            },
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    const SizedBox(height: AppSpacing.xl),
+
                     // 설정 섹션
                     _buildSectionTitle('설정', Icons.tune_outlined),
                     const SizedBox(height: AppSpacing.md),
