@@ -7,12 +7,15 @@ import 'screens/gym_search_screen.dart';
 import 'screens/membership_screen.dart';
 import 'screens/home_screen.dart';
 import 'screens/notification_settings_screen.dart';
+import 'screens/payment_history_screen.dart';
+import 'screens/payment_detail_screen.dart';
 import 'providers/auth_provider.dart';
 import 'providers/gym_provider.dart';
 import 'providers/membership_provider.dart';
 import 'providers/usehealth_provider.dart';
 import 'providers/workout_provider.dart';
 import 'providers/notification_provider.dart';
+import 'providers/order_provider.dart';
 import 'services/notification_service.dart';
 import 'config/app_colors.dart';
 
@@ -32,6 +35,7 @@ void main() async {
         ChangeNotifierProvider(create: (_) => UsehealthProvider()),
         ChangeNotifierProvider(create: (_) => WorkoutProvider()),
         ChangeNotifierProvider(create: (_) => NotificationProvider()),
+        ChangeNotifierProvider(create: (_) => OrderProvider()),
       ],
       child: const MyApp(),
     ),
@@ -61,6 +65,8 @@ class MyApp extends StatelessWidget {
         '/gym_search': (context) => const GymSearchScreen(),
         '/membership': (context) => const MembershipScreen(),
         '/notification_settings': (context) => const NotificationSettingsScreen(),
+        '/payment_history': (context) => const PaymentHistoryScreen(),
+        '/payment_detail': (context) => const PaymentDetailScreen(),
       },
     );
   }
