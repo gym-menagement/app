@@ -179,7 +179,7 @@ class NotificationProvider extends ChangeNotifier {
     );
   }
 
-  /// 운동 독려 알림 스케줄링
+  /// 운동 독려 알림 스케줄링 (매일 특정 시간)
   Future<void> scheduleWorkoutReminder({
     int hour = 20,
     int minute = 0,
@@ -191,6 +191,23 @@ class NotificationProvider extends ChangeNotifier {
     await _notificationService.scheduleWorkoutReminder(
       hour: hour,
       minute: minute,
+    );
+  }
+
+  /// 운동 독려 알림 스케줄링 (3일 미출석 시)
+  Future<void> scheduleInactivityReminder({
+    required int usehealthId,
+    required String gymName,
+    required DateTime lastAttendanceDate,
+  }) async {
+    if (!_settings.enabled || !_settings.workoutReminder) {
+      return;
+    }
+
+    await _notificationService.scheduleInactivityReminder(
+      usehealthId: usehealthId,
+      gymName: gymName,
+      lastAttendanceDate: lastAttendanceDate,
     );
   }
 

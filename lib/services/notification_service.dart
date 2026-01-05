@@ -3,6 +3,7 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/timezone.dart' as tz;
 import 'package:timezone/data/latest.dart' as tz;
+import '../model/login.dart';
 
 /// 백그라운드 메시지 핸들러 (최상위 함수여야 함)
 @pragma('vm:entry-point')
@@ -54,11 +55,19 @@ class NotificationService {
         _fcmToken = await _firebaseMessaging?.getToken();
         print('FCM Token: $_fcmToken');
 
+        // 서버에 토큰 전송
+        if (_fcmToken != null) {
+          await sendTokenToServer(_fcmToken!);
+        }
+
         // 토큰 갱신 리스너
-        _firebaseMessaging?.onTokenRefresh.listen((token) {
+        _firebaseMessaging?.onTokenRefresh.listen((token) async {
+          final oldToken = _fcmToken ?? '';
           _fcmToken = token;
           print('FCM Token 갱신: $token');
-          // TODO: 서버에 토큰 업데이트
+
+          // 서버에 토큰 업데이트
+          await sendTokenToServer(token, oldToken: oldToken);
         });
       } catch (e) {
         print('FCM 토큰 가져오기 실패 (APNs 미설정): $e');
@@ -294,6 +303,35 @@ class NotificationService {
     );
   }
 
+  /// 운동 독려 알림 스케줄링 (3일 미출석 시)
+  Future<void> scheduleInactivityReminder({
+    required int usehealthId,
+    required String gymName,
+    required DateTime lastAttendanceDate,
+  }) async {
+    final now = DateTime.now();
+    final daysSinceLastAttendance = now.difference(lastAttendanceDate).inDays;
+
+    // 3일 이상 미출석 시 내일 오전 10시에 알림
+    if (daysSinceLastAttendance >= 3) {
+      final tomorrow = now.add(const Duration(days: 1));
+      final scheduledDate = DateTime(
+        tomorrow.year,
+        tomorrow.month,
+        tomorrow.day,
+        10, // 오전 10시
+        0,
+      );
+
+      await scheduleNotification(
+        id: usehealthId * 2000 + 999, // 운동 독려 알림용 ID
+        title: '운동하러 가실 시간이에요! 💪',
+        body: '$gymName에서 ${daysSinceLastAttendance}일째 운동을 쉬고 계세요. 오늘은 운동해보시는 건 어떨까요?',
+        scheduledDate: scheduledDate,
+      );
+    }
+  }
+
   /// 특정 알림 취소
   Future<void> cancelNotification(int id) async {
     await _localNotifications.cancel(id);
@@ -339,14 +377,25 @@ class NotificationService {
   }
 
   /// FCM 토큰을 서버에 전송
-  Future<void> sendTokenToServer(String token) async {
-    // TODO: HTTP 요청으로 서버에 토큰 전송
-    print('서버에 FCM 토큰 전송: $token');
+  Future<void> sendTokenToServer(String token, {String oldToken = ''}) async {
+    try {
+      await LoginManager.fcm(token, oldToken);
+      print('서버에 FCM 토큰 전송 성공: $token');
+    } catch (e) {
+      print('서버에 FCM 토큰 전송 실패: $e');
+    }
   }
 
   /// 서버에서 FCM 토큰 삭제
   Future<void> deleteTokenFromServer() async {
-    // TODO: HTTP 요청으로 서버에서 토큰 삭제
-    print('서버에서 FCM 토큰 삭제');
+    if (_fcmToken == null) return;
+
+    try {
+      // 빈 토큰으로 업데이트하여 삭제
+      await LoginManager.fcm('', _fcmToken!);
+      print('서버에서 FCM 토큰 삭제 성공');
+    } catch (e) {
+      print('서버에서 FCM 토큰 삭제 실패: $e');
+    }
   }
 }
