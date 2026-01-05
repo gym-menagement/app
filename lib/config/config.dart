@@ -10,7 +10,14 @@ class Config {
   /// - 로컬: 'http://localhost:8004'
   /// - 개발: 'http://10.0.1.62:8004'
   /// - 운영: 'https://api.yourdomain.com'
-  static const serverUrl = 'http://10.0.1.62:8004';
+  ///
+  /// Note: 안드로이드 에뮬레이터에서는 10.0.2.2를 사용하지만,
+  /// 서버가 127.0.0.1에서만 리스닝하는 경우 실제 IP(10.0.1.62)를 사용해야 합니다
+  static const serverUrl = 'http://10.0.2.2:8004';
+  // static const serverUrl = 'http://localhost:8004';
+  // static const serverUrl = 'http://10.0.2.2:8004';
+  // static const serverUrl = 'http://221.163.209.100:8004';
+  // static const serverUrl = 'http://127.0.0.1:8004';
 
   /// API 엔드포인트 상수
   static const apiAuth = '/api/auth';
