@@ -66,17 +66,26 @@ class Http {
         url += '?$param';
       }
 
+      if (kDebugMode) {
+        print('[HTTP GET] $url');
+      }
+
       var result = await http.get(
         Uri.parse(url),
         headers: {'Authorization': 'Bearer ${config.token}'},
       );
+
+      if (kDebugMode) {
+        print('[HTTP GET Response] Status: ${result.statusCode}');
+      }
+
       if (result.statusCode == 200) {
         final parsed = json.decode(utf8.decode(result.bodyBytes));
         return parsed;
       }
     } catch (e) {
       if (kDebugMode) {
-        print(e);
+        print('[HTTP GET Error] $e');
       }
     }
 
@@ -90,20 +99,31 @@ class Http {
     final config = CConfig();
 
     try {
+      final url = '${config.serverUrl}$path';
+      if (kDebugMode) {
+        print('[HTTP POST] $url');
+        print('[HTTP POST Body] ${jsonEncode(item)}');
+      }
+
       var result = await http.post(
-        Uri.parse('${config.serverUrl}$path'),
+        Uri.parse(url),
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer ${config.token}',
         },
         body: jsonEncode(item),
       );
+
+      if (kDebugMode) {
+        print('[HTTP POST Response] Status: ${result.statusCode}');
+      }
+
       if (result.statusCode == 200) {
         return json.decode(utf8.decode(result.bodyBytes));
       }
     } catch (e) {
       if (kDebugMode) {
-        print(e);
+        print('[HTTP POST Error] $e');
       }
     }
 
