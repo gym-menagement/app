@@ -36,8 +36,9 @@ class _MembershipScreenState extends State<MembershipScreen> {
       final userId = authProvider.currentUser?.id;
 
       if (userId != null) {
-        // UsehealthProvider에 userId 설정
+        // UsehealthProvider에 userId와 context 설정
         usehealthProvider.setUserId(userId);
+        usehealthProvider.setContext(context);
 
         if (usehealthProvider.usehealths.isEmpty) {
           usehealthProvider.loadUsehealths();
