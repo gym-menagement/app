@@ -15,6 +15,7 @@ import '../model/paymentform.dart';
 import '../model/usehealth.dart';
 import '../providers/auth_provider.dart';
 import '../providers/usehealth_provider.dart';
+import '../providers/notification_provider.dart';
 import '../utils/formatters.dart';
 
 /// 결제 화면
@@ -181,6 +182,21 @@ class _PaymentScreenState extends State<PaymentScreen> {
       final usehealthProvider = context.read<UsehealthProvider>();
       await usehealthProvider.refresh();
       print('Usehealth 데이터 새로고침 완료');
+
+      // 5. 이용권 만료 알림 스케줄링
+      try {
+        final notificationProvider = context.read<NotificationProvider>();
+        final expiryDateTime = DateTime.parse(endDay);
+
+        await notificationProvider.scheduleMembershipExpiryNotifications(
+          usehealthId: usehealthId,
+          gymName: widget.gym.name,
+          expiryDate: expiryDateTime,
+        );
+        print('이용권 만료 알림 스케줄링 완료 (D-7, D-3, D-1, D-Day)');
+      } catch (e) {
+        print('알림 스케줄링 실패 (결제는 완료됨): $e');
+      }
 
       if (!mounted) return;
 
