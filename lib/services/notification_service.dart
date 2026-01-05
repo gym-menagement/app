@@ -49,16 +49,21 @@ class NotificationService {
       // FCM 메시지 리스너 설정
       _setupMessageListeners();
 
-      // FCM 토큰 가져오기
-      _fcmToken = await _firebaseMessaging?.getToken();
-      print('FCM Token: $_fcmToken');
+      // FCM 토큰 가져오기 (APNs 토큰 없어도 계속 진행)
+      try {
+        _fcmToken = await _firebaseMessaging?.getToken();
+        print('FCM Token: $_fcmToken');
 
-      // 토큰 갱신 리스너
-      _firebaseMessaging?.onTokenRefresh.listen((token) {
-        _fcmToken = token;
-        print('FCM Token 갱신: $token');
-        // TODO: 서버에 토큰 업데이트
-      });
+        // 토큰 갱신 리스너
+        _firebaseMessaging?.onTokenRefresh.listen((token) {
+          _fcmToken = token;
+          print('FCM Token 갱신: $token');
+          // TODO: 서버에 토큰 업데이트
+        });
+      } catch (e) {
+        print('FCM 토큰 가져오기 실패 (APNs 미설정): $e');
+        print('로컬 알림은 정상 작동합니다.');
+      }
     } catch (e) {
       print('Firebase 초기화 실패 (로컬 알림만 사용): $e');
     }
