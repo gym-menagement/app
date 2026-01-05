@@ -47,9 +47,9 @@
 - [ ] 개인 기록 갱신 알림
 
 #### 1.3 구현 요소
-- [ ] FCM(Firebase Cloud Messaging) 설정
-- [ ] 푸시 알림 권한 요청 UI
-- [ ] 알림 설정 화면 (on/off 토글)
+- [O] FCM(Firebase Cloud Messaging) 설정
+- [O] 푸시 알림 권한 요청 UI
+- [O] 알림 설정 화면 (on/off 토글)
 - [ ] 백엔드 스케줄러 연동
 
 ---
@@ -58,22 +58,24 @@
 **목표**: 사용자 결제 이력 투명성 확보
 
 #### 2.1 기능 요구사항
-- [ ] 결제 내역 목록 조회 (페이지네이션)
-- [ ] 결제 상세 정보 조회
-  - 결제 일시
-  - 결제 금액 (정상가, 할인, 최종 금액)
-  - 결제 수단
-  - 헬스장 정보
-  - 이용권 정보
+- [O] 결제 내역 목록 조회 (페이지네이션)
+- [O] 결제 상세 정보 조회
+  - [O] 결제 일시
+  - [O] 결제 금액 (정상가, 할인, 최종 금액)
+  - [O] 결제 수단
+  - [O] 헬스장 정보
+  - [O] 이용권 정보
 - [ ] 영수증 조회/다운로드
-- [ ] 환불 요청 기능 (조건부)
-- [ ] 결제 상태 표시 (완료, 취소, 환불)
+- [O] 환불 요청 기능 (조건부)
+- [O] 결제 상태 표시 (완료, 취소, 환불)
 
 #### 2.2 구현 파일
-- [ ] `lib/screens/payment_history_screen.dart`
-- [ ] `lib/model/payment.dart`
-- [ ] `lib/providers/payment_provider.dart`
-- [ ] 프로필 화면에 결제 내역 메뉴 추가
+- [O] `lib/screens/payment_history_screen.dart`
+- [O] `lib/screens/payment_detail_screen.dart`
+- [O] `lib/model/order.dart` (결제 정보 확장)
+- [O] `lib/providers/order_provider.dart`
+- [O] 프로필 화면에 결제 내역 메뉴 추가
+- [O] `lib/components/infinite_scroll_list.dart` (무한 스크롤 컴포넌트)
 
 ---
 
