@@ -28,7 +28,7 @@ class AppSpacing {
   static const double buttonHeightLarge = 60.0;
   static const double textFieldHeight = 52.0;
   static const double appBarHeight = 56.0;
-  static const double bottomNavHeight = 56.0;
+  static const double bottomNavHeight = 64.0;
 
   // Border radius (Gym uses larger radius for modern look)
   static const double radiusXSmall = 4.0;
