@@ -11,12 +11,13 @@ class Config {
   /// - 개발: 'http://10.0.1.62:8004'
   /// - 운영: 'https://api.yourdomain.com'
   ///
-  /// Note: 안드로이드 에뮬레이터에서는 10.0.2.2를 사용하지만,
-  /// 서버가 127.0.0.1에서만 리스닝하는 경우 실제 IP(10.0.1.62)를 사용해야 합니다
-  static const serverUrl = 'http://10.0.2.2:8004';
+  /// Note:
+  /// - Android 에뮬레이터: 10.0.2.2 (호스트 머신의 localhost) - 네트워크 문제로 10.0.1.62 사용
+  /// - 실제 Android/iOS 기기: WiFi IP 주소 (예: 10.0.1.62)
+  // static const serverUrl = 'http://10.0.2.2:8004'; // Android 에뮬레이터용
+  // static const serverUrl = 'http://10.0.1.62:8004'; // 실제 WiFi IP
   // static const serverUrl = 'http://localhost:8004';
-  // static const serverUrl = 'http://10.0.2.2:8004';
-  // static const serverUrl = 'http://221.163.209.100:8004';
+  static const serverUrl = 'http://140.82.12.99:8004';
   // static const serverUrl = 'http://127.0.0.1:8004';
 
   /// API 엔드포인트 상수
