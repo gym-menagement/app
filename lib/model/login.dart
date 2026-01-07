@@ -187,9 +187,11 @@ class LoginManager {
     return User();
   }
 
-  static Future fcm(String token, String old) async {
-    var url =
-        '/api/user/fcm/${Uri.encodeFull(token)}?old=${Uri.encodeFull(old)}';
+  static Future fcm(String token, String old, {int? userId}) async {
+    var url = '/api/user/fcm/${Uri.encodeFull(token)}?old=${Uri.encodeFull(old)}';
+    if (userId != null) {
+      url += '&userId=$userId';
+    }
     await Http.get(url);
   }
 }

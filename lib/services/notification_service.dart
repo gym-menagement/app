@@ -55,19 +55,15 @@ class NotificationService {
         _fcmToken = await _firebaseMessaging?.getToken();
         print('FCM Token: $_fcmToken');
 
-        // 서버에 토큰 전송
-        if (_fcmToken != null) {
-          await sendTokenToServer(_fcmToken!);
-        }
+        // 로그인 후에 토큰을 전송하므로 여기서는 전송하지 않음
 
         // 토큰 갱신 리스너
         _firebaseMessaging?.onTokenRefresh.listen((token) async {
-          final oldToken = _fcmToken ?? '';
           _fcmToken = token;
           print('FCM Token 갱신: $token');
 
-          // 서버에 토큰 업데이트
-          await sendTokenToServer(token, oldToken: oldToken);
+          // 토큰 갱신 시에도 userId는 나중에 수동으로 전송
+          // 필요하다면 여기서 저장된 userId를 사용하여 전송
         });
       } catch (e) {
         print('FCM 토큰 가져오기 실패 (APNs 미설정): $e');
@@ -376,11 +372,16 @@ class NotificationService {
     );
   }
 
-  /// FCM 토큰을 서버에 전송
-  Future<void> sendTokenToServer(String token, {String oldToken = ''}) async {
+  /// FCM 토큰을 서버에 전송 (로그인 후 userId와 함께 전송)
+  Future<void> sendTokenToServer({required int userId, String oldToken = ''}) async {
+    if (_fcmToken == null) {
+      print('FCM 토큰이 없습니다');
+      return;
+    }
+
     try {
-      await LoginManager.fcm(token, oldToken);
-      print('서버에 FCM 토큰 전송 성공: $token');
+      await LoginManager.fcm(_fcmToken!, oldToken, userId: userId);
+      print('서버에 FCM 토큰 전송 성공 (userId: $userId): $_fcmToken');
     } catch (e) {
       print('서버에 FCM 토큰 전송 실패: $e');
     }

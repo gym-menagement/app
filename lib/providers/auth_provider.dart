@@ -6,6 +6,7 @@ import 'dart:convert';
 import '../model/user.dart';
 import '../model/login.dart';
 import '../config/cconfig.dart';
+import '../services/notification_service.dart';
 
 /// Authentication state management provider
 /// Manages user login/logout state, authentication tokens, and user data
@@ -61,6 +62,14 @@ class AuthProvider extends ChangeNotifier {
         // 자동 로그인 정보 저장
         if (rememberMe) {
           await _saveAuthData();
+        }
+
+        // FCM 토큰을 서버에 전송
+        try {
+          final notificationService = NotificationService();
+          await notificationService.sendTokenToServer(userId: user.id);
+        } catch (e) {
+          debugPrint('FCM 토큰 전송 실패: $e');
         }
 
         _isLoading = false;
