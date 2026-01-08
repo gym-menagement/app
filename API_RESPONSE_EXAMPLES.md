@@ -3,6 +3,7 @@
 이 문서는 Gym Spring Backend API의 응답 형식 예시를 제공합니다.
 
 ## 목차
+
 - [인증 (Authentication)](#인증-authentication)
 - [사용자 (User)](#사용자-user)
 - [체육관 (Gym)](#체육관-gym)
@@ -21,12 +22,15 @@
 ## 인증 (Authentication)
 
 ### 1. 로그인 - GET /api/jwt
+
 **Request:**
+
 ```
 GET /api/jwt?loginid=testuser&passwd=password123
 ```
 
 **Success Response (200):**
+
 ```json
 {
   "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
@@ -62,17 +66,21 @@ GET /api/jwt?loginid=testuser&passwd=password123
 ```
 
 **Error Response (401 - Unauthorized):**
+
 ```json
 null
 ```
 
 **Error Response (404 - Not Found):**
+
 ```json
 null
 ```
 
 ### 2. 로그인 - POST /api/auth/login
+
 **Request:**
+
 ```json
 {
   "loginid": "testuser",
@@ -81,6 +89,7 @@ null
 ```
 
 **Success Response (200):**
+
 ```json
 {
   "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
@@ -119,12 +128,15 @@ null
 ## 사용자 (User)
 
 ### 1. 사용자 목록 조회 (페이징) - GET /api/user
+
 **Request:**
+
 ```
-GET /api/user?page=0&pageSize=10
+GET /api/user?page=0&pagesize=10
 ```
 
 **Response (200):**
+
 ```json
 {
   "content": [
@@ -194,12 +206,15 @@ GET /api/user?page=0&pageSize=10
 ```
 
 ### 2. 사용자 단건 조회 - GET /api/user/{id}
+
 **Request:**
+
 ```
 GET /api/user/1
 ```
 
 **Success Response (200):**
+
 ```json
 {
   "id": 1,
@@ -231,17 +246,21 @@ GET /api/user/1
 ```
 
 **Error Response (404):**
+
 ```
 (빈 응답)
 ```
 
 ### 3. 사용자 검색 (로그인ID) - GET /api/user/search/loginid
+
 **Request:**
+
 ```
 GET /api/user/search/loginid?loginid=testuser
 ```
 
 **Response (200):**
+
 ```json
 [
   {
@@ -275,7 +294,9 @@ GET /api/user/search/loginid?loginid=testuser
 ```
 
 ### 4. 사용자 카운트 - GET /api/user/count
+
 **Response (200):**
+
 ```json
 {
   "count": 150
@@ -283,7 +304,9 @@ GET /api/user/search/loginid?loginid=testuser
 ```
 
 ### 5. 사용자 생성 - POST /api/user
+
 **Request:**
+
 ```json
 {
   "loginid": "newuser",
@@ -304,6 +327,7 @@ GET /api/user/search/loginid?loginid=testuser
 ```
 
 **Success Response (200):**
+
 ```json
 {
   "id": 3,
@@ -335,7 +359,9 @@ GET /api/user/search/loginid?loginid=testuser
 ```
 
 ### 6. 사용자 수정 - PUT /api/user/{id}
+
 **Request:**
+
 ```json
 {
   "loginid": "testuser",
@@ -356,6 +382,7 @@ GET /api/user/search/loginid?loginid=testuser
 ```
 
 **Success Response (200):**
+
 ```json
 {
   "id": 1,
@@ -387,7 +414,9 @@ GET /api/user/search/loginid?loginid=testuser
 ```
 
 ### 7. 사용자 부분 수정 - PATCH /api/user/{id}
+
 **Request:**
+
 ```json
 {
   "tel": "010-9999-8888",
@@ -396,6 +425,7 @@ GET /api/user/search/loginid?loginid=testuser
 ```
 
 **Success Response (200):**
+
 ```json
 {
   "id": 1,
@@ -427,7 +457,9 @@ GET /api/user/search/loginid?loginid=testuser
 ```
 
 ### 8. 사용자 삭제 - DELETE /api/user/{id}
+
 **Response (200):**
+
 ```json
 {
   "success": true
@@ -439,12 +471,15 @@ GET /api/user/search/loginid?loginid=testuser
 ## 체육관 (Gym)
 
 ### 1. 체육관 목록 조회 - GET /api/gym
+
 **Request:**
+
 ```
-GET /api/gym?page=0&pageSize=10
+GET /api/gym?page=0&pagesize=10
 ```
 
 **Response (200):**
+
 ```json
 {
   "content": [
@@ -478,7 +513,9 @@ GET /api/gym?page=0&pageSize=10
 ```
 
 ### 2. 체육관 단건 조회 - GET /api/gym/{id}
+
 **Response (200):**
+
 ```json
 {
   "id": 1,
@@ -492,12 +529,15 @@ GET /api/gym?page=0&pageSize=10
 ```
 
 ### 3. 체육관 검색 (이름) - GET /api/gym/search/name
+
 **Request:**
+
 ```
 GET /api/gym/search/name?name=강남 피트니스
 ```
 
 **Response (200):**
+
 ```json
 [
   {
@@ -513,7 +553,9 @@ GET /api/gym/search/name?name=강남 피트니스
 ```
 
 ### 4. 체육관 생성 - POST /api/gym
+
 **Request:**
+
 ```json
 {
   "name": "신규 피트니스",
@@ -525,6 +567,7 @@ GET /api/gym/search/name?name=강남 피트니스
 ```
 
 **Response (200):**
+
 ```json
 {
   "id": 3,
@@ -542,12 +585,15 @@ GET /api/gym/search/name?name=강남 피트니스
 ## 멤버십 (Membership)
 
 ### 1. 멤버십 목록 조회 - GET /api/membership
+
 **Request:**
+
 ```
-GET /api/membership?page=0&pageSize=10&user=1
+GET /api/membership?page=0&pagesize=10&user=1
 ```
 
 **Response (200):**
+
 ```json
 {
   "content": [
@@ -579,7 +625,9 @@ GET /api/membership?page=0&pageSize=10&user=1
 ```
 
 ### 2. 멤버십 단건 조회 - GET /api/membership/{id}
+
 **Response (200):**
+
 ```json
 {
   "id": 1,
@@ -600,12 +648,15 @@ GET /api/membership?page=0&pageSize=10&user=1
 ```
 
 ### 3. 사용자별 멤버십 조회 - GET /api/membership/search/user
+
 **Request:**
+
 ```
 GET /api/membership/search/user?user=1
 ```
 
 **Response (200):**
+
 ```json
 [
   {
@@ -632,7 +683,9 @@ GET /api/membership/search/user?user=1
 ## 건강/운동 (Health)
 
 ### 1. 운동 프로그램 목록 - GET /api/health
+
 **Response (200):**
+
 ```json
 {
   "content": [
@@ -678,7 +731,9 @@ GET /api/membership/search/user?user=1
 ```
 
 ### 2. 운동 프로그램 단건 조회 - GET /api/health/{id}
+
 **Response (200):**
+
 ```json
 {
   "id": 1,
@@ -698,7 +753,9 @@ GET /api/membership/search/user?user=1
 ```
 
 ### 3. 운동 카테고리 목록 - GET /api/healthcategory
+
 **Response (200):**
+
 ```json
 {
   "content": [
@@ -739,12 +796,15 @@ GET /api/membership/search/user?user=1
 ## 출석 (Attendance)
 
 ### 1. 출석 기록 조회 - GET /api/attendance
+
 **Request:**
+
 ```
-GET /api/attendance?page=0&pageSize=20&user=1
+GET /api/attendance?page=0&pagesize=20&user=1
 ```
 
 **Response (200):**
+
 ```json
 {
   "content": [
@@ -780,7 +840,9 @@ GET /api/attendance?page=0&pageSize=20&user=1
 ```
 
 ### 2. 출석 체크 - POST /api/attendance
+
 **Request:**
+
 ```json
 {
   "userId": 1,
@@ -793,6 +855,7 @@ GET /api/attendance?page=0&pageSize=20&user=1
 ```
 
 **Response (200):**
+
 ```json
 {
   "id": 3,
@@ -811,7 +874,9 @@ GET /api/attendance?page=0&pageSize=20&user=1
 ## 결제 (Payment & Order)
 
 ### 1. 주문 목록 조회 - GET /api/order
+
 **Response (200):**
+
 ```json
 {
   "content": [
@@ -841,7 +906,9 @@ GET /api/attendance?page=0&pageSize=20&user=1
 ```
 
 ### 2. 주문 생성 - POST /api/order
+
 **Request:**
+
 ```json
 {
   "userId": 1,
@@ -856,6 +923,7 @@ GET /api/attendance?page=0&pageSize=20&user=1
 ```
 
 **Response (200):**
+
 ```json
 {
   "id": 2,
@@ -874,7 +942,9 @@ GET /api/attendance?page=0&pageSize=20&user=1
 ```
 
 ### 3. 결제 목록 조회 - GET /api/payment
+
 **Response (200):**
+
 ```json
 {
   "content": [
@@ -904,7 +974,9 @@ GET /api/attendance?page=0&pageSize=20&user=1
 ```
 
 ### 4. 결제 생성 - POST /api/payment
+
 **Request:**
+
 ```json
 {
   "orderId": 2,
@@ -919,6 +991,7 @@ GET /api/attendance?page=0&pageSize=20&user=1
 ```
 
 **Response (200):**
+
 ```json
 {
   "id": 2,
@@ -941,12 +1014,15 @@ GET /api/attendance?page=0&pageSize=20&user=1
 ## PT 예약 (PT Reservation)
 
 ### 1. PT 예약 목록 - GET /api/ptreservation
+
 **Request:**
+
 ```
-GET /api/ptreservation?page=0&pageSize=10&user=1
+GET /api/ptreservation?page=0&pagesize=10&user=1
 ```
 
 **Response (200):**
+
 ```json
 {
   "content": [
@@ -977,7 +1053,9 @@ GET /api/ptreservation?page=0&pageSize=10&user=1
 ```
 
 ### 2. PT 예약 생성 - POST /api/ptreservation
+
 **Request:**
+
 ```json
 {
   "userId": 1,
@@ -993,6 +1071,7 @@ GET /api/ptreservation?page=0&pageSize=10&user=1
 ```
 
 **Response (200):**
+
 ```json
 {
   "id": 2,
@@ -1016,7 +1095,9 @@ GET /api/ptreservation?page=0&pageSize=10&user=1
 ## 공지사항 (Notice)
 
 ### 1. 공지사항 목록 - GET /api/notice
+
 **Response (200):**
+
 ```json
 {
   "content": [
@@ -1062,7 +1143,9 @@ GET /api/ptreservation?page=0&pageSize=10&user=1
 ```
 
 ### 2. 공지사항 단건 조회 - GET /api/notice/{id}
+
 **Response (200):**
+
 ```json
 {
   "id": 1,
@@ -1086,12 +1169,15 @@ GET /api/ptreservation?page=0&pageSize=10&user=1
 ## 알람 (Alarm)
 
 ### 1. 알람 목록 - GET /api/alarm
+
 **Request:**
+
 ```
-GET /api/alarm?page=0&pageSize=20&user=1
+GET /api/alarm?page=0&pagesize=20&user=1
 ```
 
 **Response (200):**
+
 ```json
 {
   "content": [
@@ -1135,7 +1221,9 @@ GET /api/alarm?page=0&pageSize=20&user=1
 ```
 
 ### 2. 알람 읽음 처리 - PATCH /api/alarm/{id}
+
 **Request:**
+
 ```json
 {
   "isRead": true
@@ -1143,6 +1231,7 @@ GET /api/alarm?page=0&pageSize=20&user=1
 ```
 
 **Response (200):**
+
 ```json
 {
   "id": 1,
@@ -1165,12 +1254,15 @@ GET /api/alarm?page=0&pageSize=20&user=1
 ## QR 코드 (QR Code)
 
 ### 1. 회원 QR 코드 조회 - GET /api/memberqr/search/user
+
 **Request:**
+
 ```
 GET /api/memberqr/search/user?user=1
 ```
 
 **Response (200):**
+
 ```json
 [
   {
@@ -1188,12 +1280,15 @@ GET /api/memberqr/search/user?user=1
 ```
 
 ### 2. QR 코드 검증 - GET /api/qrcode/validate
+
 **Request:**
+
 ```
 GET /api/qrcode/validate?code=QR_USER1_20251201_ABCD1234
 ```
 
 **Success Response (200):**
+
 ```json
 {
   "valid": true,
@@ -1208,6 +1303,7 @@ GET /api/qrcode/validate?code=QR_USER1_20251201_ABCD1234
 ```
 
 **Invalid Response (200):**
+
 ```json
 {
   "valid": false,
@@ -1220,7 +1316,9 @@ GET /api/qrcode/validate?code=QR_USER1_20251201_ABCD1234
 ## 공통 응답 패턴
 
 ### 페이징 응답 구조
+
 모든 목록 조회 API는 다음 구조를 따릅니다:
+
 ```json
 {
   "content": [...],           // 실제 데이터 배열
@@ -1235,7 +1333,9 @@ GET /api/qrcode/validate?code=QR_USER1_20251201_ABCD1234
 ```
 
 ### 에러 응답
+
 대부분의 에러는 HTTP 상태 코드로 표현되며, 응답 본문은 비어있거나 null입니다:
+
 - `400 Bad Request`: 잘못된 요청
 - `401 Unauthorized`: 인증 실패
 - `404 Not Found`: 리소스 없음
@@ -1244,14 +1344,17 @@ GET /api/qrcode/validate?code=QR_USER1_20251201_ABCD1234
 ### Enum 값 매핑
 
 #### Sex (성별)
+
 - `0`: 남성 (MALE)
 - `1`: 여성 (FEMALE)
 
 #### Type (사용자 타입)
+
 - `0`: 일반 (NORMAL)
 - `1`: 소셜 (SOCIAL)
 
 #### Role (역할)
+
 - `0`: 관리자 (ADMIN)
 - `1`: 매니저 (MANAGER)
 - `2`: 트레이너 (TRAINER)
@@ -1259,22 +1362,27 @@ GET /api/qrcode/validate?code=QR_USER1_20251201_ABCD1234
 - `4`: 게스트 (GUEST)
 
 #### Level (레벨)
+
 - `0`: 일반 (NORMAL)
 - `1`: VIP
 - `2`: VVIP
 
 #### Use (사용 여부)
+
 - `0`: 사용 (USE)
 - `1`: 미사용 (UNUSE)
 
 #### Status (상태)
+
 - `0`: 대기 (PENDING)
 - `1`: 완료 (COMPLETED)
 - `2`: 취소 (CANCELLED)
 - `3`: 만료 (EXPIRED)
 
 ### Extra 필드
+
 대부분의 응답에는 `extra` 필드가 포함되어 있으며, enum 값의 한글 표현을 제공합니다:
+
 ```json
 "extra": {
   "status": "활성",
@@ -1284,13 +1392,17 @@ GET /api/qrcode/validate?code=QR_USER1_20251201_ABCD1234
 ```
 
 ### 날짜 형식
+
 모든 날짜는 `YYYY-MM-DD HH:mm:ss` 형식의 문자열로 반환됩니다:
+
 ```
 "2025-12-26 10:00:00"
 ```
 
 ### 인증 헤더
+
 JWT 토큰이 필요한 요청에는 다음 헤더를 포함해야 합니다:
+
 ```
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 ```
@@ -1323,6 +1435,7 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 - **AppVersion** (`/api/appversion`)
 
 모든 API는 다음 표준 엔드포인트를 제공합니다:
+
 - `GET /api/{entity}` - 페이징 목록
 - `GET /api/{entity}/{id}` - 단건 조회
 - `GET /api/{entity}/search/{field}?{field}=value` - 필드별 검색

@@ -5,12 +5,14 @@ API_RESPONSE_EXAMPLES.md를 기반으로 Provider와 Screen을 수정하는 가�
 ## 완료된 작업
 
 ### 1. AuthProvider ✅
+
 - **로그인**: `POST /api/auth/login` 연동 완료
 - **회원가입**: `POST /api/user` 연동 완료
 - **프로필 업데이트**: `PUT /api/user/{id}` 연동 완료
 - **아이디 중복 체크**: `GET /api/user/search/loginid` 연동 완료
 
 ### 2. Config 설정 ✅
+
 - `Config.serverUrl`: API 서버 URL 중앙 관리
 - `CConfig`: 토큰 및 런타임 설정 관리
 - `Http`: 모든 HTTP 요청을 자동으로 Config.serverUrl 사용
@@ -30,7 +32,7 @@ Future<void> loadItems() async {
   try {
     final result = await Http.get(Config.apiXxx, {
       'page': 0,
-      'pageSize': 10,
+      'pagesize': 10,
     });
 
     if (result != null && result['content'] != null) {
@@ -89,6 +91,7 @@ Future<bool> deleteItem(int id) async {
 ### 페이징 응답 처리
 
 API에서 반환하는 페이징 구조:
+
 ```json
 {
   "content": [...],
@@ -103,11 +106,12 @@ API에서 반환하는 페이징 구조:
 ```
 
 Provider에서 처리:
+
 ```dart
-Future<void> loadItems({int page = 0, int pageSize = 10}) async {
+Future<void> loadItems({int page = 0, int pagesize = 10}) async {
   final result = await Http.get(Config.apiXxx, {
     'page': page,
-    'pageSize': pageSize,
+    'pagesize': pagesize,
   });
 
   if (result != null && result['content'] != null) {
@@ -143,7 +147,7 @@ class GymProvider extends ChangeNotifier {
   String? get error => _error;
 
   /// 체육관 목록 조회
-  Future<void> loadGyms({int page = 0, int pageSize = 100}) async {
+  Future<void> loadGyms({int page = 0, int pagesize = 100}) async {
     _isLoading = true;
     _error = null;
     notifyListeners();
@@ -151,7 +155,7 @@ class GymProvider extends ChangeNotifier {
     try {
       final result = await Http.get(Config.apiGym, {
         'page': page,
-        'pageSize': pageSize,
+        'pagesize': pagesize,
       });
 
       if (result != null && result['content'] != null) {
@@ -246,7 +250,7 @@ class MembershipProvider extends ChangeNotifier {
   /// 멤버십 목록 조회 (페이징)
   Future<void> loadMemberships({
     int page = 0,
-    int pageSize = 10,
+    int pagesize = 10,
     int? userId,
   }) async {
     _isLoading = true;
@@ -256,7 +260,7 @@ class MembershipProvider extends ChangeNotifier {
     try {
       final params = {
         'page': page,
-        'pageSize': pageSize,
+        'pagesize': pagesize,
       };
 
       if (userId != null) {
