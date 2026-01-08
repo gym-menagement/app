@@ -35,7 +35,8 @@ class ProfileScreen extends StatelessWidget {
                 flexibleSpace: LayoutBuilder(
                   builder: (context, constraints) {
                     // AppBar가 축소되었는지 확인
-                    final isCollapsed = constraints.maxHeight <= kToolbarHeight + 50;
+                    final isCollapsed =
+                        constraints.maxHeight <= kToolbarHeight + 50;
 
                     return FlexibleSpaceBar(
                       centerTitle: true,
@@ -209,6 +210,16 @@ class ProfileScreen extends StatelessWidget {
                         children: [
                           _buildMenuRow(
                             context,
+                            Icons.bar_chart_outlined,
+                            '운동 통계',
+                            '운동 기록 분석 및 개인 기록 확인',
+                            () {
+                              Navigator.pushNamed(context, '/statistics');
+                            },
+                          ),
+                          const GymDivider(),
+                          _buildMenuRow(
+                            context,
                             Icons.payment_outlined,
                             '결제 내역',
                             '이용권 구매 및 결제 내역 확인',
@@ -231,11 +242,24 @@ class ProfileScreen extends StatelessWidget {
                         children: [
                           _buildMenuRow(
                             context,
+                            Icons.settings_outlined,
+                            '설정',
+                            '앱 설정 및 개인정보 관리',
+                            () {
+                              Navigator.pushNamed(context, '/settings');
+                            },
+                          ),
+                          const GymDivider(),
+                          _buildMenuRow(
+                            context,
                             Icons.notifications_outlined,
                             '알림 설정',
                             '푸시 알림 및 알림 유형 설정',
                             () {
-                              Navigator.pushNamed(context, '/notification_settings');
+                              Navigator.pushNamed(
+                                context,
+                                '/notification_settings',
+                              );
                             },
                           ),
                         ],
@@ -274,18 +298,12 @@ class ProfileScreen extends StatelessWidget {
             color: AppColors.primary.withOpacity(0.1),
             borderRadius: BorderRadius.circular(8),
           ),
-          child: Icon(
-            icon,
-            size: 20,
-            color: AppColors.primary,
-          ),
+          child: Icon(icon, size: 20, color: AppColors.primary),
         ),
         const SizedBox(width: AppSpacing.sm),
         Text(
           title,
-          style: AppTextStyles.h4.copyWith(
-            fontWeight: FontWeight.bold,
-          ),
+          style: AppTextStyles.h4.copyWith(fontWeight: FontWeight.bold),
         ),
       ],
     );
@@ -310,11 +328,7 @@ class ProfileScreen extends StatelessWidget {
               color: AppColors.grey100,
               borderRadius: BorderRadius.circular(8),
             ),
-            child: Icon(
-              icon,
-              size: 20,
-              color: AppColors.grey600,
-            ),
+            child: Icon(icon, size: 20, color: AppColors.grey600),
           ),
           const SizedBox(width: AppSpacing.md),
           Expanded(
@@ -365,11 +379,7 @@ class ProfileScreen extends StatelessWidget {
                 color: AppColors.grey100,
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: Icon(
-                icon,
-                size: 20,
-                color: AppColors.grey600,
-              ),
+              child: Icon(icon, size: 20, color: AppColors.grey600),
             ),
             const SizedBox(width: AppSpacing.md),
             Expanded(
@@ -392,11 +402,7 @@ class ProfileScreen extends StatelessWidget {
                 ],
               ),
             ),
-            Icon(
-              Icons.chevron_right,
-              color: AppColors.grey400,
-              size: 20,
-            ),
+            Icon(Icons.chevron_right, color: AppColors.grey400, size: 20),
           ],
         ),
       ),
