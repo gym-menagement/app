@@ -184,6 +184,43 @@ class Http {
     }
   }
 
+  /// PATCH 요청 (부분 업데이트)
+  /// [path]: API 엔드포인트
+  /// [item]: 업데이트할 데이터
+  static patch(String path, Object item) async {
+    final config = CConfig();
+
+    try {
+      if (kDebugMode) {
+        print('[HTTP PATCH] ${config.serverUrl}$path');
+        print('[HTTP PATCH Body] ${jsonEncode(item)}');
+      }
+
+      var result = await http.patch(
+        Uri.parse('${config.serverUrl}$path'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ${config.token}',
+        },
+        body: jsonEncode(item),
+      );
+
+      if (kDebugMode) {
+        print('[HTTP PATCH Response] Status: ${result.statusCode}');
+      }
+
+      if (result.statusCode == 200) {
+        return json.decode(utf8.decode(result.bodyBytes));
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print('[HTTP PATCH Error] $e');
+      }
+    }
+
+    return null;
+  }
+
   /// DELETE 요청
   /// [path]: API 엔드포인트
   /// [item]: 삭제할 항목 정보
