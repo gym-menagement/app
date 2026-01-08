@@ -129,7 +129,7 @@ class WorkoutProvider extends ChangeNotifier {
 
       _workoutlogs = await WorkoutlogManager.find(
         page: 0,
-        pageSize: 9999,
+        pagesize: 9999,
         params: params,
       );
 
