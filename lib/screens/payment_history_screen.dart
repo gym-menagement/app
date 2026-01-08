@@ -5,6 +5,7 @@ import '../model/order_extended.dart';
 import '../config/app_colors.dart';
 import '../components/gym_components.dart';
 
+import '../model/payment_method.dart';
 class PaymentHistoryScreen extends StatefulWidget {
   const PaymentHistoryScreen({super.key});
 
@@ -13,7 +14,7 @@ class PaymentHistoryScreen extends StatefulWidget {
 }
 
 class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
-  OrderStatus _selectedStatus = null;
+  OrderStatus _selectedStatus = OrderStatus.pending;
 
   @override
   void initState() {
@@ -31,7 +32,7 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
     await context.read<OrderProvider>().loadMore();
   }
 
-  List<Order> _getFilteredOrders(OrderProvider provider) {
+  List<OrderExtended> _getFilteredOrders(OrderProvider provider) {
     if (_selectedStatus == null) {
       return provider.orders;
     }
@@ -148,7 +149,7 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
 
               // 결제 내역 목록
               Expanded(
-                child: InfiniteScrollList<Order>(
+                child: InfiniteScrollList<OrderExtended>(
                   items: filteredOrders,
                   isLoading: orderProvider.isLoading,
                   hasMore: orderProvider.hasMore,
