@@ -197,7 +197,7 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
     );
   }
 
-  Widget _buildOrderCard(Order order) {
+  Widget _buildOrderCard(OrderExtended order) {
     return GestureDetector(
       onTap: () {
         Navigator.pushNamed(
@@ -295,7 +295,7 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
                 ),
 
                 // 결제수단
-                if (order.paymentMethod != PaymentMethod.none)
+                if (order.paymentMethod != null)
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                     decoration: BoxDecoration(
@@ -445,7 +445,7 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
     return buffer.toString();
   }
 
-  Future<void> _showCancelDialog(Order order) async {
+  Future<void> _showCancelDialog(OrderExtended order) async {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
@@ -477,7 +477,7 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
     }
   }
 
-  Future<void> _showRefundDialog(Order order) async {
+  Future<void> _showRefundDialog(OrderExtended order) async {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
@@ -509,7 +509,7 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
     }
   }
 
-  void _viewReceipt(Order order) {
+  void _viewReceipt(OrderExtended order) {
     // TODO: 영수증 URL을 웹뷰나 브라우저로 열기
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text('영수증 보기 기능은 준비중입니다')),
