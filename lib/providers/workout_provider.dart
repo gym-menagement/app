@@ -57,7 +57,9 @@ class WorkoutProvider extends ChangeNotifier {
 
     return _attendances.where((a) {
       try {
-        final date = DateTime.parse(a.checkintime.isNotEmpty ? a.checkintime : a.date);
+        final date = DateTime.parse(
+          a.checkintime.isNotEmpty ? a.checkintime : a.date,
+        );
         return date.year == year && date.month == monthNum;
       } catch (e) {
         return false;
@@ -86,7 +88,8 @@ class WorkoutProvider extends ChangeNotifier {
       String params = 'user=$_userId';
 
       if (startDate != null && endDate != null) {
-        params += '&startdate=${_formatDateForComparison(startDate)}&enddate=${_formatDateForComparison(endDate)}';
+        params +=
+            '&startdate=${_formatDateForComparison(startDate)}&enddate=${_formatDateForComparison(endDate)}';
       }
 
       _attendances = await AttendanceManager.find(
@@ -120,12 +123,13 @@ class WorkoutProvider extends ChangeNotifier {
       String params = 'user=$_userId';
 
       if (startDate != null && endDate != null) {
-        params += '&startdate=${_formatDateForComparison(startDate)}&enddate=${_formatDateForComparison(endDate)}';
+        params +=
+            '&startdate=${_formatDateForComparison(startDate)}&enddate=${_formatDateForComparison(endDate)}';
       }
 
       _workoutlogs = await WorkoutlogManager.find(
         page: 0,
-        pagesize: 9999,
+        pageSize: 9999,
         params: params,
       );
 
