@@ -13,7 +13,7 @@ class PaymentHistoryScreen extends StatefulWidget {
 }
 
 class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
-  OrderStatus _selectedStatus = OrderStatus.none;
+  OrderStatus _selectedStatus = null;
 
   @override
   void initState() {
@@ -32,7 +32,7 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
   }
 
   List<Order> _getFilteredOrders(OrderProvider provider) {
-    if (_selectedStatus == OrderStatus.none) {
+    if (_selectedStatus == null) {
       return provider.orders;
     }
     return provider.getOrdersByStatus(_selectedStatus);
@@ -69,7 +69,7 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
                     children: [
                       _buildFilterChip(
                         label: '전체',
-                        status: OrderStatus.none,
+                        status: null,
                         count: orderProvider.orders.length,
                       ),
                       const SizedBox(width: 8),
@@ -102,7 +102,7 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
               ),
 
               // 총 결제 금액
-              if (_selectedStatus == OrderStatus.none || _selectedStatus == OrderStatus.completed)
+              if (_selectedStatus == null || _selectedStatus == OrderStatus.completed)
                 Container(
                   width: double.infinity,
                   margin: const EdgeInsets.all(16),
