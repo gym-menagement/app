@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
-import '../model/order.dart';
+import '../model/order_extended.dart';
 
 /// 결제 내역 Provider
 class OrderProvider extends ChangeNotifier {
-  List<Order> _orders = [];
+  List<OrderExtended> _orders = [];
   bool _isLoading = false;
   int _currentPage = 0;
   bool _hasMore = true;
 
-  List<Order> get orders => _orders;
+  List<OrderExtended> get orders => _orders;
   bool get isLoading => _isLoading;
   bool get hasMore => _hasMore;
 
@@ -26,7 +26,7 @@ class OrderProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      final newOrders = await OrderManager.find(
+      final newOrders = await OrderExtendedManager.find(
         page: _currentPage,
         pagesize: 20,
       );
@@ -61,9 +61,9 @@ class OrderProvider extends ChangeNotifier {
   }
 
   /// 특정 주문 조회
-  Future<Order?> getOrder(int orderId) async {
+  Future<OrderExtended?> getOrder(int orderId) async {
     try {
-      return await OrderManager.get(orderId);
+      return await OrderExtendedManager.get(orderId);
     } catch (e) {
       debugPrint('주문 조회 실패: $e');
       return null;
@@ -75,7 +75,7 @@ class OrderProvider extends ChangeNotifier {
     try {
       final order = _orders.firstWhere((o) => o.id == orderId);
       order.status = OrderStatus.cancelled;
-      await OrderManager.update(order);
+      await OrderExtendedManager.update(order);
       notifyListeners();
       return true;
     } catch (e) {
@@ -89,7 +89,7 @@ class OrderProvider extends ChangeNotifier {
     try {
       final order = _orders.firstWhere((o) => o.id == orderId);
       order.status = OrderStatus.refunded;
-      await OrderManager.update(order);
+      await OrderExtendedManager.update(order);
       notifyListeners();
       return true;
     } catch (e) {
@@ -99,7 +99,7 @@ class OrderProvider extends ChangeNotifier {
   }
 
   /// 상태별 필터링
-  List<Order> getOrdersByStatus(OrderStatus status) {
+  List<OrderExtended> getOrdersByStatus(OrderStatus status) {
     return _orders.where((order) => order.status == status).toList();
   }
 
@@ -107,6 +107,6 @@ class OrderProvider extends ChangeNotifier {
   int get totalAmount {
     return _orders
         .where((order) => order.status == OrderStatus.completed)
-        .fold(0, (sum, order) => sum + order.finalPrice);
+        .fold<int>(0, (sum, order) => sum + order.finalPrice);
   }
 }

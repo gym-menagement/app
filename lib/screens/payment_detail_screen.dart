@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/order_provider.dart';
-import '../model/order.dart';
+import '../model/order_extended.dart';
 import '../config/app_colors.dart';
+import '../model/payment_method.dart';
+import '../model/payment_method.dart';
 import '../components/gym_card.dart';
 
 class PaymentDetailScreen extends StatefulWidget {
@@ -13,7 +15,7 @@ class PaymentDetailScreen extends StatefulWidget {
 }
 
 class _PaymentDetailScreenState extends State<PaymentDetailScreen> {
-  Order? _order;
+  OrderExtended? _order;
   bool _isLoading = true;
 
   @override
@@ -219,9 +221,9 @@ class _PaymentDetailScreenState extends State<PaymentDetailScreen> {
               color: AppColors.primary,
             ),
           ),
-          if (_order!.paymentMethod != PaymentMethod.none) ...[
+          if (_order!.paymentMethod != null && _order!.paymentMethod!.isNotEmpty) ...[
             const Divider(height: 24),
-            _buildInfoRow('결제수단', _order!.paymentMethod.label),
+            _buildInfoRow('결제수단', _order!.paymentMethod ?? '알 수 없음'),
           ],
           if (_order!.receiptUrl != null) ...[
             const Divider(height: 24),

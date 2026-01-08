@@ -276,7 +276,7 @@ class _MembershipScreenState extends State<MembershipScreen> {
   }
 
   Widget _buildUsehealthCard(Usehealth usehealth) {
-    final statusColor = usehealth.status.color;
+    final statusColor = Color(int.parse(usehealth.status.color.replaceFirst('#', '0xFF')));
     final remainingDays = getRemainingDays(usehealth.endday);
 
     // extra에서 gym, health 정보 추출
@@ -534,7 +534,7 @@ class _UsehealthDetailSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final statusColor = usehealth.status.color;
+    final statusColor = Color(int.parse(usehealth.status.color.replaceFirst('#', '0xFF')));
 
     String gymName = '체육관';
     String membershipName = '이용권';
