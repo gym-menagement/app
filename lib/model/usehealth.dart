@@ -2,17 +2,16 @@ import 'package:app/config/http.dart';
 
 
 enum UsehealthStatus {
-  none(0, '', '#9E9E9E'),
-  terminated(1, '종료', '#F44336'),
-  use(2, '사용중', '#4CAF50'),
-  paused(3, '일시정지', '#FF9800'),
-  expired(4, '만료', '#757575');
+  none(0, ''),
+  terminated(1, '종료'),
+  use(2, '사용중'),
+  paused(3, '일시정지'),
+  expired(4, '만료');
 
-  const UsehealthStatus(this.code, this.label, this.color);
+  const UsehealthStatus(this.code, this.label);
 
   final int code;
   final String label;
-  final String color;
 
   @override
   String toString() => label;

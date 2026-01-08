@@ -8,6 +8,7 @@ import '../config/app_colors.dart';
 import '../config/app_text_styles.dart';
 import '../config/app_spacing.dart';
 import '../model/usehealth.dart';
+import '../model/usehealth_extension.dart';
 import '../providers/usehealth_provider.dart';
 import '../providers/auth_provider.dart';
 import '../utils/formatters.dart';
@@ -276,7 +277,7 @@ class _MembershipScreenState extends State<MembershipScreen> {
   }
 
   Widget _buildUsehealthCard(Usehealth usehealth) {
-    final statusColor = Color(int.parse(usehealth.status.color.replaceFirst('#', '0xFF')));
+    final statusColor = usehealth.status.color;
     final remainingDays = getRemainingDays(usehealth.endday);
 
     // extra에서 gym, health 정보 추출
@@ -534,7 +535,7 @@ class _UsehealthDetailSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final statusColor = Color(int.parse(usehealth.status.color.replaceFirst('#', '0xFF')));
+    final statusColor = usehealth.status.color;
 
     String gymName = '체육관';
     String membershipName = '이용권';
