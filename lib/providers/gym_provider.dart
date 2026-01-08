@@ -37,16 +37,16 @@ class GymProvider extends ChangeNotifier {
       _sortBy != 'distance';
 
   /// Load gyms from API
-  Future<void> loadGyms({int page = 0, int pageSize = 100}) async {
+  Future<void> loadGyms({int page = 0, int pagesize = 100}) async {
     _isLoading = true;
     _error = null;
     notifyListeners();
 
     try {
-      // GET /api/gym?page=0&pageSize=100
+      // GET /api/gym?page=0&pagesize=100
       final result = await Http.get(Config.apiGym, {
         'page': page,
-        'pageSize': pageSize,
+        'pagesize': pagesize,
       });
 
       if (result != null && result['content'] != null) {

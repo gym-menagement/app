@@ -1,14 +1,12 @@
 import 'package:app/config/http.dart';
 
+
 enum AlarmType {
   none(0, ''),
   notice(1, '공지'),
   warning(2, '경고'),
   error(3, '에러'),
   info(4, '정보'),
-  membershipExpiring(5, '이용권 만료 예정'),
-  workoutReminder(6, '운동 독려'),
-  achievement(7, '목표 달성'),
 ;
 
   const AlarmType(this.code, this.label);
@@ -21,28 +19,6 @@ enum AlarmType {
 
   static AlarmType fromCode(int code) {
     return AlarmType.values.firstWhere((e) => e.code == code, orElse: () => AlarmType.none);
-  }
-
-  /// 알림 타입에 따른 아이콘 코드 반환
-  int get iconCode {
-    switch (this) {
-      case AlarmType.membershipExpiring:
-        return 0xe491; // Icons.card_membership
-      case AlarmType.workoutReminder:
-        return 0xe3a3; // Icons.fitness_center
-      case AlarmType.achievement:
-        return 0xe3e8; // Icons.emoji_events
-      case AlarmType.notice:
-        return 0xe3e7; // Icons.campaign
-      case AlarmType.warning:
-        return 0xe002; // Icons.warning
-      case AlarmType.error:
-        return 0xe000; // Icons.error
-      case AlarmType.info:
-        return 0xe3e6; // Icons.info
-      default:
-        return 0xe3e5; // Icons.notifications
-    }
   }
 }
 

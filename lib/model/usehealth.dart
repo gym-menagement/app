@@ -1,6 +1,5 @@
 import 'package:app/config/http.dart';
-import 'package:flutter/material.dart';
-import '../config/app_colors.dart';
+
 
 enum UsehealthStatus {
   none(0, ''),
@@ -20,24 +19,6 @@ enum UsehealthStatus {
 
   static UsehealthStatus fromCode(int code) {
     return UsehealthStatus.values.firstWhere((e) => e.code == code, orElse: () => UsehealthStatus.none);
-  }
-}
-
-/// UsehealthStatus extension for color mapping
-extension UsehealthStatusColor on UsehealthStatus {
-  Color get color {
-    switch (this) {
-      case UsehealthStatus.use:
-        return AppColors.primary;
-      case UsehealthStatus.paused:
-        return AppColors.warning;
-      case UsehealthStatus.expired:
-        return AppColors.grey500;
-      case UsehealthStatus.terminated:
-        return AppColors.error;
-      default:
-        return AppColors.grey500;
-    }
   }
 }
 
