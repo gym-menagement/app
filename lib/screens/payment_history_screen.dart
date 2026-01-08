@@ -70,7 +70,7 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
                     children: [
                       _buildFilterChip(
                         label: '전체',
-                        status: null,
+                        status: OrderStatus.pending,
                         count: orderProvider.orders.length,
                       ),
                       const SizedBox(width: 8),
@@ -303,7 +303,7 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Text(
-                      order.paymentMethod.label,
+                      order.paymentMethod ?? '알 수 없음',
                       style: TextStyle(
                         fontSize: 12,
                         color: Colors.grey[700],
