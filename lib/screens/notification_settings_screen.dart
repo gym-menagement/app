@@ -5,6 +5,7 @@ import '../config/app_colors.dart';
 import '../config/app_text_styles.dart';
 import '../config/app_spacing.dart';
 import '../model/notification_setting.dart';
+import '../model/notification_api.dart';
 import '../providers/auth_provider.dart';
 
 /// 알림 설정 화면 (백엔드 API 연동)
@@ -43,7 +44,7 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
         return;
       }
 
-      final settings = await NotificationSettingManager.getUserSetting(userId);
+      final settings = await NotificationApi.getUserSettings(userId);
 
       setState(() {
         _settings = settings ?? NotificationSetting(userId: userId);
@@ -63,7 +64,7 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
 
       // 설정이 없으면 생성
       if (settings == null) {
-        await NotificationSettingManager.createUserSetting(userId);
+        await NotificationApi.createUserSettings(userId);
       }
     } catch (e) {
       setState(() => _isLoading = false);
@@ -80,7 +81,7 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
     final userId = authProvider.currentUser?.id;
     if (userId == null) return;
 
-    final success = await NotificationSettingManager.toggleAllNotifications(userId, enabled);
+    final success = await NotificationApi.toggleAllNotifications(userId, enabled);
     if (success) {
       await _loadSettings();
       if (mounted) {
@@ -106,7 +107,7 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
     final userId = authProvider.currentUser?.id;
     if (userId == null) return;
 
-    final success = await NotificationSettingManager.updateNotificationType(
+    final success = await NotificationApi.updateNotificationType(
       userId,
       membershipExpiry: membershipExpiry,
       membershipNearExpiry: membershipNearExpiry,
@@ -138,7 +139,7 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
       return;
     }
 
-    final success = await NotificationSettingManager.updateQuietHours(
+    final success = await NotificationApi.updateQuietHours(
       userId,
       enabled: enabled,
       startTime: _quietStart != null
