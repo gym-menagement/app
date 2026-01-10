@@ -5,7 +5,6 @@ import '../model/order_extended.dart';
 import '../config/app_colors.dart';
 import '../components/gym_components.dart';
 
-import '../model/payment_method.dart';
 class PaymentHistoryScreen extends StatefulWidget {
   const PaymentHistoryScreen({super.key});
 

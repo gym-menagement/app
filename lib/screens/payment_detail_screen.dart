@@ -3,8 +3,6 @@ import 'package:provider/provider.dart';
 import '../providers/order_provider.dart';
 import '../model/order_extended.dart';
 import '../config/app_colors.dart';
-import '../model/payment_method.dart';
-import '../model/payment_method.dart';
 import '../components/gym_card.dart';
 
 class PaymentDetailScreen extends StatefulWidget {
