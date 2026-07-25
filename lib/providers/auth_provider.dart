@@ -78,7 +78,9 @@ class AuthProvider extends ChangeNotifier {
         debugPrint('Login successful!');
         return true;
       } else {
-        debugPrint('Login failed - user.id: ${user.id}, token: ${user.extra['token']}');
+        debugPrint(
+          'Login failed - user.id: ${user.id}, token: ${user.extra['token']}',
+        );
         _error = '로그인에 실패했습니다. 아이디와 비밀번호를 확인해주세요.';
         _isLoading = false;
         notifyListeners();
@@ -198,15 +200,28 @@ class AuthProvider extends ChangeNotifier {
         'email': user.email,
         'name': user.name,
         'tel': user.tel,
-        'address': user.address ?? '',
-        'image': user.image ?? '',
-        'sex': user.sex ?? 0,
-        'birth': user.birth ?? '',
-        'type': user.type ?? 0,
-        'connectid': user.connectid ?? '',
-        'level': user.level ?? 0,
-        'role': user.role ?? 3, // MEMBER
-        'use': user.use ?? 0,
+        'address': user.address,
+        'image': user.image,
+        // 열거형 필드는 .code 로 정수를 보낸다. 예전엔 열거형 객체를 그대로
+        // 넣어서 jsonEncode 가 인코딩하지 못했다. (User.toJson 도 .code 를 쓴다)
+        // 전부 non-nullable 이라 붙어 있던 `?? 0` 은 죽은 코드였다.
+        'sex': user.sex.code,
+        'birth': user.birth,
+        'type': user.type.code,
+        'connectid': user.connectid,
+        // 지정이 없으면 일반 회원으로 가입시킨다.
+        // 예전엔 role 에 3 을 넣고 주석만 MEMBER 라고 달아뒀는데, 3 은 서버·웹
+        // 프론트 모두에서 직원(STAFF)이다. 서버 RoleMember=1, 웹
+        // User.role.MEMBER=1 이고, 실 DB 102건에서도 일반 가입자 60명이
+        // 전부 role=1·level=1 이다.
+        // level 0(none)은 서버 Level enum(1부터 시작)에 없는 값이다.
+        'level':
+            user.level == UserLevel.none
+                ? UserLevel.normal.code
+                : user.level.code,
+        'role':
+            user.role == UserRole.none ? UserRole.member.code : user.role.code,
+        'use': user.use.code,
       });
 
       if (result != null && result['id'] != null) {
