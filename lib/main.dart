@@ -11,6 +11,7 @@ import 'screens/payment_history_screen.dart';
 import 'screens/payment_detail_screen.dart';
 import 'screens/statistics_screen.dart';
 import 'screens/settings_screen.dart';
+import 'screens/pt_reservation_screen.dart';
 import 'providers/auth_provider.dart';
 import 'providers/gym_provider.dart';
 import 'providers/membership_provider.dart';
@@ -76,6 +77,7 @@ class MyApp extends StatelessWidget {
         '/payment_detail': (context) => const PaymentDetailScreen(),
         '/statistics': (context) => const StatisticsScreen(),
         '/settings': (context) => const SettingsScreen(),
+        '/pt_reservation': (context) => const PtReservationScreen(),
       },
     );
   }

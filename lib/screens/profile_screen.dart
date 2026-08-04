@@ -220,6 +220,16 @@ class ProfileScreen extends StatelessWidget {
                           const GymDivider(),
                           _buildMenuRow(
                             context,
+                            Icons.event_available_outlined,
+                            'PT 예약',
+                            '트레이너 가능 시간에서 골라 예약',
+                            () {
+                              Navigator.pushNamed(context, '/pt_reservation');
+                            },
+                          ),
+                          const GymDivider(),
+                          _buildMenuRow(
+                            context,
                             Icons.payment_outlined,
                             '결제 내역',
                             '이용권 구매 및 결제 내역 확인',
