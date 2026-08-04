@@ -81,7 +81,7 @@ class Http {
 
       if (result.statusCode == 200) {
         final parsed = json.decode(utf8.decode(result.bodyBytes));
-        return parsed;
+        return _normalize(parsed);
       }
     } catch (e) {
       if (kDebugMode) {
@@ -90,6 +90,25 @@ class Http {
     }
 
     return null;
+  }
+
+  /// Go 백엔드(gowoobro 스타일) 응답을 구 Spring 형태로 정규화한다.
+  ///
+  /// 모델 40여 개가 전부 Spring 스타일(`content`, `total` 문자열)을 읽는데,
+  /// Go 이전 후 목록 응답이 `{code, items, total(숫자)}` 로 바뀌어 모든 목록이
+  /// 조용히 빈 배열이 됐다. 모델을 다 고치는 대신 웹 프론트(api.ts 인터셉터)와
+  /// 같은 방식으로 한 곳에서 흡수한다. 단건 `{item}` 은 원래 호환이라 그대로.
+  static dynamic _normalize(dynamic parsed) {
+    if (parsed is Map<String, dynamic>) {
+      if (parsed['items'] is List && parsed['content'] == null) {
+        parsed['content'] = parsed['items'];
+      }
+      // count 모델들이 int.parse(result['total']) 를 쓰므로 문자열로 맞춘다.
+      if (parsed['total'] is num) {
+        parsed['total'] = parsed['total'].toString();
+      }
+    }
+    return parsed;
   }
 
   /// POST 요청
