@@ -16,10 +16,15 @@ class FullScreenQRCode extends StatefulWidget {
   final String qrData;
   final String gymName;
 
+  /// 지정 시 이 회원권의 QR 을 발급받는다. 여러 헬스장 회원권 보유 회원이
+  /// 엉뚱한 헬스장 QR 을 받는 것을 막는다 (서버가 소유·활성 재검증).
+  final int? usehealthId;
+
   const FullScreenQRCode({
     super.key,
     required this.qrData,
     required this.gymName,
+    this.usehealthId,
   });
 
   @override
@@ -53,7 +58,9 @@ class _FullScreenQRCodeState extends State<FullScreenQRCode> {
   }
 
   Future<void> _fetchQr() async {
-    final res = await Http.get('/api/door/qr');
+    final res = await Http.get(
+        '/api/door/qr',
+        widget.usehealthId == null ? null : {'usehealth': widget.usehealthId});
     if (!mounted) return;
     setState(() {
       _remaining = _refreshSeconds;

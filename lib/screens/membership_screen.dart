@@ -589,6 +589,7 @@ class _UsehealthDetailSheet extends StatelessWidget {
                               ? 'usehealth_${usehealth.id}'
                               : usehealth.qrcode,
                           gymName: gymName,
+                          usehealthId: usehealth.id,
                         ),
                         fullscreenDialog: true,
                       ),
