@@ -7,7 +7,7 @@ plugins {
 }
 
 android {
-    namespace = "com.example.app"
+    namespace = "com.gowoobro.gym"
     compileSdk = 36
     // ndkVersion = flutter.ndkVersion  // NDK 오류 임시 해결
 
@@ -22,8 +22,8 @@ android {
     }
 
     defaultConfig {
-        // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
-        applicationId = "com.example.app"
+        // iOS 번들 ID(com.gowoobro.gym)와 통일. 스토어에 한 번 올리면 변경 불가.
+        applicationId = "com.gowoobro.gym"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
         minSdk = flutter.minSdkVersion
