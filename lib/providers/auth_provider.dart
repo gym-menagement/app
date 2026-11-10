@@ -268,6 +268,25 @@ class AuthProvider extends ChangeNotifier {
     }
   }
 
+  /// 회원 탈퇴. 서버가 계정과 개인 기록을 삭제하면(성공) 저장된 인증 정보를
+  /// 지우고 true 를 돌려준다. 실패하면 로그인 상태를 그대로 두고 false.
+  Future<bool> deleteAccount() async {
+    final success = await Http.deleteOk('${Config.apiUser}/me');
+    if (!success) {
+      return false;
+    }
+
+    await _clearAuthData();
+
+    _currentUser = null;
+    _token = null;
+    CConfig().token = '';
+    _isAuthenticated = false;
+    _error = null;
+    notifyListeners();
+    return true;
+  }
+
   /// Update user profile
   Future<bool> updateProfile(User updatedUser) async {
     _isLoading = true;

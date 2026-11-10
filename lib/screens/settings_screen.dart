@@ -3,10 +3,12 @@ import 'package:provider/provider.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import '../providers/settings_provider.dart';
 import '../providers/auth_provider.dart';
+import '../config/config.dart';
 import '../config/app_colors.dart';
 import '../config/app_spacing.dart';
 import '../config/app_text_styles.dart';
 import '../components/gym_components.dart';
+import '../utils/legal_links.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -202,13 +204,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         Icons.description_outlined,
                         '이용약관',
                         '서비스 이용약관 확인',
-                        () {
-                          // TODO: 이용약관 화면으로 이동
-                          GymSnackbar.show(
-                            context: context,
-                            message: '이용약관 화면 (준비 중)',
-                          );
-                        },
+                        () => openLegalUrl(context, Config.termsUrl),
                       ),
                       const GymDivider(),
                       _buildMenuRow(
@@ -216,13 +212,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         Icons.privacy_tip_outlined,
                         '개인정보 처리방침',
                         '개인정보 보호 정책 확인',
-                        () {
-                          // TODO: 개인정보 처리방침 화면으로 이동
-                          GymSnackbar.show(
-                            context: context,
-                            message: '개인정보 처리방침 화면 (준비 중)',
-                          );
-                        },
+                        () => openLegalUrl(context, Config.privacyUrl),
                       ),
                       const GymDivider(),
                       _buildMenuRow(
@@ -541,7 +531,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       context: context,
       title: '회원 탈퇴',
       message:
-          '정말로 탈퇴하시겠습니까?\n\n모든 데이터가 삭제되며 복구할 수 없습니다.\n이용권, 결제 내역, 운동 기록 등 모든 정보가 삭제됩니다.',
+          '정말로 탈퇴하시겠습니까?\n\n계정과 운동 기록·출석·신체 정보·예약·문의 등 개인 기록이 삭제되며 복구할 수 없습니다.\n이용 중인 회원권은 종료되고 정기결제는 해지됩니다.\n결제·계약 내역은 관련 법령에 따라 보관 기간 동안 보존됩니다.',
       confirmText: '탈퇴',
       cancelText: '취소',
       isDangerous: true,
@@ -561,26 +551,30 @@ class _SettingsScreenState extends State<SettingsScreen> {
       if (finalConfirmed == true && context.mounted) {
         showLoadingDialog(context: context, message: '회원 탈퇴 처리 중...');
 
-        // TODO: 회원 탈퇴 API 호출
-        await Future.delayed(const Duration(seconds: 1)); // 시뮬레이션
+        final success = await authProvider.deleteAccount();
 
         if (context.mounted) {
           Navigator.pop(context); // 로딩 다이얼로그 닫기
 
-          // 로그아웃 및 로그인 화면으로 이동
-          await authProvider.logout();
-
-          if (context.mounted) {
-            Navigator.of(
-              context,
-            ).pushNamedAndRemoveUntil('/login', (route) => false);
-
+          if (!success) {
+            // 실패 시 로그아웃하지 않는다 — 계정이 그대로 남아 있다.
             GymSnackbar.show(
               context: context,
-              message: '회원 탈퇴가 완료되었습니다',
-              type: GymSnackbarType.success,
+              message: '회원 탈퇴에 실패했습니다. 잠시 후 다시 시도해 주세요.',
+              type: GymSnackbarType.error,
             );
+            return;
           }
+
+          Navigator.of(
+            context,
+          ).pushNamedAndRemoveUntil('/login', (route) => false);
+
+          GymSnackbar.show(
+            context: context,
+            message: '회원 탈퇴가 완료되었습니다',
+            type: GymSnackbarType.success,
+          );
         }
       }
     }
