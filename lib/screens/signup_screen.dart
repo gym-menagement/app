@@ -5,6 +5,8 @@ import '../components/gym_button.dart';
 import '../config/app_colors.dart';
 import '../config/app_text_styles.dart';
 import '../config/app_spacing.dart';
+import '../config/config.dart';
+import '../utils/legal_links.dart';
 import '../utils/validators.dart';
 import '../model/user.dart';
 
@@ -634,6 +636,7 @@ class _SignupScreenState extends State<SignupScreen> {
               });
             },
             required: true,
+            url: Config.termsUrl,
           ),
 
           const SizedBox(height: AppSpacing.sm),
@@ -648,6 +651,7 @@ class _SignupScreenState extends State<SignupScreen> {
               });
             },
             required: true,
+            url: Config.privacyUrl,
           ),
 
           const SizedBox(height: AppSpacing.sm),
@@ -690,6 +694,7 @@ class _SignupScreenState extends State<SignupScreen> {
     bool value,
     Function(bool?) onChanged, {
     required bool required,
+    String? url,
   }) {
     return Row(
       children: [
@@ -699,12 +704,28 @@ class _SignupScreenState extends State<SignupScreen> {
             onChanged: _isLoading ? null : onChanged,
             title: Row(
               children: [
-                Expanded(
-                  child: Text(
-                    title,
-                    style: AppTextStyles.bodyMedium,
+                if (url == null)
+                  Expanded(
+                    child: Text(
+                      title,
+                      style: AppTextStyles.bodyMedium,
+                    ),
+                  )
+                else ...[
+                  // 문구를 누르면 문서가 열린다 (동의 체크는 체크박스로).
+                  Flexible(
+                    child: GestureDetector(
+                      onTap: () => openLegalUrl(context, url),
+                      child: Text(
+                        title,
+                        style: AppTextStyles.bodyMedium.copyWith(
+                          decoration: TextDecoration.underline,
+                        ),
+                      ),
+                    ),
                   ),
-                ),
+                  const Spacer(),
+                ],
                 if (required)
                   Container(
                     padding: const EdgeInsets.symmetric(
@@ -732,6 +753,10 @@ class _SignupScreenState extends State<SignupScreen> {
         IconButton(
           icon: const Icon(Icons.chevron_right, color: AppColors.grey500),
           onPressed: () {
+            if (url != null) {
+              openLegalUrl(context, url);
+              return;
+            }
             // TODO: Show agreement detail
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(content: Text('$title 내용 보기')),

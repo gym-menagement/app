@@ -263,6 +263,26 @@ class Http {
     }
   }
 
+  /// DELETE 요청 — 성공(200) 여부를 돌려준다.
+  /// [delete] 는 결과를 알 수 없어, 실패 처리가 필요한 호출(회원 탈퇴)에 쓴다.
+  static Future<bool> deleteOk(String path) async {
+    final config = CConfig();
+
+    try {
+      var result = await http.delete(
+        Uri.parse('${config.serverUrl}$path'),
+        headers: {'Authorization': 'Bearer ${config.token}'},
+      );
+      return result.statusCode == 200;
+    } catch (e) {
+      if (kDebugMode) {
+        print(e);
+      }
+    }
+
+    return false;
+  }
+
   /// 파일 업로드
   /// [url]: 업로드 API 엔드포인트
   /// [name]: 파일 필드 이름

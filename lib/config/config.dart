@@ -18,6 +18,10 @@ class Config {
   // static const serverUrl = 'http://localhost:8004';
   static const serverUrl = 'https://gymspring.gowoobro.com';
 
+  /// 약관·개인정보 처리방침 (운영자 통합 호스팅, 모바일 앱 프로젝트 id 6)
+  static const termsUrl = 'https://gowoobro.com/ko/app/6/terms';
+  static const privacyUrl = 'https://gowoobro.com/ko/app/6/privacy';
+
   /// API 엔드포인트 상수
   static const apiAuth = '/api/auth';
   static const apiUser = '/api/user';
